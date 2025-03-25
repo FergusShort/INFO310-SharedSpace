@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chores Board</title>
+    <link rel="stylesheet" href="styles/style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="compartment" id="urgent">
+            <h2>Urgent</h2>
+            <ul id="urgent-list"></ul>
+            <input type="text" id="new-urgent" placeholder="Add a new chore">
+            <button onclick="addChore('urgent')">Add</button>
+        </div>
+        <div class="compartment" id="not-so-urgent">
+            <h2>Not So Urgent</h2>
+            <ul id="not-so-urgent-list"></ul>
+        </div>
+        <div class="compartment" id="low-urgency">
+            <h2>Low Urgency</h2>
+            <ul id="low-urgency-list"></ul>
+        </div>
+    </div>
+    <script src="scripts/app.js"></script>
+</body>
+</html>
