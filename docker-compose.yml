@@ -1,0 +1,19 @@
+version: '3.7'
+
+services:
+  mysql:
+    image: mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: SharedSpace
+      MYSQL_USER: sharedspace
+      MYSQL_PASSWORD: password
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./sql:/sql # scripts for creating tables and inserting data
+      - ./mysql-data:/var/lib/mysql # Where mysql stores its data
+    container_name: sharedspacemysql
+
+volumes:
+  mysql-data:
