@@ -11,7 +11,7 @@ router.use(express.static('public'));
 router.get('/', async (req, res) => {
     const db = pool.promise();
     
-    query = "select * from Flat;";
+    /*query = "select * from Flat;";
 
     try{
         const [rows, fields] = await db.query(query);
@@ -19,7 +19,7 @@ router.get('/', async (req, res) => {
         console.log(data);
     }catch (err){
         console.error("query didn't work", err);
-    }
+    }*/
 
     res.render('groceries'); //change later when homepage is created
 });
