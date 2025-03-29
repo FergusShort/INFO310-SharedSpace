@@ -2,11 +2,11 @@ const express = require('express');
 const fileUpload = require('express-fileupload');
 const pool = require('./db');
 const path = require('path');
+
 router = express.Router();
 
 router.use(express.urlencoded({ extended: true }));
 router.use(fileUpload());
-router.use(express.static('public'));
 
 router.get('/', async (req, res) => {
     const db = pool.promise();
@@ -21,7 +21,15 @@ router.get('/', async (req, res) => {
         console.error("query didn't work", err);
     }*/
 
-    res.render('groceries'); //change later when homepage is created
+    res.render('login'); //change later when homepage is created
+});
+
+router.get('/signup', async (req, res) => {
+    res.render('signup');
+});
+
+router.get('/login', async (req, res) => {
+    res.render('login');
 });
 
 router.get('/groceries', async (req, res) => {
