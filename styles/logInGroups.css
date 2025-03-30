@@ -10,7 +10,7 @@ body {
     justify-content: center;
     align-items: center;
     height: 100vh;
-    background-color: #f4f4f4;
+    background-color: white;
 }
 
 .container {
@@ -47,11 +47,11 @@ input {
 }
 
 input:focus {
-    border: 1px solid #007BFF;
+    border: 1px solid #fa00a7;
 }
 
 button {
-    background: #007BFF;
+    background: #fa00a7;
     color: white;
     padding: 0.8rem;
     border: none;
@@ -62,7 +62,7 @@ button {
 }
 
 button:hover {
-    background: #0056b3;
+    background: rgb(188, 65, 212);
 }
 
 p {
@@ -71,7 +71,7 @@ p {
 }
 
 a {
-    color: #007BFF;
+    color: #fa00a7;
     text-decoration: none;
 }
 
