@@ -4,6 +4,7 @@ const pool = require('./db');
 const bodyParser = require('body-parser');
 const path = require('path');
 
+
 router = express.Router();
 
 router.use(bodyParser.urlencoded({ extended: true }));
@@ -37,6 +38,23 @@ router.get('/groceries', async (req, res) => {
     res.render('groceries');
 });
 
+router.post('/login/submit', async (req, res) => {
+
+    const email = req.body.email;
+    const pwd = req.body.pwd;
+
+
+    const db = pool.promise();
+    const status_query = `SELECT User_ID FROM User WHERE Email = ? AND Username = ?;`;
+    try {
+        const [rows] = await db.query(status_query, [email, pwd]);        
+    } catch (err) {
+        console.error("You havent set up the database yet!" + err);
+    }
+
+    return res.redirect('/groceries');
+});
+
 router.post('/signup/submit', async (req, res) => {
 
     const Uname = req.body.Uname;
@@ -58,14 +76,16 @@ router.post('/signup/submit', async (req, res) => {
                 console.error(err + "\n\n\n");
                 return res.status(500).send("Database error. Please try again later.");
             }
+        } else if (rows.length > 0) {
+            return res.status(400).send("Email already exists");
         } else {
-            return res.redirect('/login');
+            return res.redirect('/signup');
         }
     } catch (err) {
         console.error("You havent set up the database yet!");
     }
 
-    return res.redirect('/signup');
+    return res.redirect('/groceries');
 });
 
 module.exports = router;
