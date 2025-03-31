@@ -14,7 +14,7 @@ drop table if exists User;
 drop table if exists Groceries;
 drop table if exists Chores;
 drop table if exists Bills;
-drop table if exists Event;
+drop table if exists Events;
 drop table if exists Flat;
 
 -- Instances represent a flat shared between Users
@@ -38,7 +38,7 @@ create table User (
 
 -- Instances represent an Event happening at some point in time
 -- A flat can have multiple events, an event must be associated with a flat
-create table Event (
+create table Events (
     Event_ID int not null unique auto_increment,
     Flat_ID varchar(10) not null,
     Title varchar(40),
