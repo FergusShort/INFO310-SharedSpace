@@ -85,3 +85,38 @@ button:hover {
     background-color: #003380;
     transform: scale(1.01); /* Slight zoom effect */
 }
+
+/* Styles for the list of chores */
+.chore-item {
+    background-color: #f4f5f7; /* Light gray background for items */
+    border: 1px solid #dfe1e6; 
+    border-radius: 5px; 
+    padding: 10px;
+    display: flex;
+    justify-content: space-between; /* Space between text and button */
+    align-items: center; /* Center content vertically */
+    font-size: 1rem;
+    color: #172b4d;
+    transition: background-color 0.2s ease-in-out;
+}
+
+
+/* Styles for the delete button */
+.delete-btn {
+    background-color: transparent; /* Transparent background */
+    cursor: pointer; /* Pointer cursor on hover */
+    font-size: 1rem; 
+    color: #ff5630; /* Red color for the "X" */
+    font-weight: bold; /* Bold for visibility */
+
+    transition: color 0.1s ease-in-out; /* Subtle color transition */
+}
+
+.delete-btn:hover {
+    color: #bf2600; /* Slightly darker red on hover */
+    background-color: transparent;
+}
+
+.delete-btn:active {
+    color: #7f1d00; /* Even darker red on click */
+}

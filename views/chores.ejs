@@ -10,7 +10,13 @@
     <div class="container">
         <div class="compartment" id="urgent">
             <h2>Urgent</h2>
-            <ul id="urgent-list"></ul>
+            <ul id="urgent-list">
+                <!-- Temp. item to test delete button-->
+                 <li class="chore-item">
+                    Test Chore 1
+                    <button class="delete-btn">X</button>
+                </li>
+            </ul>
             <input type="text" id="new-urgent" placeholder="Add a new chore">
             <button onclick="addChore('urgent')">Add</button> 
         </div>
@@ -27,6 +33,36 @@
             <button onclick="addChore('urgent')">Add</button>
         </div>
     </div>
-    <script src="scripts/app.js"></script>
+
+
+    <script>
+        // Function to add a chore to the list
+        function addChore(urgency) {
+            const input = document.getElementById(`new-${urgency}`);
+            const list = document.getElementById(`${urgency}-list`);
+            const choreText = input.value.trim();
+            
+            if (choreText) {
+                const li = document.createElement('li');
+                li.textContent = choreText;
+                list.appendChild(li);
+                input.value = ''; // Clear the input field
+            } else {
+                alert('Please enter a chore');
+            }
+        }
+
+        // Add delete button
+            const deleteBtn = document.createElement('button');
+            deleteBtn.textContent = 'X';
+            deleteBtn.className = 'delete-btn';
+            deleteBtn.onclick = function() {
+                list.removeChild(li);
+            };
+            li.appendChild(deleteBtn);
+            list.appendChild(li);
+    </script>
+    
+
 </body>
 </html>
