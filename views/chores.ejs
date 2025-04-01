@@ -1,36 +1,38 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chores Board</title>
     <link rel="stylesheet" href="/styles/chores.css">
 </head>
+
 <body>
     <div class="container">
         <div class="compartment" id="urgent">
             <h2>Urgent</h2>
             <ul id="urgent-list">
                 <!-- Temp. item to test delete button-->
-                 <li class="chore-item">
+                <li class="chore-item">
                     Test Chore 1
                     <button class="delete-btn">X</button>
                 </li>
             </ul>
             <input type="text" id="new-urgent" placeholder="Add a new chore">
-            <button onclick="addChore('urgent')">Add</button> 
+            <button onclick="addChore('urgent')">Add</button>
         </div>
         <div class="compartment" id="sort-of-urgent">
             <h2>Not So Urgent</h2>
             <ul id="sort-of-urgent-list"></ul>
-            <input type="text" id="new-urgent" placeholder="Add a new chore">
-            <button onclick="addChore('urgent')">Add</button> 
+            <input type="text" id="new-sort-of-urgent" placeholder="Add a new chore">
+            <button onclick="addChore('sort-of-urgent')">Add</button>
         </div>
         <div class="compartment" id="low-urgency">
             <h2>Low Urgency</h2>
             <ul id="low-urgency-list"></ul>
-            <input type="text" id="new-urgent" placeholder="Add a new chore">
-            <button onclick="addChore('urgent')">Add</button>
+            <input type="text" id="new-low-urgency" placeholder="Add a new chore">
+            <button onclick="addChore('low-urgency')">Add</button>
         </div>
     </div>
 
@@ -41,28 +43,30 @@
             const input = document.getElementById(`new-${urgency}`);
             const list = document.getElementById(`${urgency}-list`);
             const choreText = input.value.trim();
-            
+
             if (choreText) {
                 const li = document.createElement('li');
+                li.className = 'chore-item'; // Add the class for styling
                 li.textContent = choreText;
+
+                // Add delete button
+                const deleteBtn = document.createElement('button');
+                deleteBtn.textContent = 'X';
+                deleteBtn.className = 'delete-btn';
+                deleteBtn.onclick = function () {
+                    list.removeChild(li);
+                };
+
+                li.appendChild(deleteBtn);
                 list.appendChild(li);
                 input.value = ''; // Clear the input field
             } else {
                 alert('Please enter a chore');
             }
         }
-
-        // Add delete button
-            const deleteBtn = document.createElement('button');
-            deleteBtn.textContent = 'X';
-            deleteBtn.className = 'delete-btn';
-            deleteBtn.onclick = function() {
-                list.removeChild(li);
-            };
-            li.appendChild(deleteBtn);
-            list.appendChild(li);
     </script>
-    
+
 
 </body>
+
 </html>
