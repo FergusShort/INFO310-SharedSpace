@@ -5,7 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Groceries</title>
-    <link rel="stylesheet" href="/styles/groceries.css">
+    <link rel="stylesheet" href="/groceries.css">
+
 </head>
 
 <body>
@@ -13,13 +14,14 @@
     <h1>Groceries</h1>
 
     <input type="text" id="itemInput" placeholder="Add item">
-    <button onclick="addItem()">Add</button>
+    <div class="list">
+        <div id="checklist"></div>
 
-    <div id="checklist"></div>
-
-    <div class="buttons">
-        <button onclick="clearChecked()">Clear Checked</button>
-        <button onclick="clearAll()">Clear All</button>
+        <div class="buttons">
+            <button onclick="addItem()">Add</button>
+            <button onclick="clearChecked()">Clear Checked</button>
+            <button onclick="clearAll()">Clear All</button>
+        </div>
     </div>
 
     <script>
@@ -59,7 +61,7 @@
         }
 
         function clearAll() {
-            document.getElementById("checklist").innerHTML = ""; // Clears all items
+            document.getElementById("checklist").innerHTML = ""; 
         }
     </script>
 </body>
