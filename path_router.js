@@ -43,14 +43,17 @@ router.get('/groceries', async (req, res) => {
 router.get('/bills', (req, res) => {
        /*const bills = getBillsFromDatabase() || []; // Replace with actual logic to get bills */
 
-    // Dummy data 
+    // Dummy data - works with no data too took me ages to figure out
     const bills = [
         { title: "Electricity", amount: 100, due_date: "2025-05-01", payment_status: "Unpaid", amount_paid: 0, bill_id: 1 },
         { title: "Internet", amount: 50, due_date: "2025-04-15", payment_status: "Paid", amount_paid: 50, bill_id: 2 }
     ];
 
-    res.render('Bills', { bills: bills });  // Pass 'bills' to the view
+    res.render('Bills', { bills: bills || [] });  
 });
+
+
+
 
 
 

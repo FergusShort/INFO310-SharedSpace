@@ -44,11 +44,37 @@
                         <td>$<%= (bill.amount - bill.amount_paid).toFixed(2) %></td>
                         <td>
                             <% if (bill.amount_paid < bill.amount) { %>
-                                <form action="/bills/pay" method="POST">
+                                <form action="/bills/pay" method="POST" id="payForm_<%= bill.bill_id %>">
                                     <input type="hidden" name="bill_id" value="<%= bill.bill_id %>">
-                                    <button type="submit">Paid My Share</button>
+                                    
+                                    <label for="customAmount_<%= bill.bill_id %>">Enter amount to pay:</label>
+                                    <input type="number" name="amount" id="customAmount_<%= bill.bill_id %>" placeholder="Enter amount" min="0" step="0.01">
+                                    
+                                    <input type="hidden" name="shareAmount" id="shareAmount_<%= bill.bill_id %>">
+                                    <button type="button" class="payShareButton" data-bill-id="<%= bill.bill_id %>">Pay My Share</button>
+                                    
+                                    <button type="submit">Pay</button>
                                 </form>
+
+                                <script>
+                                    document.querySelector(".payShareButton[data-bill-id='<%= bill.bill_id %>']").addEventListener("click", function() {
+                                        // Get the number of people in the flat -- mock for now but will be dynamic later
+                                        var numPeople = 3;  // Adjust this dynamically later
+                                        var billAmount = <%= bill.amount %>;
+                                        var amountPaid = <%= bill.amount_paid %>; //errors here and above will sort out later, its about how it goes from ejs to js but just wanting page to appear properly
+                                        
+                                        // Calculate the share of the bill
+                                        var shareAmount = (billAmount - amountPaid) / numPeople;
+                              
+                                        document.getElementById("shareAmount_<%= bill.bill_id %>").value = shareAmount.toFixed(2);
+                                     
+                                        document.getElementById("customAmount_<%= bill.bill_id %>").value = shareAmount.toFixed(2);
+                                    
+                                        document.getElementById("payForm_<%= bill.bill_id %>").submit();
+                                    });
+                                </script>
                             <% } %>
+
                             <form action="/bills/delete" method="POST">
                                 <input type="hidden" name="bill_id" value="<%= bill.bill_id %>">
                                 <button type="submit">Delete</button>
