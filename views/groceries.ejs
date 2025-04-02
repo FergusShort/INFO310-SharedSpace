@@ -10,60 +10,72 @@
 </head>
 
 <body>
+    <div class="container">
+        <h1>Groceries</h1>
 
-    <h1>Groceries</h1>
+        <div class="list">
+            <div id="checklist"></div>
 
-    <input type="text" id="itemInput" placeholder="Add item">
-    <div class="list">
-        <div id="checklist"></div>
 
-        <div class="buttons">
-            <button onclick="addItem()">Add</button>
-            <button onclick="clearChecked()">Clear Checked</button>
-            <button onclick="clearAll()">Clear All</button>
         </div>
-    </div>
+        <div class="item-adder">
+            <input type="text" id="itemInput" placeholder="Add item">
 
-    <script>
-        function addItem() {
-            const input = document.getElementById("itemInput");
-            const itemText = input.value.trim();
+            <div class="buttons">
 
-            if (itemText === "") {
-                return;
+                <button onclick="addItem()">Add</button>
+                <button onclick="clearChecked()">Clear Checked</button>
+                <button onclick="clearAll()">Clear All</button>
+            </div>
+        </div>
+
+        <script>
+            function addItem() {
+                const input = document.getElementById("itemInput");
+                const itemText = input.value.trim();
+
+                if (itemText === "") {
+                    return;
+                }
+
+                const div = document.createElement("div");
+                div.classList.add("item");
+
+                const checkbox = document.createElement("input");
+                checkbox.type = "checkbox";
+
+                const label = document.createElement("label");
+                label.textContent = itemText;
+
+                div.appendChild(checkbox);
+                div.appendChild(label);
+
+                document.getElementById("checklist").appendChild(div);
+
+                input.value = "";
             }
 
-            const div = document.createElement("div");
-            div.classList.add("item");
+            function clearChecked() {
+                const items = document.querySelectorAll("#checklist .item");
+                items.forEach(item => {
+                    const checkbox = item.querySelector("input[type='checkbox']");
+                    if (checkbox.checked) {
+                        item.remove();
+                    }
+                });
+            }
 
-            const checkbox = document.createElement("input");
-            checkbox.type = "checkbox";
-
-            const label = document.createElement("label");
-            label.textContent = itemText;
-
-            div.appendChild(checkbox);
-            div.appendChild(label);
-
-            document.getElementById("checklist").appendChild(div);
-
-            input.value = "";
-        }
-
-        function clearChecked() {
-            const items = document.querySelectorAll("#checklist .item");
-            items.forEach(item => {
-                const checkbox = item.querySelector("input[type='checkbox']");
-                if (checkbox.checked) {
-                    item.remove();
+            function clearAll() {
+                document.getElementById("checklist").innerHTML = "";
+            }
+            document.getElementById("itemInput").addEventListener("keypress", function (event) {
+                if (event.key === "Enter") { 
+                    event.preventDefault();   
+                    addItem();   
                 }
             });
-        }
-
-        function clearAll() {
-            document.getElementById("checklist").innerHTML = ""; 
-        }
-    </script>
+        </script>
+    </div>
 </body>
 
 </html>
