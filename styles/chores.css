@@ -1,0 +1,122 @@
+/* Basic reset for margins and paddings */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Body styles */
+body {
+    font-family: 'Segoe UI', sans-serif;
+    background-color: white;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 20px;
+    color: #172b4d; /* Dark text color */
+}
+
+/* Container for compartments */
+.container {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    width: 100%;
+    max-width: 1200px;
+    gap: 20px; /* Space between compartments */ 
+    margin-top: 20px;
+}
+
+/* Styles for each compartment */
+.compartment {
+    background-color: #fbfbfb;
+    border: 1px solid darkgrey;  
+    border-radius: 8px;
+    margin: 0 10px;
+    padding: 10px;
+    width: 30%;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+/* Header styles for compartments */
+.compartment h2 {
+    text-align: center;
+    font-size: 1.2rem;
+    margin-bottom: 10px;
+    border-bottom: 2px solid #dfe1e6; /* Subtle divider */
+    padding-bottom: 5px;
+}
+
+/* Input styles */
+input[type="text"] {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #dfe1e6;
+    border-radius: 5px;
+    font-size: 1rem;
+    color: black;
+    background-color: #eaedf4;
+
+}
+
+input[type="text"]:focus { /* Focus state; keeping same colour scheme*/
+    outline: none;
+    border: 1px solid #0052cc;
+}
+
+/* Button styles */
+button {
+    background-color: rgb(126, 158, 227);
+    color: white;
+    border: none;
+    padding: 10px;
+    border-radius: 5px;
+    font-size: 1rem;
+    font-weight: bold;
+    transition: background-color 0.2s ease-in-out, transform 0.1s ease-in-out; /* Transition effect */
+}
+
+/* Button hover effect */
+button:hover {
+    background-color: #003380;
+    transform: scale(1.01); /* Slight zoom effect */
+}
+
+/* Styles for the list of chores */
+.chore-item {
+    background-color: #f4f5f7; /* Light gray background for items */
+    border: 1px solid #dfe1e6; 
+    border-radius: 5px; 
+    padding: 10px;
+    display: flex;
+    justify-content: space-between; /* Space between text and button */
+    align-items: center; /* Center content vertically */
+    font-size: 1rem;
+    color: #172b4d;
+    transition: background-color 0.2s ease-in-out;
+}
+
+
+/* Styles for the delete button */
+.delete-btn {
+    background-color: transparent; /* Transparent background */
+    cursor: pointer; /* Pointer cursor on hover */
+    font-size: 1rem; 
+    color: #ff5630; /* Red color for the "X" */
+    font-weight: bold; /* Bold for visibility */
+
+    transition: color 0.1s ease-in-out; /* Subtle color transition */
+}
+
+.delete-btn:hover {
+    color: #bf2600; /* Slightly darker red on hover */
+    background-color: transparent;
+}
+
+.delete-btn:active {
+    color: #7f1d00; /* Even darker red on click */
+}

@@ -14,7 +14,7 @@ drop table if exists User;
 drop table if exists Groceries;
 drop table if exists Chores;
 drop table if exists Bills;
-drop table if exists Event;
+drop table if exists Events;
 drop table if exists Flat;
 
 -- Instances represent a flat shared between Users
@@ -38,7 +38,7 @@ create table User (
 
 -- Instances represent an Event happening at some point in time
 -- A flat can have multiple events, an event must be associated with a flat
-create table Event (
+create table Events (
     Event_ID int not null unique auto_increment,
     Flat_ID varchar(10) not null,
     Title varchar(40),
@@ -57,20 +57,20 @@ create table Bills (
     Bill_ID int not null unique auto_increment,
     Flat_ID varchar(10) not null,
     Amount decimal(7, 2), 
-    Amount_Paid decimal(7, 2), -- Amount paid by so far by flatties
+    Amount_Paid decimal(7, 2) default 0, -- Amount paid by so far by flatties
     Due_Date date,
     Status char(1) check (Status in ('A', 'P', 'I')),  -- A: Active, P: Paused, I: Inactive only needed for recurring bills
     Payment_Status char(1) check (Payment_Status in ('U', 'P', 'F')), -- U: Unpaid, P: Partially Paid, F: Fully Paid
     Title varchar(30),
     Recurring boolean not null,
     Time_period int,-- Number of days between bill due dates for recurring bills
-    Overdue boolean not null, -- True if bill is overdue
+    Overdue boolean not null default false, -- True if bill is overdue
     Description varchar(150),
     constraint Bills_PK primary key (Flat_ID, Bill_ID),
     constraint Bills_Flat_FK foreign key (Flat_ID)
         references Flat(Flat_ID),
-    constraint Amount_CHK check (Amount > 0)
-    constraint Amount_Paid_CHK check (Amount_Paid <= Amount)
+    constraint Amount_CHK check (Amount > 0),
+    constraint Amount_Paid_CHK check (Amount_Paid >= 0 and Amount_Paid <= Amount)
 );
 
 -- Instances represent grocery items for grocery list 

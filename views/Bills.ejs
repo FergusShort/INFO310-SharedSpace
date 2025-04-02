@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bills Management</title>
+    <link rel="stylesheet" href="/styles/bills.css">
+</head>
+<body>
+    <h1>Bills</h1>
+    
+    <!-- Form for adding the bills -->
+    <form action="/bills/add" method="POST">
+        <input type="text" name="title" placeholder="Bill Title" required>
+        <input type="number" name="amount" placeholder="Total Amount" step="0.01" required>
+        <input type="date" name="due_date" required>
+        <label>
+            <input type="checkbox" name="recurring"> Recurring
+        </label>
+        <input type="number" name="time_period" placeholder="Days between recurrences">
+        <button type="submit">Add Bill</button>
+    </form>
+
+   <!-- Bills Table -->
+   <% if (bills && bills.length > 0) { %>
+        <table>
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Amount</th>
+                    <th>Due Date</th>
+                    <th>Status</th>
+                    <th>Remaining</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% bills.forEach(bill => { %>
+                    <tr>
+                        <td><%= bill.title %></td>
+                        <td>$<%= bill.amount %></td>
+                        <td><%= bill.due_date %></td>
+                        <td><%= bill.payment_status %></td>
+                        <td>$<%= (bill.amount - bill.amount_paid).toFixed(2) %></td>
+                        <td>
+                            <% if (bill.amount_paid < bill.amount) { %>
+                                <form action="/bills/pay" method="POST" id="payForm_<%= bill.bill_id %>">
+                                    <input type="hidden" name="bill_id" value="<%= bill.bill_id %>">
+                                    
+                                    <label for="customAmount_<%= bill.bill_id %>">Enter amount to pay:</label>
+                                    <input type="number" name="amount" id="customAmount_<%= bill.bill_id %>" placeholder="Enter amount" min="0" step="0.01">
+                                    
+                                    <input type="hidden" name="shareAmount" id="shareAmount_<%= bill.bill_id %>">
+                                    <button type="button" class="payShareButton" data-bill-id="<%= bill.bill_id %>">Pay My Share</button>
+                                    
+                                    <button type="submit">Pay</button>
+                                </form>
+
+                                <script>
+                                    document.querySelector(".payShareButton[data-bill-id='<%= bill.bill_id %>']").addEventListener("click", function() {
+                                        // Get the number of people in the flat -- mock for now but will be dynamic later
+                                        var numPeople = 3;  // Adjust this dynamically later
+                                        var billAmount = <%= bill.amount %>;
+                                        var amountPaid = <%= bill.amount_paid %>; //errors here and above will sort out later, its about how it goes from ejs to js but just wanting page to appear properly
+                                        
+                                        // Calculate the share of the bill
+                                        var shareAmount = (billAmount - amountPaid) / numPeople;
+                              
+                                        document.getElementById("shareAmount_<%= bill.bill_id %>").value = shareAmount.toFixed(2);
+                                     
+                                        document.getElementById("customAmount_<%= bill.bill_id %>").value = shareAmount.toFixed(2);
+                                    
+                                        document.getElementById("payForm_<%= bill.bill_id %>").submit();
+                                    });
+                                </script>
+                            <% } %>
+
+                            <form action="/bills/delete" method="POST">
+                                <input type="hidden" name="bill_id" value="<%= bill.bill_id %>">
+                                <button type="submit">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                <% }); %>
+            </tbody>
+        </table>
+    <% } else { %>
+        <p>No bills to show. Add a new bill!</p>
+    <% } %>
+</body>
+</html>

@@ -1,15 +1,17 @@
 const express = require('express')
 const path = require('path');
 
+
 /* create the server */
 const app = express();
 const PORT = 3000;
 
-app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
+app.set('view engine', 'ejs');
+
 
 /* host public/ directory to serve: images, css, js, etc. */
-app.use(express.static('public'));
+app.use(express.static('styles'));
 
 /* path routing and endpoints */
 app.use('/', require('./path_router'));
