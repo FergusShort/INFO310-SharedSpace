@@ -94,11 +94,12 @@ button:hover {
     padding: 10px;
     display: flex;
     flex-direction: column; /* Stack title and comment vertically */
-    gap: 5px; /* Add space between title and comment */
+    gap: 5px 0; /* Add space between title and comment */
     font-size: 1rem;
     color: #172b4d;
     transition: background-color 0.2s ease-in-out;
     position: relative; /* For positioning the delete button */
+    margin-bottom: 10px; /* Space between items */
 }
 
 .chore-item:hover {
@@ -161,4 +162,13 @@ textarea:focus {
     font-size: 0.9rem; 
     color: #6b778c; 
 
+}
+
+/* Styles for the chore timestamp */
+.chore-timestamp {
+    font-size: 0.8rem; /* Smaller font size */
+    color: #a0a0a0; /* Subtle gray color */
+    margin-top: 5px; /* Add some space above the timestamp */
+    font-style: italic; /* Optional: make it italic for emphasis */
+    text-align: right; /* Align the timestamp to the right */
 }
