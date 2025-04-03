@@ -120,6 +120,6 @@ create table Users_Events (
     constraint Event_User_FK foreign key (User_ID)
         references User(User_ID),
     constraint Event_FK foreign key (Event_ID)
-        references Event(Event_ID)
+        references Events(Event_ID)
 );
 
