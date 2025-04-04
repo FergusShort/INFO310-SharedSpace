@@ -1,91 +1,208 @@
-/* General Styles */
-body {
-    font-family: Arial, sans-serif;
+
+* {
     margin: 0;
     padding: 0;
-    background-color: #f4f4f4;
+    box-sizing: border-box;
 }
 
-h1 {
-    text-align: center;
-    margin-top: 20px;
-    font-size: 2em;
-}
 
-/* Form Styling */
-form {
+body {
+    font-family: 'Segoe UI', sans-serif;
+    background-color: white;
+    height: 100vh;
     display: flex;
-    flex-direction: column;
-    align-items: center;
-    background-color: #fff;
+    justify-content: center;
+    align-items: flex-start;
     padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    margin: 20px auto;
-    width: 80%;
-    max-width: 400px;
+    color: #172b4d; 
 }
 
-form input, form button {
-    margin: 10px 0;
-    padding: 10px;
+
+.container {
     width: 100%;
-    border: 1px solid #ddd;
+    max-width: 800px; 
+    margin-top: 20px;
+    padding: 20px;
+}
+
+
+.form-container {
+    background-color: #fbfbfb;
+    border: 1px solid darkgrey;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 20px; 
+    text-align: center;
+}
+
+form input[type="text"],
+form input[type="number"],
+form input[type="date"] {
+    width: 90%;
+    padding: 10px;
+    margin-bottom: 10px; 
+    border: 1px solid #dfe1e6;
     border-radius: 5px;
     font-size: 1rem;
+    color: black;
+    background-color: #eaedf4;
+}
+
+form input:focus {
+    outline: none;
+    border: 1px solid #0052cc;
+}
+
+form label.checkbox-label {
+    display: block;
+    margin-bottom: 10px;
+    font-size: 0.9rem;
+    color: #6b778c;
+}
+
+form label.checkbox-label input[type="checkbox"] {
+    margin-right: 5px;
 }
 
 form button {
-    background-color: #28a745;
+    background-color: rgb(126, 158, 227);
     color: white;
+    border: none;
+    padding: 10px 15px; 
+    border-radius: 5px;
+    font-size: 1rem;
+    font-weight: bold;
     cursor: pointer;
+    transition: background-color 0.2s ease-in-out, transform 0.1s ease-in-out;
+    width: auto; 
+    display: block; 
+    margin: 10px auto; 
 }
 
 form button:hover {
-    background-color: #218838;
+    background-color: #003380;
+    transform: scale(1.01);
 }
 
-/* Table Styling */
-table {
-    width: 90%;
-    margin: 30px auto;
-    border-collapse: collapse;
+
+.bills-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px; 
+    margin-top: 20px;
 }
 
-table th, table td {
-    padding: 10px;
-    text-align: left;
-    border: 1px solid #ddd;
+.bill-card {
+    background-color: #f4f5f7;
+    border: 1px solid #dfe1e6;
+    border-radius: 5px;
+    padding: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 1rem;
+    color: #172b4d;
+    transition: background-color 0.2s ease-in-out;
+    position: relative; 
 }
 
-table th {
-    background-color: #f1f1f1;
+.bill-card:hover {
+    background-color: #ebecf0;
 }
 
-table tr:nth-child(even) {
-    background-color: #f9f9f9;
+.bill-info h2 {
+    margin: 0 0 5px 0; 
+    font-size: 1.1rem; 
+    font-weight: bold;
 }
 
-table button {
-    background-color: #007bff;
+.bill-info p {
+    margin: 3px 0; 
+    font-size: 0.9rem; 
+    color: #6b778c;
+}
+
+.bill-info p.remaining {
+    font-weight: bold;
+    color: #0052cc; 
+}
+
+.bill-info p.paid {
+    color: #28a745; 
+    font-weight: bold;
+}
+
+.bill-info p.partially-paid {
+    color: #ffc107; 
+    font-weight: bold;
+}
+
+.bill-info p.unpaid {
+    color: #dc3545; 
+    font-weight: bold;
+}
+
+
+.bill-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 5px; 
+}
+
+.pay-share-button,
+.pay-button,
+.delete-button {
+    background-color: rgb(126, 158, 227);
     color: white;
     border: none;
-    padding: 5px 10px;
+    padding: 8px 12px; 
     border-radius: 5px;
     cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: bold;
+    transition: background-color 0.2s ease-in-out, transform 0.1s ease-in-out;
+    width: 100%;
 }
 
-table button:hover {
+.pay-share-button:hover {
     background-color: #0056b3;
+    transform: scale(1.01);
 }
 
-/* Adjustments for small screens */
+.pay-button {
+    background-color: #28a745;
+}
+
+.pay-button:hover {
+    background-color: #218838;
+    transform: scale(1.01);
+}
+
+.delete-button {
+    background-color: #dc3545;
+}
+
+.delete-button:hover {
+    background-color: #c82333;
+    transform: scale(1.01);
+}
+
 @media (max-width: 600px) {
-    table {
-        width: 100%;
+    .bill-card {
+        flex-direction: column;
+        align-items: flex-start; 
+        gap: 10px;
     }
 
-    form {
-        width: 100%;
+    .bill-actions {
+        flex-direction: row;
+        justify-content: flex-end;
+        gap: 5px;
+        width: 100%; 
+    }
+
+    .bill-actions button {
+        width: auto; 
+        flex-grow: 1;
     }
 }
