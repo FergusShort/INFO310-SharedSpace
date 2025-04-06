@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Group</title>
+    <link rel="stylesheet" href="/logInGroups.css">
+</head>
+<body>
+    <div class="container">
+        <h2>Create Group</h2>
+        <form action="/group/create" method="POST">
+            <label for="groupName">Group Name</label>
+            <input type="text" id="groupName" name="groupName" required>
+            
+            <label for="description">Description</label>
+            <input type="text" id="description" name="description" required>
+            
+            <label for="groupCode">Custom Group Code (Optional)</label>
+            <input type="text" id="groupCode" name="groupCode">
+            
+            <button type="submit">Create Group</button>
+            <p>Want to join an existing group? <a href="joinGroup">Join Group</a></p>
+        </form>
+    </div>
+</body>
+</html>

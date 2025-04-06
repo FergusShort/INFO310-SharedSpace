@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Join Group</title>
+    <link rel="stylesheet" href="/logInGroups.css">
+</head>
+<body>
+    <div class="container">
+        <h2>Join Group</h2>
+        <form action="/group/join" method="POST">
+            <label for="groupCode">Group Code</label>
+            <input type="text" id="groupCode" name="groupCode" required>
+            
+            <button type="submit">Join Group</button>
+            <p>Want to create a new group? <a href="createGroup">Create Group</a></p>
+        </form>
+    </div>
+</body>
+</html>

@@ -35,6 +35,16 @@ router.get('/signup', async (req, res) => {
     res.render('signup');
 });
 
+router.get('/createGroup', async (req, res) => {
+    res.render('createGroup');
+});
+
+router.get('/joinGroup', async (req, res) => {
+    res.render('joinGroup');
+});
+
+
+
 router.get('/groceries', async (req, res) => {
     res.render('groceries');
 });
@@ -169,7 +179,7 @@ router.post('/login/submit', async (req, res) => {
         console.error("You havent set up the database yet!" + err);
     }
 
-    return res.redirect('/groceries');
+    return res.redirect('/createGroup');
 });
 
 router.post('/signup/submit', async (req, res) => {
@@ -202,7 +212,7 @@ router.post('/signup/submit', async (req, res) => {
         console.error("You havent set up the database yet!");
     }
 
-    return res.redirect('/groceries');
+    return res.redirect('/createGroup');
 });
 
 
