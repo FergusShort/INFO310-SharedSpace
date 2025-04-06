@@ -216,7 +216,42 @@ router.post('/signup/submit', async (req, res) => {
 });
 
 
+// Route to add a chore
+router.post('/chores/add', async (req, res) => {
+    const flat_id = 1; // Replace with actual flat ID later
+    const {title, comment, urgency} = req.body;
+    const db = pool.promise();
+    const insertQuery = `
+        INSERT INTO Chores (Flat_ID, Priority, Title, Description)
+        VALUES (?, ?, ?, ?);
+    `;
 
+    try {
+        const [result] = await db.query(insertQuery, [flat_id, urgency, title, comment]);
+        const choreId = result.insertId; // Get the inserted chore ID
+
+        res.status(201).json({ message: 'Chore added successfully', choreId });
+    } catch (err) {
+        console.error("Error adding chore:", err);
+        res.status(500).send('Error adding chore.');
+    }
+});
+
+// Route to delete a chore 
+router.post('/chores/delete', async (req, res) => {
+    const choreId = req.body.choreId; // Get the chore ID 
+
+    const db = pool.promise();
+    const deleteQuery = `DELETE FROM Chores WHERE Chore_ID = ?;`;
+
+    try {
+        await db.query(deleteQuery, [choreId]);
+        res.status(200).send('Chore deleted successfully');
+    } catch (err) {
+        console.error(deleteQuery, err);
+        res.status(500).send('Error deleting chore');
+    }
+});
 
 
 module.exports = router;

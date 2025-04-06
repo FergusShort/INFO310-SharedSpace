@@ -34,7 +34,7 @@
     </div>
 
     <script>
-        // Function to add a chore to the database via API
+        // Function to add a chore to the database 
         async function addChore(urgency) {
             const titleInput = document.getElementById(`new-${urgency}-title`);
             const commentInput = document.getElementById(`new-${urgency}-comment`);
@@ -44,8 +44,7 @@
     
             if (choreTitle) {
                 try {
-                    // Send chore data to the server
-                    const response = await fetch(`/api/chores`, {
+                    const response = await fetch(`/chores/add`, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -59,13 +58,7 @@
     
                     if (response.ok) {
                         const chore = await response.json();
-    
-                        // Optionally, update the UI with the new chore
-                        const list = document.getElementById(`${urgency}-list`);
-                        const li = document.createElement('li');
-                        li.className = 'chore-item';
-    
-                        // Add chore title
+
                         const titleDiv = document.createElement('div');
                         titleDiv.className = 'chore-title';
                         titleDiv.textContent = chore.title;
@@ -112,10 +105,10 @@
             }
         }
     
-        // Function to delete a chore from the database via API
+        // Function to delete a chore from the database
         async function deleteChore(choreId, li, list) {
             try {
-                const response = await fetch(`/api/chores/${choreId}`, {
+                const response = await fetch(`/chores/delete/${choreId}`, {
                     method: 'DELETE',
                 });
     
