@@ -49,6 +49,10 @@ router.get('/groceries', async (req, res) => {
     res.render('groceries');
 });
 
+router.get('/chores', async (req, res) => {
+    res.render('chores');
+});
+
 
 
 router.get('/bills', async (req, res) => {
