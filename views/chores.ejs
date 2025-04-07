@@ -2,71 +2,138 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Chores Board</title>
-    <link rel="stylesheet" href="/styles/chores.css">
+    <link rel="stylesheet" href="/chores.css" />
 </head>
 
 <body>
     <div class="container">
         <div class="compartment" id="urgent">
             <h2>Urgent</h2>
-            <ul id="urgent-list">
-                <!-- Temp. item to test delete button-->
-                <li class="chore-item">
-                    Test Chore 1
-                    <button class="delete-btn">X</button>
-                </li>
-            </ul>
-            <input type="text" id="new-urgent" placeholder="Add a new chore">
+            <ul id="urgent-list"></ul>
+            <input type="text" id="new-urgent-title" placeholder="Chore title" />
+            <textarea id="new-urgent-comment" placeholder="Optional comment"></textarea>
             <button onclick="addChore('urgent')">Add</button>
         </div>
         <div class="compartment" id="sort-of-urgent">
             <h2>Not So Urgent</h2>
             <ul id="sort-of-urgent-list"></ul>
-            <input type="text" id="new-sort-of-urgent" placeholder="Add a new chore">
+            <input type="text" id="new-sort-of-urgent-title" placeholder="Chore title" />
+            <textarea id="new-sort-of-urgent-comment" placeholder="Optional comment"></textarea>
             <button onclick="addChore('sort-of-urgent')">Add</button>
         </div>
         <div class="compartment" id="low-urgency">
             <h2>Low Urgency</h2>
             <ul id="low-urgency-list"></ul>
-            <input type="text" id="new-low-urgency" placeholder="Add a new chore">
+            <input type="text" id="new-low-urgency-title" placeholder="Chore title" />
+            <textarea id="new-low-urgency-comment" placeholder="Optional comment"></textarea>
             <button onclick="addChore('low-urgency')">Add</button>
         </div>
     </div>
 
-
     <script>
-        // Function to add a chore to the list
-        function addChore(urgency) {
-            const input = document.getElementById(`new-${urgency}`);
-            const list = document.getElementById(`${urgency}-list`);
-            const choreText = input.value.trim();
+        // Function to add a chore to the database 
+        async function addChore(urgency) {
+            const titleInput = document.getElementById(`new-${urgency}-title`);
+            const commentInput = document.getElementById(`new-${urgency}-comment`);
+    
+            const choreTitle = titleInput.value.trim();
+            const choreComment = commentInput.value.trim();
+    
+            if (choreTitle) {
+                try {
+                    const response = await fetch(`/chores/add`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            title: choreTitle,
+                            comment: choreComment,
+                            urgency: urgency,
+                        }),
+                    });
+    
+                    if (response.ok) {
+                        const chore = await response.json();
 
-            if (choreText) {
-                const li = document.createElement('li');
-                li.className = 'chore-item'; // Add the class for styling
-                li.textContent = choreText;
-
-                // Add delete button
-                const deleteBtn = document.createElement('button');
-                deleteBtn.textContent = 'X';
-                deleteBtn.className = 'delete-btn';
-                deleteBtn.onclick = function () {
-                    list.removeChild(li);
-                };
-
-                li.appendChild(deleteBtn);
-                list.appendChild(li);
-                input.value = ''; // Clear the input field
+                        const titleDiv = document.createElement('div');
+                        titleDiv.className = 'chore-title';
+                        titleDiv.textContent = chore.title;
+    
+                        // Add chore comment (if available)
+                        if (chore.comment) {
+                            const commentDiv = document.createElement('div');
+                            commentDiv.className = 'chore-comment';
+                            commentDiv.textContent = chore.comment;
+                            li.appendChild(commentDiv);
+                        }
+    
+                        li.appendChild(titleDiv);
+    
+                        // Add timestamp
+                        const timestampDiv = document.createElement('div');
+                        timestampDiv.className = 'chore-timestamp';
+                        timestampDiv.textContent = `Added on: ${new Date(chore.timestamp).toLocaleDateString()} at ${new Date(chore.timestamp).toLocaleTimeString()}`;
+                        li.appendChild(timestampDiv);
+    
+                        // Add delete button
+                        const deleteBtn = document.createElement('button');
+                        deleteBtn.textContent = 'X';
+                        deleteBtn.className = 'delete-btn';
+                        deleteBtn.onclick = async function () {
+                            await deleteChore(chore.id, li, list);
+                        };
+    
+                        li.appendChild(deleteBtn);
+                        list.appendChild(li);
+    
+                        // Clear the input fields
+                        titleInput.value = '';
+                        commentInput.value = '';
+                    } else {
+                        alert('Failed to add chore. Please try again.');
+                    }
+                } catch (error) {
+                    console.error('Error adding chore:', error);
+                    alert('An error occurred. Please try again.');
+                }
             } else {
-                alert('Please enter a chore');
+                alert('Please enter a chore title');
             }
         }
+    
+        // Function to delete a chore from the database
+        async function deleteChore(choreId, li, list) {
+            try {
+                const response = await fetch(`/chores/delete/${choreId}`, {
+                    method: 'DELETE',
+                });
+    
+                if (response.ok) {
+                    list.removeChild(li);
+                } else {
+                    alert('Failed to delete chore. Please try again.');
+                }
+            } catch (error) {
+                console.error('Error deleting chore:', error);
+                alert('An error occurred. Please try again.');
+            }
+        }
+    
+        // Add event listeners for "Enter" key
+        document.querySelectorAll('input[type="text"], textarea').forEach(input => {
+            input.addEventListener('keypress', function (event) {
+                if (event.key === 'Enter') {
+                    event.preventDefault(); // Prevent form submission or default behavior
+                    const urgency = this.id.split('-')[1];
+                    addChore(urgency);
+                }
+            });
+        });
     </script>
-
-
 </body>
 
 </html>

@@ -56,16 +56,16 @@ create table Events (
 create table Bills (
     Bill_ID int not null unique auto_increment,
     Flat_ID varchar(10) not null,
+    Initial_Amount decimal(7, 2), -- Initial amount of the bill
     Amount decimal(7, 2), 
     Amount_Paid decimal(7, 2) default 0, -- Amount paid by so far by flatties
     Due_Date date,
     Status char(1) check (Status in ('A', 'P', 'I')),  -- A: Active, P: Paused, I: Inactive only needed for recurring bills
-    Payment_Status char(1) check (Payment_Status in ('U', 'P', 'F')), -- U: Unpaid, P: Partially Paid, F: Fully Paid
+    Payment_Status char(1) default 'U' check (Payment_Status in ('U', 'P', 'F')) , -- U: Unpaid, P: Partially Paid, F: Fully Paid
     Title varchar(30),
     Recurring boolean not null,
     Time_period int,-- Number of days between bill due dates for recurring bills
     Overdue boolean not null default false, -- True if bill is overdue
-    Description varchar(150),
     constraint Bills_PK primary key (Flat_ID, Bill_ID),
     constraint Bills_Flat_FK foreign key (Flat_ID)
         references Flat(Flat_ID),
@@ -120,6 +120,6 @@ create table Users_Events (
     constraint Event_User_FK foreign key (User_ID)
         references User(User_ID),
     constraint Event_FK foreign key (Event_ID)
-        references Event(Event_ID)
+        references Events(Event_ID)
 );
 

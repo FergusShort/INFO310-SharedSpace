@@ -2,6 +2,8 @@ const express = require('express')
 const path = require('path');
 
 
+
+
 /* create the server */
 const app = express();
 const PORT = 3000;
@@ -15,6 +17,10 @@ app.use(express.static('styles'));
 
 /* path routing and endpoints */
 app.use('/', require('./path_router'));
+
+app.use(express.json());  // for parsing application/json
+app.use(express.urlencoded({ extended: true }));  // for parsing application/x-www-form-urlencoded
+
 
 /* start the server */
 app.listen(PORT, () => {

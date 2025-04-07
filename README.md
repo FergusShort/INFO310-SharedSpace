@@ -7,6 +7,8 @@
 
 [SCRUM Spreadsheet](https://otagouni-my.sharepoint.com/:x:/r/personal/shofe999_student_otago_ac_nz/Documents/INFO310_Project_Management_SharedSpace.xlsm?d=w6ef4d4d876d34f4487d256dcabb2cecc&csf=1&web=1&e=T4PMRQ)
 
+[Test cases](https://otagouni-my.sharepoint.com/:x:/r/personal/shofe999_student_otago_ac_nz/_layouts/15/Doc.aspx?sourcedoc=%7B119FB2AC-A535-43A1-8EF4-ADB2F2B0830F%7D&file=TestCases_template.xlsx&fromShare=true&action=default&mobileredirect=true)
+
 ## Files / Folders:
 `mysql-data/` - Holds all the mysql and DB files\
 `node_modules/` - Contains modules used by node\
