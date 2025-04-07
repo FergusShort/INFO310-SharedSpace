@@ -14,16 +14,29 @@
         <h1>Groceries</h1>
 
         <ul class="list" id="checklist"></ul>
-        <div class="item-adder">
-            <input type="text" id="itemInput" placeholder="Add item">
 
-            <div class="buttons">
+        <div class="buttons">
+            <form action="/groceries/add" method="POST" class="add-form">
+                <input type="text" name="item" id="itemInput" placeholder="Item" required>
 
-                <button onclick="addItem()">Add</button>
-                <button onclick="clearChecked()">Clear Checked</button>
-                <button onclick="clearAll()">Clear All</button>
+                <div class="price-quantity-row">
+                    <input type="number" name="price" step="0.01" min="0.01" placeholder="Price" required>
+                    <input type="number" name="quantity" min="1" placeholder="Quantity" required>
+                </div>
+
+                <button type="submit">Add item</button>
+            </form>
+
+            <div class="buttons-bottom">
+                <form action="/groceries/clear-checked" method="POST">
+                    <button type="submit">Clear checked</button>
+                </form>
+                <form action="/groceries/clear-all" method="POST">
+                    <button type="submit">Clear all</button>
+                </form>
             </div>
         </div>
+
 
         <script>
             function addItem() {
@@ -68,9 +81,9 @@
             }
 
             document.getElementById("itemInput").addEventListener("keypress", function (event) {
-                if (event.key === "Enter") { 
-                    event.preventDefault();   
-                    addItem();   
+                if (event.key === "Enter") {
+                    event.preventDefault();
+                    addItem();
                 }
             });
         </script>
