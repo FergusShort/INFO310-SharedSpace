@@ -1,12 +1,19 @@
 const express = require('express')
 const path = require('path');
-
+const session = require('express-session');
 
 
 
 /* create the server */
 const app = express();
 const PORT = 3000;
+
+app.use(session({
+    secret: 'my-secret-key', 
+    resave: false,
+    saveUninitialized: true,
+    cookie: { secure: false } 
+}));
 
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
