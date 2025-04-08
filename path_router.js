@@ -39,7 +39,6 @@ router.get('/createGroup', async (req, res) => {
         res.render('signup');
     }    
     res.render('createGroup');
-    console.log(req.session.userId);
 });
 
 router.get('/joinGroup', async (req, res) => {
@@ -52,13 +51,10 @@ router.get('/groceries', async (req, res) => {
     res.render('groceries');
 });
 
-
-
 router.get('/bills', async (req, res) => {
     const bills = await getBillsFromDatabase();
     res.render('bills', { bills: Array.isArray(bills) ? bills : [] });
 });
-
 
 const getBillsFromDatabase = async () => {
     const db = pool.promise();
@@ -72,7 +68,6 @@ const getBillsFromDatabase = async () => {
         return [];
     }
 };
-
 
 router.post('/bills/add', async (req, res) => {
     const flat_id = 1;
@@ -106,8 +101,6 @@ router.post('/bills/add', async (req, res) => {
         return res.status(500).send("Error adding bill.");
     }
 });
-
-
 
 router.post('/bills/pay', async (req, res) => {
     const bill_id = req.body.bill_id;
@@ -147,7 +140,6 @@ router.post('/bills/pay', async (req, res) => {
     }
 });
 
-
 router.post('/bills/delete', async (req, res) => {
     const bill_id = req.body.bill_id;
 
@@ -162,13 +154,7 @@ router.post('/bills/delete', async (req, res) => {
     }
 });
 
-
-
-
-
-
 router.post('/login/submit', async (req, res) => {
-
     const email = req.body.email;
     const pwd = req.body.pwd;
 
@@ -231,8 +217,58 @@ router.post('/signup/submit', async (req, res) => {
     return res.redirect('/createGroup');
 });
 
+router.post('/createGroup/create', async (req, res) => {
+    const groupName = req.body.groupName;
+    const groupID = makeFlatID();
 
+    const db = pool.promise();
+    const status_query = `SELECT User_ID FROM User WHERE Email = ? AND Username = ?;`;
+    try {
+        const [rows] = await db.query(status_query, [email, pwd]);  
+        if (rows.length > 0) {
+            req.session.userId = rows[0].User_ID;
+            return res.redirect('/createGroup');
+        } 
+    } catch (err) {
+        console.error("You havent set up the database yet!" + err);
+    }
 
+    return res.redirect('/signup');
+});
 
+async function makeFlatID() {
+    const iD = generateFlatID();
+
+    const db = pool.promise();
+    const status_query = `SELECT Flat_ID FROM Flat WHERE Flat_ID = ?;`;
+    try {
+        const [rows] = await db.query(status_query, iD);  
+        if (rows.length > 0) {
+            iD = makeFlatID();
+        } 
+    } catch (err) {
+        console.error("You havent set up the database yet!" + err);
+    }
+    return iD;
+}
+
+function generateFlatID() {
+    const alphabet = [
+        'a', 'b', 'c', 'd', 'e',
+        'f', 'g', 'h', 'i', 'j',
+        'k', 'l', 'm', 'n', 'o',
+        'p', 'q', 'r', 's', 't',
+        'u', 'v', 'w', 'x', 'y',
+        'z'
+    ];
+
+    let FlatID = "";
+
+    for(let i = 0; i < 4; i++){
+        FlatID += alphabet[getRandomInt(26)];
+    }
+
+    return FlatID;
+}
 
 module.exports = router;
