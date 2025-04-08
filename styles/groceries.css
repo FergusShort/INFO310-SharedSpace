@@ -56,6 +56,8 @@ li {
     width: 100%;
     white-space: nowrap;
     text-align: left;
+    justify-content: flex-start;
+
 }
 
 .item-adder {
@@ -150,21 +152,6 @@ button:hover {
     gap: 20px;
     width: 100%;
     margin-top: 10px;
-}
-
-.buttons-bottom form {
-    flex: 1;
-    max-width: 150px;
-}
-
-.buttons-bottom button {
-    width: 100%;
-    height: 40px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    white-space: nowrap;
-    font-size: 0.8rem;
 }
 
 .buttons-bottom form {
