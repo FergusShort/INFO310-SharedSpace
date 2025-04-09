@@ -12,17 +12,19 @@
     <div class="container">
         <h1>Groceries</h1>
 
-        <table class="table">
-            <thead>
-                <tr class="table-header">
-                    <th id="checkbox">✔</th>
-                    <th id="item">Item</th>
-                    <th id="qty">Quantity</th>
-                    <th id="price">Price</th>
-                </tr>
-            </thead>
-            <tbody id="checklist"></tbody>
-        </table>
+        <div class="checklist-container">
+            <table class="table">
+                <thead>
+                    <tr class="table-header">
+                        <th id="checkbox">✔</th>
+                        <th id="item">Item</th>
+                        <th id="qty">Quantity</th>
+                        <th id="price">Price</th>
+                    </tr>
+                </thead>
+                <tbody id="checklist"></tbody>
+            </table>
+        </div>
 
         <h3>Estimated Total:</h3>
         <p id="totalCost">$0.00</p>
@@ -89,8 +91,6 @@
                 const priceCell = document.createElement("td");
                 priceCell.textContent = `$${price.toFixed(2)}`;
 
-                const totalCell = document.createElement("td");
-
                 row.appendChild(checkboxCell);
                 row.appendChild(itemCell);
                 row.appendChild(quantityCell);
@@ -121,7 +121,7 @@
 
             function clearAll() {
                 document.getElementById("checklist").innerHTML = "";
-                totalCost = 0; 
+                totalCost = 0;
                 document.getElementById("totalCost").textContent = `$${totalCost.toFixed(2)}`;
             }
 
