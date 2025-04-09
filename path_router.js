@@ -224,8 +224,6 @@ router.post('/createGroup/create', async (req, res) => {
     const db = pool.promise();
     const status_query = `INSERT INTO Flat (Flat_ID, GroupName) VALUE (?, ?);`;
     try {
-        console.log(groupID);
-        console.log(groupName);
         const [rows] = await db.query(status_query, [groupID, groupName]);  
         
     } catch (err) {
@@ -241,7 +239,33 @@ router.post('/createGroup/create', async (req, res) => {
         console.error("You havent set up the database yet!!!" + err);
     }
 
-    return res.redirect('/signup');
+    return res.redirect('/groceries');
+});
+
+router.post('/joinGroup/join', async (req, res) => {
+    const groupCode = req.body.groupCode;
+    const userID = req.session.userId;
+
+    const db = pool.promise();
+    const status_query = `SELECT Flat_ID FROM Flat WHERE Flat_ID = ?;`;
+    try {
+        const [rows] = await db.query(status_query, groupCode);  
+        if (rows.length > 0) {
+            const dbb = pool.promise();
+            const status_queryy = `UPDATE User SET Flat_ID = ? WHERE User_ID = ?;`;
+            try {
+                const [row] = await dbb.query(status_queryy, [groupCode ,userID]);  
+                    
+            } catch (err) {
+                console.error("You havent set up the database yet!!!" + err);
+            }
+        }
+        
+    } catch (err) {
+        console.error("You havent set up the database yet!!" + err);
+    }
+
+    return res.redirect('/groceries');
 });
 
 async function makeFlatID() {

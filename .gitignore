@@ -23,3 +23,9 @@ mysql-data/SharedSpace/flat.ibd
 mysql-data/SharedSpace/groceries.ibd
 mysql-data/SharedSpace/user.ibd
 mysql-data/SharedSpace/users_events.ibd
+mysql-data/ibdata1
+mysql-data/mysql.ibd
+mysql-data/undo_001
+mysql-data/undo_002
+mysql-data/SharedSpace/flat.ibd
+mysql-data/SharedSpace/user.ibd
