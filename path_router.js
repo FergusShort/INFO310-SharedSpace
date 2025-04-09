@@ -207,7 +207,7 @@ router.post('/signup/submit', async (req, res) => {
     const dbb = pool.promise();
     const status_queryy = `SELECT User_ID FROM User WHERE Email = ?`;
     try {
-        const [rows] = await db.query(status_query, email);  
+        const [rows] = await dbb.query(status_queryy, email);  
         if (rows.length > 0) {
             req.session.userId = rows[0].User_ID;
         } 
@@ -219,18 +219,26 @@ router.post('/signup/submit', async (req, res) => {
 
 router.post('/createGroup/create', async (req, res) => {
     const groupName = req.body.groupName;
-    const groupID = makeFlatID();
+    const groupID = await makeFlatID();
 
     const db = pool.promise();
-    const status_query = `SELECT User_ID FROM User WHERE Email = ? AND Username = ?;`;
+    const status_query = `INSERT INTO Flat (Flat_ID, GroupName) VALUE (?, ?);`;
     try {
-        const [rows] = await db.query(status_query, [email, pwd]);  
-        if (rows.length > 0) {
-            req.session.userId = rows[0].User_ID;
-            return res.redirect('/createGroup');
-        } 
+        console.log(groupID);
+        console.log(groupName);
+        const [rows] = await db.query(status_query, [groupID, groupName]);  
+        
     } catch (err) {
-        console.error("You havent set up the database yet!" + err);
+        console.error("You havent set up the database yet!!" + err);
+    }
+
+    const dbb = pool.promise();
+    const status_queryy = `UPDATE User SET Flat_ID = ? WHERE User_ID = ?;`;
+    try {
+        const [row] = await dbb.query(status_queryy, [groupID ,req.session.userId]);  
+            
+    } catch (err) {
+        console.error("You havent set up the database yet!!!" + err);
     }
 
     return res.redirect('/signup');
@@ -250,7 +258,7 @@ async function makeFlatID() {
         console.error("You havent set up the database yet!" + err);
     }
     return iD;
-}
+};
 
 function generateFlatID() {
     const alphabet = [
@@ -265,10 +273,10 @@ function generateFlatID() {
     let FlatID = "";
 
     for(let i = 0; i < 4; i++){
-        FlatID += alphabet[getRandomInt(26)];
+        FlatID += alphabet[Math.floor(Math.random() * 26)];
     }
 
     return FlatID;
-}
+};
 
 module.exports = router;
