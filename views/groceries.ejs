@@ -15,10 +15,10 @@
         <table class="table">
             <thead>
                 <tr class="table-header">
-                    <th>✔</th>
-                    <th>Item</th>
-                    <th>Quantity</th>
-                    <th>Price</th>
+                    <th id="checkbox">✔</th>
+                    <th id="item">Item</th>
+                    <th id="qty">Quantity</th>
+                    <th id="price">Price</th>
                 </tr>
             </thead>
             <tbody id="checklist"></tbody>
@@ -87,7 +87,9 @@
                 quantityCell.textContent = quantity;
 
                 const priceCell = document.createElement("td");
-                priceCell.textContent = `$${itemTotal.toFixed(2)}`;
+                priceCell.textContent = `$${price.toFixed(2)}`;
+
+                const totalCell = document.createElement("td");
 
                 row.appendChild(checkboxCell);
                 row.appendChild(itemCell);
@@ -106,8 +108,8 @@
                 checkboxes.forEach(checkbox => {
                     if (checkbox.checked) {
                         const row = checkbox.closest("tr");
-                        const priceText = row.querySelector("td:last-child").textContent.replace("$", "");
-                        const itemTotal = parseFloat(priceText);
+                        const totalText = row.querySelector("td:last-child").textContent.replace("$", "");
+                        const itemTotal = parseFloat(totalText);
                         totalCost -= itemTotal;
 
                         row.remove();
