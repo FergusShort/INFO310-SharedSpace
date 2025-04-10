@@ -257,5 +257,9 @@ router.post('/chores/delete', async (req, res) => {
     }
 });
 
+/* INDEX (HomePage) CODE */
+router.get('/home', async (req, res) => { 
+    res.render('index');
+});
 
 module.exports = router;
