@@ -60,7 +60,6 @@ CREATE TABLE Bills (
     Amount_Left DECIMAL(10, 2),         -- running amount so far
     Amount_Paid DECIMAL(10, 2) DEFAULT 0,
     Due_Date DATE,
-    Status CHAR(1) CHECK (Status IN ('A', 'P', 'I')),  -- A: Active, P: Paused, I: Inactive
     Payment_Status CHAR(1) DEFAULT 'U' CHECK (Payment_Status IN ('U', 'P', 'F')), -- U: Unpaid, P: Partial, F: Full
     Title VARCHAR(30),
     Recurring BOOLEAN NOT NULL,

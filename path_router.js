@@ -104,7 +104,6 @@ router.post("/bills/add", async (req, res) => {
   const amount_paid = 0.00;
   const amount_left = initial_amount;
   const due_date = req.body.due_date ? new Date(req.body.due_date) : null;
-  const status = req.body.status || "A";
   let payment_status = "U";
   const title = req.body.title;
   const recurring = req.body.recurring === 'on' ? 1 : 0;
@@ -120,10 +119,10 @@ router.post("/bills/add", async (req, res) => {
   const insertQuery = `
     INSERT INTO Bills (
         Flat_ID, Initial_Amount, Amount_Left, Amount_Paid, Due_Date,
-        Status, Payment_Status, Title, Description,
+         Payment_Status, Title, Description,
         Recurring, Time_period, Overdue
     )
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+    VALUES (?, ?, ?, ?,  ?, ?, ?, ?, ?, ?, ?);
 `;
 
   try {
@@ -134,7 +133,6 @@ router.post("/bills/add", async (req, res) => {
       amount_left,
       amount_paid,
       due_date,
-      status,
       payment_status,
       title,
       description,
@@ -159,7 +157,7 @@ router.post('/bills/pay', async (req, res) => {
   try {
       // Retrieve the bill data, including Recurring and Time_period
       const checkQuery = `
-          SELECT Initial_Amount, Amount_Left, Amount_Paid, Due_Date, Recurring, Time_period, Flat_ID, Title, Description, Status, Overdue
+          SELECT Initial_Amount, Amount_Left, Amount_Paid, Due_Date, Recurring, Time_period, Flat_ID, Title, Description, Overdue
           FROM Bills WHERE Bill_ID = ?;
       `;
       const [rows] = await db.query(checkQuery, [bill_id]);
@@ -207,10 +205,10 @@ router.post('/bills/pay', async (req, res) => {
           const insertRecurringQuery = `
               INSERT INTO Bills (
                   Flat_ID, Initial_Amount, Amount_Left, Amount_Paid, Due_Date,
-                  Status, Payment_Status, Title, Description,
+                   Payment_Status, Title, Description,
                   Recurring, Time_period, Overdue
               )
-              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
           `;
           await db.query(insertRecurringQuery, [
               bill.Flat_ID,
@@ -218,7 +216,6 @@ router.post('/bills/pay', async (req, res) => {
               bill.Initial_Amount,
               0.00,
               nextDueDate,
-              bill.Status,
               "U",
               bill.Title,
               bill.Description,
