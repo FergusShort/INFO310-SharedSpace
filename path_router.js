@@ -156,10 +156,6 @@ router.post('/bills/pay', async (req, res) => {
   const amountPaid = parseFloat(req.body.amount_paid || req.body.shareAmount || 0);
   const db = pool.promise();
 
-  if (isNaN(amountPaid) || amountPaid <= 0) {
-      return res.redirect('/bills?error=invalid_amount');
-  }
-
   try {
       // Retrieve the bill data, including Recurring and Time_period
       const checkQuery = `

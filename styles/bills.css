@@ -110,7 +110,7 @@ form button:hover,
 /* --- BILL CARDS --- */
 .bills-container {
     display: flex;
-    flex-direction: column;
+    flex-wrap: wrap; 
     gap: 15px;
 }
 
@@ -123,6 +123,12 @@ form button:hover,
     justify-content: space-between;
     align-items: center;
     box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    width: calc(50% - 7.5px); 
+}
+
+.bill-info {
+    flex-grow: 1;
+    margin-right: 20px;
 }
 
 .bill-info h2 {
@@ -162,6 +168,7 @@ form button:hover,
     display: flex;
     flex-direction: column;
     gap: 10px;
+    width: 150px; 
 }
 
 .pay-button {
@@ -193,6 +200,7 @@ form button:hover,
 /* --- MOBILE --- */
 @media (max-width: 600px) {
     .bill-card {
+        width: 100%; 
         flex-direction: column;
         align-items: flex-start;
         gap: 15px;
@@ -200,7 +208,7 @@ form button:hover,
 
     .bill-actions {
         flex-direction: row;
-        width: 100%;
+        width: 100%; 
         justify-content: space-between;
     }
 
@@ -208,3 +216,4 @@ form button:hover,
         flex-grow: 1;
     }
 }
+
