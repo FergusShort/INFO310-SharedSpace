@@ -167,18 +167,7 @@ router.post('/bills/pay', async (req, res) => {
 
       const bill = rows[0];
       const currentAmountLeft = parseFloat(bill.Amount_Left);
-      const currentAmountPaid = parseFloat(bill.Amount_Paid);
       const initialAmount = parseFloat(bill.Initial_Amount);
-
-      if (amountPaid > currentAmountLeft) {
-          return res.redirect('/bills?error=amount_too_large');
-      }
-
-      if (currentAmountLeft <= 0) {
-          return res.status(400).send("This bill is already fully paid.");
-      }
-
-      const newAmountPaid = currentAmountPaid + amountPaid;
       const newAmountLeft = currentAmountLeft - amountPaid;
 
       // Ensure amount_left doesn't go below zero
@@ -195,7 +184,7 @@ router.post('/bills/pay', async (req, res) => {
           SET Amount_Paid = ?, Amount_Left = ?, Payment_Status = ?
           WHERE Bill_ID = ?;
       `;
-      await db.query(updateQuery, [newAmountPaid, updatedAmountLeft, paymentStatus, bill_id]);
+      await db.query(updateQuery, [amountPaid, updatedAmountLeft, paymentStatus, bill_id]);
 
       // Create a new recurring bill and delete the old one if fully paid and recurring
       if (updatedAmountLeft <= 0 && bill.Recurring && bill.Time_period) {

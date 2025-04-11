@@ -21,9 +21,9 @@ INSERT INTO Events (Flat_ID, Title, Description, Event_Date, Start_Time, End_Tim
 ('WXYZ', 'Cleaning Day', 'Flat cleaning and organization', '2025-04-15', '09:00:00', '12:00:00');
 
 -- Insert Bills
-INSERT INTO Bills (Flat_ID, Initial_Amount, Amount_Paid, Due_Date, Payment_Status, Title, Recurring, Time_period, Overdue, Description) VALUES
-('1', 200.00, 50.00, '2025-04-20',  'P', 'Electricity', TRUE, 30, FALSE, 'Monthly electricity bill'),
-('1', 150.00, 75.00, '2025-04-22', 'P', 'Internet', FALSE, NULL, FALSE, 'Internet service provider bill');
+INSERT INTO Bills (Flat_ID, Initial_Amount, Amount_Left, Amount_Paid, Due_Date, Payment_Status, Title, Recurring, Time_period, Overdue, Description) VALUES
+('1', 200.00, 150.00, 50.00, '2025-04-20',  'P', 'Electricity', TRUE, 30, FALSE, 'Monthly electricity bill'),
+('1', 150.00, 75.00, 75.00, '2025-04-22', 'P', 'Internet', FALSE, NULL, FALSE, 'Internet service provider bill');
 
 -- Insert Groceries
 INSERT INTO Groceries (Flat_ID, Item, Price, Quantity) VALUES
