@@ -9,6 +9,8 @@
 
 [Test cases](https://otagouni-my.sharepoint.com/:x:/r/personal/shofe999_student_otago_ac_nz/_layouts/15/Doc.aspx?sourcedoc=%7B119FB2AC-A535-43A1-8EF4-ADB2F2B0830F%7D&file=TestCases_template.xlsx&fromShare=true&action=default&mobileredirect=true)
 
+[Milestone Presentation](https://otagouni-my.sharepoint.com/:p:/r/personal/gorma749_student_otago_ac_nz/Documents/Milestone.pptx?d=w434e1499660e404ab87cfafbfc58066e&csf=1&web=1&e=UFEolp)
+
 ## Files / Folders:
 `mysql-data/` - Holds all the mysql and DB files\
 `node_modules/` - Contains modules used by node\
