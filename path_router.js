@@ -5,7 +5,6 @@ const bodyParser = require('body-parser');
 const path = require('path');
 const { get } = require('express/lib/response');
 
-
 router = express.Router();
 
 router.use(bodyParser.urlencoded({ extended: true }));
@@ -356,16 +355,16 @@ router.post('/chores/delete', async (req, res) => {
 
 /* INDEX (HomePage) CODE */
 router.get('/home', async (req, res) => { 
-    const db = pool.promise();
-    const query = `SELECT * FROM Events where Flat_ID = ?`
+    // const db = pool.promise();
+    // const query = `SELECT * FROM Events where Flat_ID = ?`
 
-    try {
-        const [rows] = db.query(query, ['12345']); // Needs to be changed to select all events of a specific flat
-        res.status(200).send('Events retrieved');
-    } catch (err) {
-        console.error(err);
-        res.status(500).send('Error retrieving Events');
-    }
+    // try {
+    //     const [rows] = db.query(query, ['12345']); // Needs to be changed to select all events of a specific flat
+    //     res.status(200).send('Events retrieved');
+    // } catch (err) {
+    //     console.error(err);
+    //     res.status(500).send('Error retrieving Events');
+    // }
 
     res.render('index');
 });
