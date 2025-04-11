@@ -1,2 +1,1 @@
-*.sock
-mysql-data/*
+mysql-data/
