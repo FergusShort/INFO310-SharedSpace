@@ -1,0 +1,99 @@
+' CHATGPT Generated Erd from db_setup.sql (for presintation)
+@startuml
+
+' Define style
+skinparam {
+    ' switch off unnecessary decorations
+    Style StrictUML
+    ' lines are drawn only at 90 degree angles
+    LineType ortho
+    monochrome true
+    ' horizontal spacing
+    NodeSep 80
+    ' vertical spacing
+    RankSep 40
+}
+
+entity Flat {
+    *Flat_ID : varchar(10) <<PK>>
+    --
+    Address : varchar(50)
+}
+
+entity User {
+    *User_ID : int <<PK>>
+    --
+    Email : varchar(30) <<UQ>>
+    Username : varchar(30) <<UQ>>
+    Password : varchar(15)
+    Flat_ID : varchar(10) <<FK>>
+}
+
+entity Events {
+    *Event_ID : int <<PK>>
+    *Flat_ID : varchar(10) <<PK, FK>>
+    --
+    Title : varchar(40)
+    Description : varchar(150)
+    Event_Date : date
+    Start_Time : time
+    End_Time : time
+}
+
+entity Bills {
+    *Bill_ID : int <<PK>>
+    *Flat_ID : varchar(10) <<PK, FK>>
+    --
+    Initial_Amount : decimal(7,2)
+    Amount : decimal(7,2)
+    Amount_Paid : decimal(7,2)
+    Due_Date : date
+    Status : char(1)
+    Payment_Status : char(1)
+    Title : varchar(30)
+    Recurring : boolean
+    Time_period : int
+    Overdue : boolean
+}
+
+entity Groceries {
+    *Flat_ID : varchar(10) <<PK, FK>>
+    *Item : varchar(30) <<PK>>
+    --
+    Price : decimal(7,2)
+    Quantity : int
+}
+
+entity Chores {
+    *Flat_ID : varchar(10) <<PK, FK>>
+    *Chore_ID : int <<PK>>
+    --
+    Priority : varchar(30)
+    Title : varchar(30)
+    Description : varchar(150)
+}
+
+entity Chore_Assignment {
+    *User_ID : int <<PK, FK>>
+    *Chore_ID : int <<PK, FK>>
+}
+
+entity Users_Events {
+    *User_ID : int <<PK, FK>>
+    *Event_ID : int <<PK, FK>>
+}
+
+' Relationships
+Flat ||--o{ User : has
+Flat ||--o{ Events : has
+Flat ||--o{ Bills : has
+Flat ||--o{ Groceries : has
+Flat ||--o{ Chores : has
+
+User ||--o{ Chore_Assignment : assigned
+Chores ||--o{ Chore_Assignment : includes
+
+User ||--o{ Users_Events : attends
+Events ||--o{ Users_Events : contains
+
+@enduml
