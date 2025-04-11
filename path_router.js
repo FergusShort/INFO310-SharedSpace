@@ -55,114 +55,211 @@ router.get('/chores', async (req, res) => {
 
 
 
-router.get('/bills', async (req, res) => {
-    const bills = await getBillsFromDatabase();
-    res.render('bills', { bills: Array.isArray(bills) ? bills : [] });
+router.get("/bills", async (req, res) => {
+  const sortType = req.query.sort || "all";
+  const errorMessage = req.query.error;
+
+  try {
+    const bills = await getBillsFromDatabase(sortType);
+    res.render("bills", { bills, sort: sortType, error: errorMessage });
+  } catch (error) {
+    res.status(500).send("Error fetching bills");
+  }
 });
 
 
-const getBillsFromDatabase = async () => {
-    const db = pool.promise();
-    const query = `SELECT * FROM Bills;`;
+async function getBillsFromDatabase(sortType = "all") {
+  const db = pool.promise();
+  const today = new Date();
 
-    try {
-        const [rows, fields] = await db.query(query);
-        return rows;
-    } catch (err) {
-        console.error("query didn't work", err);
-        return [];
-    }
-};
+  let query = "SELECT * FROM Bills";
+  let params = [];
+
+  if (sortType === "week") {
+    const nextWeek = new Date(today);
+    nextWeek.setDate(today.getDate() + 7);
+    query = `SELECT * FROM Bills WHERE Due_Date BETWEEN ? AND ?`;
+    params = [today, nextWeek];
+  } else if (sortType === "month") {
+    const nextMonth = new Date(today);
+    nextMonth.setMonth(today.getMonth() + 1);
+    query = `SELECT * FROM Bills WHERE Due_Date BETWEEN ? AND ?`;
+    params = [today, nextMonth];
+  }
+
+  try {
+    const [rows] = await db.query(query, params);
+    return rows;
+  } catch (error) {
+    console.error("Error fetching bills from database:", error);
+    throw new Error("Unable to fetch bills from the database");
+  }
+}
 
 
 
-router.post('/bills/add', async (req, res) => {
-    const flat_id = 1;
-    const amount = req.body.amount;
-    const amount_paid = req.body.amount_paid || 0;
-    const due_date = req.body.due_date || null;
-    const status = req.body.status || 'A';
-    let payment_status = req.body.payment_status || 'U';
-    const title = req.body.title;
-    const recurring = req.body.recurring || false;
-    const time_period = req.body.time_period || null;
-    const overdue = req.body.overdue || false;
+router.post("/bills/add", async (req, res) => {
+  const flat_id = 1;
+  const initial_amount = parseFloat(req.body.amount);
+  const amount_paid = 0.00;
+  const amount_left = initial_amount;
+  const due_date = req.body.due_date ? new Date(req.body.due_date) : null;
+  let payment_status = "U";
+  const title = req.body.title;
+  const recurring = req.body.recurring === 'on' ? 1 : 0;
+  const time_period = parseInt(req.body.time_period) || null;
+  const overdue = req.body.overdue || false;
+  const description = req.body.description || "";
 
-    if (amount_paid > 0 && payment_status === 'U') {
-        payment_status = 'P';
-    } else if (amount_paid >= amount) {
-        payment_status = 'F';
-    }
+  if (initial_amount === 0) {
+    payment_status = "F";
+  }
 
-    const db = pool.promise();
-    const insertQuery = `
-        INSERT INTO Bills (Flat_ID, Amount, Amount_Paid, Due_Date, Status, Payment_Status, Title, Recurring, Time_period, Overdue, Initial_Amount)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
-    `;
+  const db = pool.promise();
+  const insertQuery = `
+    INSERT INTO Bills (
+        Flat_ID, Initial_Amount, Amount_Left, Amount_Paid, Due_Date,
+         Payment_Status, Title, Description,
+        Recurring, Time_period, Overdue
+    )
+    VALUES (?, ?, ?, ?,  ?, ?, ?, ?, ?, ?, ?);
+`;
 
-    try {
-        await db.query(insertQuery, [flat_id, amount, amount_paid, due_date, status, payment_status, title, recurring, time_period, overdue, amount]); 
-        return res.redirect('/bills');
-    } catch (err) {
-        console.error(err);
-        return res.status(500).send("Error adding bill.");
-    }
+  try {
+    // Insert the initial bill
+    await db.query(insertQuery, [
+      flat_id,
+      initial_amount,
+      amount_left,
+      amount_paid,
+      due_date,
+      payment_status,
+      title,
+      description,
+      recurring,
+      time_period,
+      overdue,
+    ]);
+
+    res.redirect("/bills");
+  } catch (err) {
+    console.error("Error inserting bill:", err);
+    res.status(500).send("Internal Server Error");
+  }
 });
-
 
 
 router.post('/bills/pay', async (req, res) => {
-    const bill_id = req.body.bill_id;
-    const paymentAmount = parseFloat(req.body.amount || req.body.shareAmount || 0); 
-    const db = pool.promise();
+  const bill_id = req.body.bill_id;
+  const amountPaid = parseFloat(req.body.amount_paid || req.body.shareAmount || 0);
+  const db = pool.promise();
 
-    try {
-        const updateQuery = `
-            UPDATE Bills
-            SET Amount_Paid = Amount_Paid + ?,
-                Payment_Status = CASE
-                    WHEN Amount_Paid + ? >= Amount THEN 'F'  -- Full paid
-                    WHEN Amount_Paid > 0 THEN 'P'  -- Partially paid
-                    ELSE 'U'  -- Unpaid
-                END
-            WHERE Bill_ID = ?;
-        `;
+  try {
+      // Retrieve the bill data, including Recurring and Time_period
+      const checkQuery = `
+          SELECT Initial_Amount, Amount_Left, Amount_Paid, Due_Date, Recurring, Time_period, Flat_ID, Title, Description, Overdue
+          FROM Bills WHERE Bill_ID = ?;
+      `;
+      const [rows] = await db.query(checkQuery, [bill_id]);
 
-        await db.query(updateQuery, [paymentAmount, paymentAmount, bill_id]);
+      if (rows.length === 0) {
+          return res.status(404).send("Bill not found.");
+      }
 
-        // Check if the bill is fully paid and delete it if it is
-        const checkQuery = `SELECT Amount, Amount_Paid, Initial_Amount FROM Bills WHERE Bill_ID = ?`;
-        const [rows] = await db.query(checkQuery, [bill_id]);
-    
-        if (rows.length > 0) {
-            const bill = rows[0];
-            if (bill.Amount_Paid >= bill.Initial_Amount) { 
-                const deleteQuery = `DELETE FROM Bills WHERE Bill_ID = ?`;
-                await db.query(deleteQuery, [bill_id]);
-            }
-        }
-    
-        return res.redirect('/bills');
-    } catch (err) {
-        console.error("Error in /bills/pay route:", err);
-        return res.status(500).send("Error processing payment.");
-    }
+      const bill = rows[0];
+      const currentAmountLeft = parseFloat(bill.Amount_Left);
+      const currentAmountPaid = parseFloat(bill.Amount_Paid);
+      const initialAmount = parseFloat(bill.Initial_Amount);
+
+      if (amountPaid > currentAmountLeft) {
+          return res.redirect('/bills?error=amount_too_large');
+      }
+
+      if (currentAmountLeft <= 0) {
+          return res.status(400).send("This bill is already fully paid.");
+      }
+
+      const newAmountPaid = currentAmountPaid + amountPaid;
+      const newAmountLeft = currentAmountLeft - amountPaid;
+
+      // Ensure amount_left doesn't go below zero
+      const updatedAmountLeft = Math.max(0, newAmountLeft);
+
+      let paymentStatus = 'P'; // Partially paid by default
+      if (updatedAmountLeft <= 0) {
+          paymentStatus = 'F'; // Fully paid
+      }
+
+      // Update Amount_Paid and Amount_Left
+      const updateQuery = `
+          UPDATE Bills
+          SET Amount_Paid = ?, Amount_Left = ?, Payment_Status = ?
+          WHERE Bill_ID = ?;
+      `;
+      await db.query(updateQuery, [newAmountPaid, updatedAmountLeft, paymentStatus, bill_id]);
+
+      // Create a new recurring bill and delete the old one if fully paid and recurring
+      if (updatedAmountLeft <= 0 && bill.Recurring && bill.Time_period) {
+          const nextDueDate = new Date(bill.Due_Date);
+          nextDueDate.setDate(nextDueDate.getDate() + bill.Time_period);
+          const insertRecurringQuery = `
+              INSERT INTO Bills (
+                  Flat_ID, Initial_Amount, Amount_Left, Amount_Paid, Due_Date,
+                   Payment_Status, Title, Description,
+                  Recurring, Time_period, Overdue
+              )
+              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+          `;
+          await db.query(insertRecurringQuery, [
+              bill.Flat_ID,
+              bill.Initial_Amount,
+              bill.Initial_Amount,
+              0.00,
+              nextDueDate,
+              "U",
+              bill.Title,
+              bill.Description,
+              bill.Recurring,
+              bill.Time_period,
+              bill.Overdue
+          ]);
+
+          // Delete the original, now fully paid, recurring bill
+          const deleteQuery = `
+              DELETE FROM Bills WHERE Bill_ID = ?;
+          `;
+          await db.query(deleteQuery, [bill_id]);
+      } else if (updatedAmountLeft <= 0 && !bill.Recurring) {
+          const deleteQuery = `
+              DELETE FROM Bills WHERE Bill_ID = ?;
+          `;
+          await db.query(deleteQuery, [bill_id]);
+      }
+
+      // Redirect to the bills page
+      return res.redirect('/bills');
+  } catch (err) {
+      console.error("Error in /bills/pay route:", err);
+  }
 });
 
 
-router.post('/bills/delete', async (req, res) => {
-    const bill_id = req.body.bill_id;
 
-    const db = pool.promise();
 
-    try {
-        await db.query(`DELETE FROM Bills WHERE Bill_ID = ?;`, [bill_id]);
-        return res.redirect('/bills');
-    } catch (err) {
-        console.error(err);
-        return res.status(500).send("Error deleting bill.");
-    }
+router.post("/bills/delete", async (req, res) => {
+const bill_id = req.body.bill_id;
+
+const db = pool.promise();
+
+try {
+  await db.query(`DELETE FROM Bills WHERE Bill_ID = ?;`, [bill_id]);
+  return res.redirect("/bills");
+} catch (err) {
+  console.error(err);
+  return res.status(500).send("Error deleting bill.");
+}
 });
+
 
 
 

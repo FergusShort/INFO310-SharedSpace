@@ -53,25 +53,27 @@ create table Events (
 
 -- Instances represnt a flat bill / expense
 -- A flat can have multiple bills, a bill must be associated with a flat
-create table Bills (
-    Bill_ID int not null unique auto_increment,
-    Flat_ID varchar(10) not null,
-    Initial_Amount decimal(7, 2), -- Initial amount of the bill
-    Amount decimal(7, 2), 
-    Amount_Paid decimal(7, 2) default 0, -- Amount paid by so far by flatties
-    Due_Date date,
-    Status char(1) check (Status in ('A', 'P', 'I')),  -- A: Active, P: Paused, I: Inactive only needed for recurring bills
-    Payment_Status char(1) default 'U' check (Payment_Status in ('U', 'P', 'F')) , -- U: Unpaid, P: Partially Paid, F: Fully Paid
-    Title varchar(30),
-    Recurring boolean not null,
-    Time_period int,-- Number of days between bill due dates for recurring bills
-    Overdue boolean not null default false, -- True if bill is overdue
-    constraint Bills_PK primary key (Flat_ID, Bill_ID),
-    constraint Bills_Flat_FK foreign key (Flat_ID)
-        references Flat(Flat_ID),
-    constraint Amount_CHK check (Amount > 0),
-    constraint Amount_Paid_CHK check (Amount_Paid >= 0 and Amount_Paid <= Amount)
+CREATE TABLE Bills (
+    Bill_ID INT NOT NULL AUTO_INCREMENT, 
+    Flat_ID VARCHAR(10) NOT NULL,
+    Initial_Amount DECIMAL(10, 2), 
+    Amount_Left DECIMAL(10, 2),         -- running amount so far
+    Amount_Paid DECIMAL(10, 2) DEFAULT 0,
+    Due_Date DATE,
+    Payment_Status CHAR(1) DEFAULT 'U' CHECK (Payment_Status IN ('U', 'P', 'F')), -- U: Unpaid, P: Partial, F: Full
+    Title VARCHAR(30),
+    Recurring BOOLEAN NOT NULL,
+    Time_period INT, -- in days
+    Description VARCHAR(100),
+    Overdue BOOLEAN NOT NULL DEFAULT FALSE,
+    PRIMARY KEY (Bill_ID),  -- Set Bill_ID as the primary key
+    CONSTRAINT Bills_Flat_FK FOREIGN KEY (Flat_ID) REFERENCES Flat(Flat_ID),
+    CONSTRAINT Amount_CHK CHECK (Amount_Left >= 0),
+    CONSTRAINT Initial_Amount_CHK CHECK (Initial_Amount >= 0),
+    CONSTRAINT Amount_Paid_CHK CHECK (Amount_Paid >= 0)
+
 );
+
 
 -- Instances represent grocery items for grocery list 
 -- A flat can have multiple groceries, a grocery item must be associated with a flat

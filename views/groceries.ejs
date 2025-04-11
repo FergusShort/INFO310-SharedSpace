@@ -6,78 +6,123 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Groceries</title>
     <link rel="stylesheet" href="/groceries.css">
-
 </head>
 
 <body>
     <div class="container">
         <h1>Groceries</h1>
 
-        <ul class="list" id="checklist"></ul>
+        <div class="checklist-container">
+            <table class="table">
+                <thead>
+                    <tr class="table-header">
+                        <th id="checkbox">✔</th>
+                        <th id="item">Item</th>
+                        <th id="qty">Quantity</th>
+                        <th id="price">Price</th>
+                    </tr>
+                </thead>
+                <tbody id="checklist"></tbody>
+            </table>
+        </div>
+
+        <h3>Estimated Total:</h3>
+        <p id="totalCost">$0.00</p>
 
         <div class="buttons">
-            <form action="/groceries/add" method="POST" class="add-form">
+            <form action="/groceries/add" method="POST" class="add-form" onsubmit="event.preventDefault(); addItem();">
                 <input type="text" name="item" id="itemInput" placeholder="Item" required>
-
                 <div class="price-quantity-row">
                     <input type="number" name="price" step="0.01" min="0.01" placeholder="Price" required>
                     <input type="number" name="quantity" min="1" placeholder="Quantity" required>
                 </div>
-
                 <button type="submit">Add item</button>
             </form>
 
             <div class="buttons-bottom">
                 <form action="/groceries/clear-checked" method="POST">
-                    <button type="submit">Clear checked</button>
+                    <button onclick="clearChecked()" type="submit">Clear checked</button>
                 </form>
                 <form action="/groceries/clear-all" method="POST">
-                    <button type="submit">Clear all</button>
+                    <button onclick="clearAll()" type="submit">Clear all</button>
                 </form>
             </div>
         </div>
 
-
         <script>
-            function addItem() {
-                const input = document.getElementById("itemInput");
-                const itemText = input.value.trim();
+            let totalCost = 0;
 
-                if (itemText === "") {
+            function addItem() {
+                const itemInput = document.getElementById("itemInput");
+                const item = itemInput.value.trim();
+
+                const priceInput = document.querySelector("input[name='price']");
+                const quantityInput = document.querySelector("input[name='quantity']");
+
+                const price = parseFloat(priceInput.value);
+                const quantity = parseInt(quantityInput.value);
+
+                if (item === "" || isNaN(price) || isNaN(quantity)) {
                     return;
                 }
 
-                const li = document.createElement("li");
-                li.classList.add("item");
+                const itemTotal = price * quantity;
 
+                totalCost += itemTotal;
+
+                document.getElementById("totalCost").textContent = `$${totalCost.toFixed(2)}`;
+
+                const tbody = document.getElementById("checklist");
+                const row = document.createElement("tr");
+                row.classList.add("item-row");
+
+                const checkboxCell = document.createElement("td");
                 const checkbox = document.createElement("input");
                 checkbox.type = "checkbox";
+                checkbox.classList.add("row-checkbox");
+                checkboxCell.appendChild(checkbox);
 
-                const label = document.createElement("label");
-                label.textContent = itemText;
+                const itemCell = document.createElement("td");
+                itemCell.textContent = item;
 
-                li.appendChild(checkbox);
-                li.appendChild(label);
+                const quantityCell = document.createElement("td");
+                quantityCell.textContent = quantity;
 
-                document.getElementById("checklist").appendChild(li);
+                const priceCell = document.createElement("td");
+                priceCell.textContent = `$${price.toFixed(2)}`;
 
-                checklist.scrollTop = checklist.scrollHeight; // Scroll to the bottom when list gets long
+                row.appendChild(checkboxCell);
+                row.appendChild(itemCell);
+                row.appendChild(quantityCell);
+                row.appendChild(priceCell);
 
-                input.value = "";
+                tbody.appendChild(row);
+
+                itemInput.value = "";
+                priceInput.value = "";
+                quantityInput.value = "";
             }
 
             function clearChecked() {
-                const items = document.querySelectorAll("#checklist .item");
-                items.forEach(item => {
-                    const checkbox = item.querySelector("input[type='checkbox']");
+                const checkboxes = document.querySelectorAll("#checklist input[type='checkbox']");
+                checkboxes.forEach(checkbox => {
                     if (checkbox.checked) {
-                        item.remove();
+                        const row = checkbox.closest("tr");
+                        const totalText = row.querySelector("td:last-child").textContent.replace("$", "");
+                        const itemTotal = parseFloat(totalText);
+                        totalCost -= itemTotal;
+
+                        row.remove();
                     }
                 });
+
+                document.getElementById("totalCost").textContent = `$${totalCost.toFixed(2)}`;
             }
 
             function clearAll() {
                 document.getElementById("checklist").innerHTML = "";
+                totalCost = 0;
+                document.getElementById("totalCost").textContent = `$${totalCost.toFixed(2)}`;
             }
 
             document.getElementById("itemInput").addEventListener("keypress", function (event) {
