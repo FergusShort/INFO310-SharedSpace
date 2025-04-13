@@ -1,3 +1,5 @@
+mysql-data/
+mysql-data/#innodb_temp/
 *.sock
 mysql-data/*
 mysql-data/#ib_16384_0.dblwr
