@@ -36,12 +36,15 @@ router.get('/signup', async (req, res) => {
 
 router.get('/createGroup', async (req, res) => {
     if (!req.session.userId) {
-        res.render('signup');
+       return res.render('signup');
     }    
-    res.render('createGroup');
+    return res.render('createGroup');
 });
 
 router.get('/joinGroup', async (req, res) => {
+    if (!req.session.userId) {
+        return res.render('signup');
+    }  
     res.render('joinGroup');
 });
 
@@ -158,9 +161,8 @@ router.post('/login/submit', async (req, res) => {
     const email = req.body.email;
     const pwd = req.body.pwd;
 
-
     const db = pool.promise();
-    const status_query = `SELECT User_ID FROM User WHERE Email = ? AND Username = ?;`;
+    const status_query = `SELECT User_ID, Flat_ID FROM User WHERE Email = ? AND Password = ?;`;
     try {
         const [rows] = await db.query(status_query, [email, pwd]);  
         if (rows.length > 0) {
@@ -168,7 +170,8 @@ router.post('/login/submit', async (req, res) => {
             return res.redirect('/createGroup');
         } 
     } catch (err) {
-        console.error("You havent set up the database yet!" + err);
+        console.error("Login error:" + err);
+        return res.redirect('/signup');
     }
 
     return res.redirect('/signup');
@@ -208,11 +211,9 @@ router.post('/signup/submit', async (req, res) => {
     const status_queryy = `SELECT User_ID FROM User WHERE Email = ?`;
     try {
         const [rows] = await dbb.query(status_queryy, email);  
-        if (rows.length > 0) {
-            req.session.userId = rows[0].User_ID;
-        } 
+        req.session.userId = rows[0].User_ID;     
     } catch (err) {
-        console.error("You havent set up the database yet!" + err);
+        console.error("An error occured: " + err);
     }
     return res.redirect('/createGroup');
 });
@@ -234,7 +235,7 @@ router.post('/createGroup/create', async (req, res) => {
     const status_queryy = `UPDATE User SET Flat_ID = ? WHERE User_ID = ?;`;
     try {
         const [row] = await dbb.query(status_queryy, [groupID ,req.session.userId]);  
-            
+        req.session.flatId = groupID;
     } catch (err) {
         console.error("You havent set up the database yet!!!" + err);
     }
@@ -255,7 +256,7 @@ router.post('/joinGroup/join', async (req, res) => {
             const status_queryy = `UPDATE User SET Flat_ID = ? WHERE User_ID = ?;`;
             try {
                 const [row] = await dbb.query(status_queryy, [groupCode ,userID]);  
-                    
+                req.session.flatId = groupID;    
             } catch (err) {
                 console.error("You havent set up the database yet!!!" + err);
             }
