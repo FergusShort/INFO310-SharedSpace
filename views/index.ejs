@@ -22,7 +22,16 @@
     
     <%- include('nav') %>
     <main id="calendar">
-
+        <script type="module">
+            const { createCalendar, createViewMonthGrid } = window.SXCalendar;
+            
+            const calendar = createCalendar({
+                views: [createViewMonthGrid()],
+                events: <%- JSON.stringify(events) %>,
+            })
+            
+            calendar.render(document.getElementById("calendar"));
+        </script>
     </main>
 
     <aside>
@@ -46,7 +55,5 @@
 
     <footer>
     </footer>
-
-    <script type="module" src="/calendar.js"></script>
 </body>
 </html>

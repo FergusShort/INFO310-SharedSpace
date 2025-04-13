@@ -4,6 +4,7 @@ const pool = require('./db');
 const bodyParser = require('body-parser');
 const path = require('path');
 const { get } = require('express/lib/response');
+const { format } = require('date-fns');
 
 router = express.Router();
 
@@ -355,18 +356,27 @@ router.post('/chores/delete', async (req, res) => {
 
 /* INDEX (HomePage) CODE */
 router.get('/home', async (req, res) => { 
-    // const db = pool.promise();
-    // const query = `SELECT * FROM Events where Flat_ID = ?`
+    const db = pool.promise();
+    const query = `
+        SELECT Event_ID as id, Title as title, Start_Time as start, End_Time as end
+        FROM Events where Flat_ID = 'WXYZ'
+    `
 
-    // try {
-    //     const [rows] = db.query(query, ['12345']); // Needs to be changed to select all events of a specific flat
-    //     res.status(200).send('Events retrieved');
-    // } catch (err) {
-    //     console.error(err);
-    //     res.status(500).send('Error retrieving Events');
-    // }
+    try {
+        const [rows, fields] = await db.query(query); // Needs to be changed to select all events of a specific flat
+        res.status(200);
+        console.log(rows);
+        events = rows
+    } catch (err) {
+        console.error(err);
+        res.status(500);
+    }
 
-    res.render('index');
+    for(i = 0; i < events.length; i++){
+        events[i].start = format(new Date(events[i].start), 'yyyy-MM-dd HH:mm:SS')
+    }
+
+    res.render('index', {events: events});
 });
 
 router.post('/home/addevent', async (req, res) => {
