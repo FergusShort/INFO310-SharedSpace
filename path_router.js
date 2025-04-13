@@ -13,18 +13,7 @@ router.use(fileUpload());
 
 router.get('/', async (req, res) => {
     const db = pool.promise();
-    
-    /*query = "select * from Flat;";
-
-    try{
-        const [rows, fields] = await db.query(query);
-        data = rows
-        console.log(data);
-    }catch (err){
-        console.error("query didn't work", err);
-    }*/
-
-    res.render('login'); //change later when homepage is created
+    res.render('login');
 });
 
 router.get('/login', async (req, res) => {
@@ -49,8 +38,6 @@ router.get('/joinGroup', async (req, res) => {
     res.render('joinGroup');
 });
 
-
-
 router.get('/groceries', async (req, res) => {
     res.render('groceries');
 });
@@ -58,8 +45,6 @@ router.get('/groceries', async (req, res) => {
 router.get('/chores', async (req, res) => {
     res.render('chores');
 });
-
-
 
 router.get("/bills", async (req, res) => {
   const sortType = req.query.sort || "all";
@@ -72,7 +57,6 @@ router.get("/bills", async (req, res) => {
     res.status(500).send("Error fetching bills");
   }
 });
-
 
 async function getBillsFromDatabase(sortType = "all") {
   const db = pool.promise();
@@ -102,8 +86,6 @@ async function getBillsFromDatabase(sortType = "all") {
   }
 }
 
-
-
 router.post("/bills/add", async (req, res) => {
   const flat_id = 1;
   const initial_amount = parseFloat(req.body.amount);
@@ -128,8 +110,7 @@ router.post("/bills/add", async (req, res) => {
          Payment_Status, Title, Description,
         Recurring, Time_period, Overdue
     )
-    VALUES (?, ?, ?, ?,  ?, ?, ?, ?, ?, ?, ?);
-`;
+    VALUES (?, ?, ?, ?,  ?, ?, ?, ?, ?, ?, ?);`;
 
   try {
     // Insert the initial bill
@@ -153,7 +134,6 @@ router.post("/bills/add", async (req, res) => {
     res.status(500).send("Internal Server Error");
   }
 });
-
 
 router.post('/bills/pay', async (req, res) => {
   const bill_id = req.body.bill_id;
@@ -238,8 +218,6 @@ router.post('/bills/pay', async (req, res) => {
   }
 });
 
-
-
 router.post("/bills/delete", async (req, res) => {
 const bill_id = req.body.bill_id;
 
@@ -254,12 +232,6 @@ try {
 }
 });
 
-
-
-
-
-
-
 router.post('/login/submit', async (req, res) => {
     const email = req.body.email;
     const pwd = req.body.pwd;
@@ -270,7 +242,12 @@ router.post('/login/submit', async (req, res) => {
         const [rows] = await db.query(status_query, [email, pwd]);  
         if (rows.length > 0) {
             req.session.userId = rows[0].User_ID;
-            return res.redirect('/createGroup');
+            if (rows[0].Flat_ID != null) {
+                req.session.flatID = rows[0].User_ID;
+                return res.redirect('/home');
+            } else {
+                return res.redirect('/createGroup');
+            }
         } 
     } catch (err) {
         console.error("Login error:" + err);
@@ -343,7 +320,7 @@ router.post('/createGroup/create', async (req, res) => {
         console.error("You havent set up the database yet!!!" + err);
     }
 
-    return res.redirect('/groceries');
+    return res.redirect('/home');
 });
 
 router.post('/joinGroup/join', async (req, res) => {
@@ -369,7 +346,7 @@ router.post('/joinGroup/join', async (req, res) => {
         console.error("You havent set up the database yet!!" + err);
     }
 
-    return res.redirect('/groceries');
+    return res.redirect('/home');
 });
 
 async function makeFlatID() {
@@ -406,6 +383,7 @@ function generateFlatID() {
 
     return FlatID;
 };
+
 // Route to add a chore
 router.post('/chores/add', async (req, res) => {
     const flat_id = 1; // Replace with actual flat ID later

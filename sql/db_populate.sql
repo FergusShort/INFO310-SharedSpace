@@ -3,7 +3,7 @@
 -- insert statements that will fill all tables with "2 flats"' 
 
 -- Insert Flats
-INSERT INTO Flat (Flat_ID, Address) VALUES
+INSERT INTO Flat (Flat_ID, GroupName) VALUES
 ('ABCD', '123 Main Street'),
 ('1', '123 Main Street'),
 ('WXYZ', '456 Oak Avenue');
