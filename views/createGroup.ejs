@@ -9,15 +9,9 @@
 <body>
     <div class="container">
         <h2>Create Group</h2>
-        <form action="/group/create" method="POST">
+        <form action="/createGroup/create" method="POST" enctype="multipart/form-data">
             <label for="groupName">Group Name</label>
             <input type="text" id="groupName" name="groupName" required>
-            
-            <label for="description">Description</label>
-            <input type="text" id="description" name="description" required>
-            
-            <label for="groupCode">Custom Group Code (Optional)</label>
-            <input type="text" id="groupCode" name="groupCode">
             
             <button type="submit">Create Group</button>
             <p>Want to join an existing group? <a href="joinGroup">Join Group</a></p>

@@ -38,10 +38,14 @@ h1 {
 .checklist-container {
     max-height: 50%; 
     overflow-y: auto;
+    width: 80%;
 }
 
 #item {
     width: 50%;
+}
+table {
+    width: 100%;
 }
 
 .table th, .table td {
@@ -69,19 +73,19 @@ input {
     width: 100%;
     padding: 0.8rem;
     border: 1px solid #ccc;
-    border-radius: 25px;
+    border-radius: 5px;
     outline: none;
     transition: border 0.3s;
     margin-bottom: 1rem;
 }
 
 button {
-    background: #fa00a7;
+    background: rgb(126, 158, 227);
     height: 40px;
     color: white;
     padding: 0.8rem;
     border: none;
-    border-radius: 25px;
+    border-radius: 5px;
     cursor: pointer;
     font-size: 0.8rem;
     transition: background 0.3s;
@@ -99,7 +103,8 @@ button {
 }
 
 button:hover {
-    background: rgb(188, 65, 212);
+    background-color: #003380;
+    transform: scale(1.01);
 }
 
 .add-form {
@@ -158,3 +163,18 @@ button:hover {
     font-size: 0.8rem;
     margin-top: -10px;
 }
+
+/* #clear-checked {
+    background-color: #ff4d4d;
+}
+
+#clear-checked:hover {
+    background-color: #ff1a1a;
+}
+ #clear-all {
+    background-color: #ff4d4d;
+ }
+
+#clear-all:hover {
+    background-color: #ff1a1a;
+} */

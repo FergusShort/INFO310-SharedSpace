@@ -20,7 +20,7 @@ drop table if exists Flat;
 -- Instances represent a flat shared between Users
 create table Flat (
     Flat_ID varchar(10) not null unique,
-    Address varchar(50),
+    GroupName varchar(50),
     constraint Flat_PK primary key (Flat_ID)
 );
 
