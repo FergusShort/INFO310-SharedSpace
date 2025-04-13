@@ -1,117 +1,151 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
+<head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Bills Management</title>
     <link rel="stylesheet" href="/bills.css" />
-  </head>
-  <body>
+</head>
+<body>
     <div class="container">
-      <h1>Bills</h1>
+        <h1>Bills</h1>
 
-      <div class="form-container">
-        <form action="/bills/add" method="POST">
-          <input type="text" name="title" placeholder="Bill Title" required />
-          <input
-            type="number"
-            name="amount"
-            placeholder="Total Amount"
-            step="0.01"
-            required
-          />
-          <input type="date" name="due_date" required />
-          <label class="checkbox-label">
-            <input type="checkbox" name="recurring" /> Recurring
-          </label>
-          <input
-            type="number"
-            name="time_period"
-            placeholder="Days between recurrences"
-          />
-          <button type="submit">Add Bill</button>
-        </form>
-      </div>
-
-      <div class="bills-container">
-        <% if (bills && bills.length > 0) { %>
-          <% bills.forEach(bill => { %>
-            <div class="bill-card">
-              <div class="bill-info">
-                <h2><%= bill.Title %></h2>
-                <p>Amount: $<%= bill.Amount %></p>
-                <p>Due Date: <%= bill.Due_Date ? bill.Due_Date.toISOString().split('T')[0] : 'N/A' %></p>
-                <p>Status:
-                  <% if (bill.Payment_Status === 'F') { %>
-                    Paid
-                  <% } else if (bill.Payment_Status === 'P') { %>
-                    Partially Paid
-                  <% } else { %>
-                    Unpaid
-                  <% } %>
-                </p>
-                <p>Remaining: $<%= (bill.Amount - bill.Amount_Paid).toFixed(2) %></p>
-              </div>
-              <div class="bill-actions">
-                <% if (bill.Payment_Status !== 'F') { %>
-                    <form action="/bills/pay" method="POST" id="payForm_<%= bill.Bill_ID %>">
-                      <input type="hidden" name="bill_id" value="<%= bill.Bill_ID %>" />
-                      <input
+        <div class="form-container">
+            <form action="/bills/add" method="POST">
+                <input type="text" name="title" placeholder="Bill Title" required />
+                <input
+                    type="number"
+                    name="amount"
+                    placeholder="Total Amount"
+                    step="0.01"
+                    max="999999"
+                    min="0.01"
+                    required
+                     />
+                    <input
+                    type="text"
+                    name="description"
+                    placeholder="Description (optional)"
+                    maxlength="100"
+                    />
+                <input type="date" name="due_date" id="due_date" required />
+                <div class="recurring-container">
+                    <label for="recurring">Recurring:</label>
+                    <input type="checkbox" name="recurring" id="recurring" />
+                    <label for="time_period">Till Next Bill (Days):</label>
+                    <input
                         type="number"
-                        name="amount"
-                        id="customAmount_<%= bill.Bill_ID %>"
-                        placeholder="Enter amount"
-                        min="0"
-                        step="0.01"
-                      />
-                      <input
-                        type="hidden"
-                        name="shareAmount"
-                        id="shareAmount_<%= bill.Bill_ID %>"
-                      />
-                      <button
-                        type="button" class="pay-share-button"
-                        data-bill-id="<%= bill.Bill_ID %>"
-                        data-bill-amount="<%= bill.Amount %>"
-                        data-amount-paid="<%= bill.Amount_Paid %>"
-                      >
-                        My Share
-                      </button>
-                      <button type="submit" class="pay-button">Pay</button>
-                    </form>
-                  <% } %>
-                <form action="/bills/delete" method="POST">
-                  <input type="hidden" name="bill_id" value="<%= bill.Bill_ID %>" />
-                  <button type="submit" class="delete-button">Delete</button>
-                </form>
-              </div>
-            </div>
-          <% }); %>
-        <% } else { %>
-          <p>No bills added yet.</p>
-        <% } %>
-      </div>
+                        name="time_period"
+                        id="time_period"
+                        placeholder="e.g., 7 days"
+                        disabled
+                        required
+                    />
+                </div>
+
+                <button type="submit">Add Bill</button>
+            </form>
+        </div>
+
+        <div class="sort-options">
+            <label for="date-range">Sort by:</label>
+            <select name="date-range" id="date-range" onchange="window.location.href=this.value">
+                <option value="/bills?sort=week" <% if (sort === 'week') { %> selected <% } %>>Upcoming Week</option>
+                <option value="/bills?sort=month" <% if (sort === 'month') { %> selected <% } %>>Upcoming Month</option>
+                <option value="/bills?sort=all" <% if (sort === 'all') { %> selected <% } %>>All Bills</option>
+            </select>
+        </div>
+
+        <div class="bills-container">
+            <% if (bills && bills.length > 0) { %>
+                <% bills.forEach(bill => { %>
+                    <div class="bill-card">
+                        <div class="bill-info">
+                            <h2 class="bill-title"><%= bill.Title %></h2>
+                            <% if (bill.Description) { %>
+                                <p class="bill-description"><%= bill.Description %></p>
+                            <% } %>
+
+                            <p>Amount: $<%= bill.Initial_Amount %></p>
+                            <p>
+                                Due Date: <%= new Date(bill.Due_Date).toLocaleDateString() || 'N/A' %>
+                            </p>
+                            <p>
+                                Status: <% if (bill.Payment_Status === 'F') { %> Paid <% } else if (bill.Payment_Status === 'P') { %> Partially Paid <% } else { %> Unpaid <% } %>
+                            </p>
+                            <p>
+                                Remaining: $<%= (bill.Initial_Amount - bill.Amount_Paid).toFixed(2) %>
+                            </p>
+                        </div>
+                        <div class="bill-actions">
+                            <% if (bill.Payment_Status !== 'F') { %>
+                                <form action="/bills/pay" method="POST" id="payForm_<%= bill.Bill_ID %>">
+                                    <input type="hidden" name="bill_id" value="<%= bill.Bill_ID %>" />
+                                    <input
+                                        type="number"
+                                        name="amount_paid"
+                                        id="customAmount_<%= bill.Bill_ID %>"
+                                        placeholder="Enter amount"
+                                        min="0.01"
+                                        step="0.01"
+                                        max="<%= (bill.Initial_Amount - bill.Amount_Paid).toFixed(2) %>"
+                                        required
+                                    />
+                                    <input type="hidden" name="shareAmount" id="shareAmount_<%= bill.Bill_ID %>" />
+                                    <button
+                                        type="button"
+                                        class="pay-share-button"
+                                        data-bill-id="<%= bill.Bill_ID %>"
+                                        data-bill-amount="<%= bill.Initial_Amount %>"
+                                        data-amount-paid="<%= bill.Amount_Paid %>"
+                                    >
+                                        My Share
+                                    </button>
+                                    <button type="submit" class="pay-button">Pay</button>
+                                </form>
+                            <% } %>
+                            <form action="/bills/delete" method="POST">
+                                <input type="hidden" name="bill_id" value="<%= bill.Bill_ID %>" />
+                                <button type="submit" class="delete-button">Delete</button>
+                            </form>
+                        </div>
+                    </div>
+                <% }); %>
+            <% } else { %>
+                <p>No bills added yet.</p>
+            <% } %>
+        </div>
     </div>
 
     <script>
-      document.querySelectorAll(".pay-share-button").forEach((button) => {
-        button.addEventListener("click", function () {
-          const billId = this.getAttribute("data-bill-id");
-          const billAmount = parseFloat(this.getAttribute("data-bill-amount"));
-          const amountPaid = parseFloat(this.getAttribute("data-amount-paid"));
-          const numPeople = 3; // Hardcoded for now 
+        // Handle enabling/disabling the "Till Next Bill" input based on the Recurring checkbox
+        const recurringCheckbox = document.getElementById("recurring");
+        const timePeriodInput = document.getElementById("time_period");
 
-          const remainingAmount = billAmount - amountPaid;
-          const shareAmount = remainingAmount / numPeople;
+        // Initially disable the time period input
+        timePeriodInput.disabled = !recurringCheckbox.checked;
 
-          document.getElementById("shareAmount_" + billId).value =
-            shareAmount.toFixed(2);
-          document.getElementById("customAmount_" + billId).value =
-            shareAmount.toFixed(2);
-
-          this.innerText = "My Share";
+        // Listen for changes to the Recurring checkbox
+        recurringCheckbox.addEventListener("change", function () {
+            timePeriodInput.disabled = !this.checked;
         });
-      });
+
+        document.querySelectorAll(".pay-share-button").forEach((button) => {
+            button.addEventListener("click", function () {
+                const billId = this.getAttribute("data-bill-id");
+                const billAmount = parseFloat(this.getAttribute("data-bill-amount"));
+                const amountPaid = parseFloat(this.getAttribute("data-amount-paid"));
+                const numPeople = 3; // Hardcoded for now
+
+                const remainingAmount = billAmount - amountPaid;
+                const shareAmount = remainingAmount / numPeople;
+
+                document.getElementById("shareAmount_" + billId).value =
+                    shareAmount.toFixed(2);
+                document.getElementById("customAmount_" + billId).value =
+                    shareAmount.toFixed(2);
+            });
+        });
     </script>
-  </body>
+</body>
 </html>

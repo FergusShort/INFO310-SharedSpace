@@ -1,0 +1,117 @@
+/* * {
+    margin: auto;
+    padding: auto;
+} */
+
+body {
+    display: grid;
+    grid-template-columns: 1fr 3fr;
+    grid-template-rows: 0.1fr 0.6fr 0.5fr;
+    font-family: Arial, sans-serif;
+    min-height: 100vh;
+    max-height: 100vh;
+}
+
+/* header {
+    background-color: blue;
+    grid-column: span 2;
+    grid-row: span 1;
+} */
+
+#calendar {
+    grid-column: span 1;
+    grid-row: span 1;
+    grid-row-start: 2;
+    min-height: 80vh;
+    max-height: 80vh;
+}
+
+aside {
+    background-color: #ccc;
+    grid-column: span 1;
+    grid-row: span 1;
+    grid-row-start: 2;
+    grid-column-start: 1;
+    min-height: 80vh;
+    max-height: 80vh;
+}
+
+footer {
+    background-color: rgb(126, 158, 227);
+    grid-column: span 2;
+    grid-row: span 1;
+    grid-row-start: 3;
+    min-height: 10vh;
+    max-height: 10vh;
+}
+
+/* Navigation Bar Syling */
+nav {
+    background-color: rgb(126, 158, 227);
+    grid-column: span 2;
+    grid-row: span 1;
+    min-height: 10vh;
+    max-height: 10vh;
+}
+
+ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+}
+
+li {
+    float: left;
+}
+
+li a {
+    display: block;
+    padding: 14px 16px;
+    text-align: center;
+    color: white;
+}
+
+input, label, button {
+    width: 97%;
+}
+
+form {
+    background-color: white;
+    padding: 10px;
+    margin: 15px;
+    border: 2px solid darkgray;
+}
+
+form button {
+    background-color: rgb(126, 158, 227);
+    color: white;
+    border: none;
+    padding: 10px 15px; 
+    border-radius: 5px;
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.2s ease-in-out, transform 0.1s ease-in-out;
+    width: auto; 
+    display: block; 
+    margin: 10px auto; 
+}
+
+form button:hover {
+    background-color: #003380;
+    transform: scale(1.01);
+}
+
+form input[type="text"],
+form input[type="date"],
+form input[type="time"] {
+    min-width: 96%;
+    max-width: 96%;
+    padding: 5px;
+    margin-bottom: 10px;
+    border: 1px solid #dfe1e6;
+    border-radius: 5px;
+    font-size: 1rem;
+    color: black;
+    background-color: #eaedf4;
+}
