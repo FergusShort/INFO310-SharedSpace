@@ -39,6 +39,8 @@ router.get('/joinGroup', async (req, res) => {
     res.render('joinGroup');
 });
 
+
+
 router.get('/groceries', async (req, res) => {
     res.render('groceries');
 });
@@ -46,6 +48,8 @@ router.get('/groceries', async (req, res) => {
 router.get('/chores', async (req, res) => {
     res.render('chores');
 });
+
+
 
 router.get("/bills", async (req, res) => {
   const sortType = req.query.sort || "all";
@@ -58,6 +62,7 @@ router.get("/bills", async (req, res) => {
     res.status(500).send("Error fetching bills");
   }
 });
+
 
 async function getBillsFromDatabase(sortType = "all") {
   const db = pool.promise();
@@ -86,6 +91,8 @@ async function getBillsFromDatabase(sortType = "all") {
     throw new Error("Unable to fetch bills from the database");
   }
 }
+
+
 
 router.post("/bills/add", async (req, res) => {
   const flat_id = 1;
@@ -136,6 +143,7 @@ router.post("/bills/add", async (req, res) => {
   }
 });
 
+
 router.post('/bills/pay', async (req, res) => {
   const bill_id = req.body.bill_id;
   const amountPaid = parseFloat(req.body.amount_paid || req.body.shareAmount || 0);
@@ -155,7 +163,18 @@ router.post('/bills/pay', async (req, res) => {
 
       const bill = rows[0];
       const currentAmountLeft = parseFloat(bill.Amount_Left);
+      const currentAmountPaid = parseFloat(bill.Amount_Paid);
       const initialAmount = parseFloat(bill.Initial_Amount);
+
+      if (amountPaid > currentAmountLeft) {
+          return res.redirect('/bills?error=amount_too_large');
+      }
+
+      if (currentAmountLeft <= 0) {
+          return res.status(400).send("This bill is already fully paid.");
+      }
+
+      const newAmountPaid = currentAmountPaid + amountPaid;
       const newAmountLeft = currentAmountLeft - amountPaid;
 
       // Ensure amount_left doesn't go below zero
@@ -219,6 +238,9 @@ router.post('/bills/pay', async (req, res) => {
   }
 });
 
+
+
+
 router.post("/bills/delete", async (req, res) => {
 const bill_id = req.body.bill_id;
 
@@ -233,18 +255,26 @@ try {
 }
 });
 
+
+
+
+
+
+
 router.post('/login/submit', async (req, res) => {
+
     const email = req.body.email;
     const pwd = req.body.pwd;
+
 
     const db = pool.promise();
     const status_query = `SELECT User_ID, Flat_ID FROM User WHERE Email = ? AND Password = ?;`;
     try {
-        const [rows] = await db.query(status_query, [email, pwd]);  
+        const [rows] = await db.query(status_query, [email, pwd]);        
         if (rows.length > 0) {
             req.session.userId = rows[0].User_ID;
             if (rows[0].Flat_ID != null) {
-                req.session.flatID = rows[0].User_ID;
+                req.session.flatID = rows[0].Flat_ID;
                 return res.redirect('/home');
             } else {
                 return res.redirect('/createGroup');
@@ -337,7 +367,7 @@ router.post('/joinGroup/join', async (req, res) => {
             const status_queryy = `UPDATE User SET Flat_ID = ? WHERE User_ID = ?;`;
             try {
                 const [row] = await dbb.query(status_queryy, [groupCode ,userID]);  
-                req.session.flatId = groupID;    
+                req.session.flatId = groupCode;    
             } catch (err) {
                 console.error("You havent set up the database yet!!!" + err);
             }
@@ -427,14 +457,14 @@ router.get('/home', async (req, res) => {
     const db = pool.promise();
     const query = `
         SELECT Event_ID as id, Title as title, Start_Time as start, End_Time as end
-        FROM Events where Flat_ID = 'WXYZ'
+        FROM Events where Flat_ID = ?;
     `
 
     try {
-        const [rows, fields] = await db.query(query); // Needs to be changed to select all events of a specific flat
+        const [rows, fields] = await db.query(query, req.session.flatId); // Needs to be changed to select all events of a specific flat
         res.status(200);
-        console.log(rows);
-        events = rows
+        console.log(req.session.flatId);
+        events = rows;
     } catch (err) {
         console.error(err);
         res.status(500);
@@ -448,7 +478,27 @@ router.get('/home', async (req, res) => {
 });
 
 router.post('/home/addevent', async (req, res) => {
+    const db = pool.promise();
+    const stmt = `
+        INSERT INTO Events(Flat_ID, Title, Description, Start_Time, End_Time)
+        VALUES (?, ?, ?, ?, ?);
+    `
+    flat_id = req.session.flatId;
+    title = req.body.title;
+    desc = req.body.desc;
+    start = format(new Date(req.body.start_time), 'yyyy-MM-dd HH-mm-SS');
+    end = format(new Date(req.body.end_time), 'yyyy-MM-dd HH-mm-SS');
 
+    console.log(flat_id + " " + title + " " + desc + " " + start + " " + end);
+
+    try {
+        await db.query(stmt, [flat_id, title, desc, start, end]);
+    } catch (err) {
+        console.error(err);
+        console.log('adding event was unsuccesful')
+    }
+
+    res.redirect('/home');
 });
 
 module.exports = router;

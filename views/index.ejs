@@ -35,19 +35,16 @@
     </main>
 
     <aside>
-        <form action="/home/addevent" method="POST" enctype="multipart/form-data">
+        <form action="/home/addevent" method="POST">
             <label>Add Event</label>
             <input name="title" type="text" placeholder="Title">
             <input name="desc" type="text" placeholder="Description">
 
-            <label for="date">Date</label>
-            <input name="date" type="date">
-
             <label for="start_time">Start Time</label>
-            <input name="start_time" type="time">
+            <input name="start_time" type="datetime-local">
 
             <label for="end_time">End Time</label>
-            <input name="end_time" type="time">
+            <input name="end_time" type="datetime-local">
 
             <button type="submit">Submit</button>
         </form>
