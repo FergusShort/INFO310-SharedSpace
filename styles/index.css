@@ -103,8 +103,7 @@ form button:hover {
 }
 
 form input[type="text"],
-form input[type="date"],
-form input[type="time"] {
+form input[type="datetime-local"] {
     min-width: 96%;
     max-width: 96%;
     padding: 5px;

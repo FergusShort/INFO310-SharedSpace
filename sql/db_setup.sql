@@ -20,7 +20,7 @@ drop table if exists Flat;
 -- Instances represent a flat shared between Users
 create table Flat (
     Flat_ID varchar(10) not null unique,
-    Address varchar(50),
+    GroupName varchar(50),
     constraint Flat_PK primary key (Flat_ID)
 );
 
@@ -43,9 +43,8 @@ create table Events (
     Flat_ID varchar(10) not null,
     Title varchar(40),
     Description varchar(150),
-    Event_Date date,
-    Start_Time time,
-    End_Time time,
+    Start_Time datetime,
+    End_Time datetime,
     constraint Event_PK primary key (Event_ID, Flat_ID),
     constraint Event_Flat_FK foreign key (Flat_ID)
         references Flat(Flat_ID)
