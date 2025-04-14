@@ -135,10 +135,9 @@
                 const billId = this.getAttribute("data-bill-id");
                 const billAmount = parseFloat(this.getAttribute("data-bill-amount"));
                 const amountPaid = parseFloat(this.getAttribute("data-amount-paid"));
-                const numPeople = 3; // Hardcoded for now
 
                 const remainingAmount = billAmount - amountPaid;
-                const shareAmount = remainingAmount / numPeople;
+                const shareAmount = remainingAmount / numPeoples;
 
                 document.getElementById("shareAmount_" + billId).value =
                     shareAmount.toFixed(2);
