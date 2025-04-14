@@ -24,11 +24,15 @@
                 </thead>
                 <tbody id="checklist"></tbody>
             </table>
+            <div class="estimated-cost">
+                <h3>Estimated Total:</h3>
+                <p id="totalCost">$0.00</p>
+            </div>
         </div>
-
-        <h3>Estimated Total:</h3>
-        <p id="totalCost">$0.00</p>
-
+        <!-- <div class="estimated-cost">
+            <h3>Estimated Total:</h3>
+            <p id="totalCost">$0.00</p>
+        </div> -->
         <div class="buttons">
             <form action="/groceries/add" method="POST" class="add-form" onsubmit="event.preventDefault(); addItem();">
                 <input type="text" name="item" id="itemInput" placeholder="Item" required>
@@ -41,10 +45,10 @@
 
             <div class="buttons-bottom">
                 <form action="/groceries/clear-checked" method="POST">
-                    <button onclick="clearChecked()" type="submit">Clear checked</button>
+                    <button id="clear-checked" onclick="clearChecked()" type="submit">Clear checked</button>
                 </form>
                 <form action="/groceries/clear-all" method="POST">
-                    <button onclick="clearAll()" type="submit">Clear all</button>
+                    <button id="clear-all" onclick="clearAll()" type="submit">Clear all</button>
                 </form>
             </div>
         </div>
@@ -108,8 +112,9 @@
                 checkboxes.forEach(checkbox => {
                     if (checkbox.checked) {
                         const row = checkbox.closest("tr");
-                        const totalText = row.querySelector("td:last-child").textContent.replace("$", "");
-                        const itemTotal = parseFloat(totalText);
+                        const quantity = parseInt(row.children[2].textContent);
+                        const price = parseFloat(row.children[3].textContent.replace("$", ""));
+                        const itemTotal = price * quantity;
                         totalCost -= itemTotal;
 
                         row.remove();

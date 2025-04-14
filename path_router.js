@@ -1,9 +1,11 @@
 const express = require('express');
+const session = require('express-session');
 const fileUpload = require('express-fileupload');
 const pool = require('./db');
 const bodyParser = require('body-parser');
 const path = require('path');
 const { get } = require('express/lib/response');
+const { format } = require('date-fns');
 
 router = express.Router();
 
@@ -12,18 +14,7 @@ router.use(fileUpload());
 
 router.get('/', async (req, res) => {
     const db = pool.promise();
-    
-    /*query = "select * from Flat;";
-
-    try{
-        const [rows, fields] = await db.query(query);
-        data = rows
-        console.log(data);
-    }catch (err){
-        console.error("query didn't work", err);
-    }*/
-
-    res.render('login'); //change later when homepage is created
+    res.render('login');
 });
 
 router.get('/login', async (req, res) => {
@@ -35,10 +26,16 @@ router.get('/signup', async (req, res) => {
 });
 
 router.get('/createGroup', async (req, res) => {
-    res.render('createGroup');
+    if (!req.session.userId) {
+       return res.render('signup');
+    }    
+    return res.render('createGroup');
 });
 
 router.get('/joinGroup', async (req, res) => {
+    if (!req.session.userId) {
+        return res.render('signup');
+    }  
     res.render('joinGroup');
 });
 
@@ -121,8 +118,7 @@ router.post("/bills/add", async (req, res) => {
          Payment_Status, Title, Description,
         Recurring, Time_period, Overdue
     )
-    VALUES (?, ?, ?, ?,  ?, ?, ?, ?, ?, ?, ?);
-`;
+    VALUES (?, ?, ?, ?,  ?, ?, ?, ?, ?, ?, ?);`;
 
   try {
     // Insert the initial bill
@@ -195,7 +191,7 @@ router.post('/bills/pay', async (req, res) => {
           SET Amount_Paid = ?, Amount_Left = ?, Payment_Status = ?
           WHERE Bill_ID = ?;
       `;
-      await db.query(updateQuery, [newAmountPaid, updatedAmountLeft, paymentStatus, bill_id]);
+      await db.query(updateQuery, [amountPaid, updatedAmountLeft, paymentStatus, bill_id]);
 
       // Create a new recurring bill and delete the old one if fully paid and recurring
       if (updatedAmountLeft <= 0 && bill.Recurring && bill.Time_period) {
@@ -272,14 +268,24 @@ router.post('/login/submit', async (req, res) => {
 
 
     const db = pool.promise();
-    const status_query = `SELECT User_ID FROM User WHERE Email = ? AND Username = ?;`;
+    const status_query = `SELECT User_ID, Flat_ID FROM User WHERE Email = ? AND Password = ?;`;
     try {
         const [rows] = await db.query(status_query, [email, pwd]);        
+        if (rows.length > 0) {
+            req.session.userId = rows[0].User_ID;
+            if (rows[0].Flat_ID != null) {
+                req.session.flatID = rows[0].Flat_ID;
+                return res.redirect('/home');
+            } else {
+                return res.redirect('/createGroup');
+            }
+        } 
     } catch (err) {
-        console.error("You havent set up the database yet!" + err);
+        console.error("Login error:" + err);
+        return res.redirect('/signup');
     }
 
-    return res.redirect('/createGroup');
+    return res.redirect('/signup');
 });
 
 router.post('/signup/submit', async (req, res) => {
@@ -312,9 +318,102 @@ router.post('/signup/submit', async (req, res) => {
         console.error("You havent set up the database yet!");
     }
 
+    const dbb = pool.promise();
+    const status_queryy = `SELECT User_ID FROM User WHERE Email = ?`;
+    try {
+        const [rows] = await dbb.query(status_queryy, email);  
+        req.session.userId = rows[0].User_ID;     
+    } catch (err) {
+        console.error("An error occured: " + err);
+    }
     return res.redirect('/createGroup');
 });
 
+router.post('/createGroup/create', async (req, res) => {
+    const groupName = req.body.groupName;
+    const groupID = await makeFlatID();
+
+    const db = pool.promise();
+    const status_query = `INSERT INTO Flat (Flat_ID, GroupName) VALUE (?, ?);`;
+    try {
+        const [rows] = await db.query(status_query, [groupID, groupName]);  
+        
+    } catch (err) {
+        console.error("You havent set up the database yet!!" + err);
+    }
+
+    const dbb = pool.promise();
+    const status_queryy = `UPDATE User SET Flat_ID = ? WHERE User_ID = ?;`;
+    try {
+        const [row] = await dbb.query(status_queryy, [groupID ,req.session.userId]);  
+        req.session.flatId = groupID;
+    } catch (err) {
+        console.error("You havent set up the database yet!!!" + err);
+    }
+
+    return res.redirect('/home');
+});
+
+router.post('/joinGroup/join', async (req, res) => {
+    const groupCode = req.body.groupCode;
+    const userID = req.session.userId;
+
+    const db = pool.promise();
+    const status_query = `SELECT Flat_ID FROM Flat WHERE Flat_ID = ?;`;
+    try {
+        const [rows] = await db.query(status_query, groupCode);  
+        if (rows.length > 0) {
+            const dbb = pool.promise();
+            const status_queryy = `UPDATE User SET Flat_ID = ? WHERE User_ID = ?;`;
+            try {
+                const [row] = await dbb.query(status_queryy, [groupCode ,userID]);  
+                req.session.flatId = groupCode;    
+            } catch (err) {
+                console.error("You havent set up the database yet!!!" + err);
+            }
+        }
+        
+    } catch (err) {
+        console.error("You havent set up the database yet!!" + err);
+    }
+
+    return res.redirect('/home');
+});
+
+async function makeFlatID() {
+    const iD = generateFlatID();
+
+    const db = pool.promise();
+    const status_query = `SELECT Flat_ID FROM Flat WHERE Flat_ID = ?;`;
+    try {
+        const [rows] = await db.query(status_query, iD);  
+        if (rows.length > 0) {
+            iD = makeFlatID();
+        } 
+    } catch (err) {
+        console.error("You havent set up the database yet!" + err);
+    }
+    return iD;
+};
+
+function generateFlatID() {
+    const alphabet = [
+        'a', 'b', 'c', 'd', 'e',
+        'f', 'g', 'h', 'i', 'j',
+        'k', 'l', 'm', 'n', 'o',
+        'p', 'q', 'r', 's', 't',
+        'u', 'v', 'w', 'x', 'y',
+        'z'
+    ];
+
+    let FlatID = "";
+
+    for(let i = 0; i < 4; i++){
+        FlatID += alphabet[Math.floor(Math.random() * 26)];
+    }
+
+    return FlatID;
+};
 
 // Route to add a chore
 router.post('/chores/add', async (req, res) => {
@@ -355,22 +454,51 @@ router.post('/chores/delete', async (req, res) => {
 
 /* INDEX (HomePage) CODE */
 router.get('/home', async (req, res) => { 
-    // const db = pool.promise();
-    // const query = `SELECT * FROM Events where Flat_ID = ?`
+    const db = pool.promise();
+    const query = `
+        SELECT Event_ID as id, Title as title, Start_Time as start, End_Time as end
+        FROM Events where Flat_ID = ?;
+    `
 
-    // try {
-    //     const [rows] = db.query(query, ['12345']); // Needs to be changed to select all events of a specific flat
-    //     res.status(200).send('Events retrieved');
-    // } catch (err) {
-    //     console.error(err);
-    //     res.status(500).send('Error retrieving Events');
-    // }
+    try {
+        const [rows, fields] = await db.query(query, req.session.flatId); // Needs to be changed to select all events of a specific flat
+        res.status(200);
+        console.log(req.session.flatId);
+        events = rows;
+    } catch (err) {
+        console.error(err);
+        res.status(500);
+    }
 
-    res.render('index');
+    for(i = 0; i < events.length; i++){
+        events[i].start = format(new Date(events[i].start), 'yyyy-MM-dd HH:mm:SS')
+    }
+
+    res.render('index', {events: events});
 });
 
 router.post('/home/addevent', async (req, res) => {
+    const db = pool.promise();
+    const stmt = `
+        INSERT INTO Events(Flat_ID, Title, Description, Start_Time, End_Time)
+        VALUES (?, ?, ?, ?, ?);
+    `
+    flat_id = req.session.flatId;
+    title = req.body.title;
+    desc = req.body.desc;
+    start = format(new Date(req.body.start_time), 'yyyy-MM-dd HH-mm-SS');
+    end = format(new Date(req.body.end_time), 'yyyy-MM-dd HH-mm-SS');
 
+    console.log(flat_id + " " + title + " " + desc + " " + start + " " + end);
+
+    try {
+        await db.query(stmt, [flat_id, title, desc, start, end]);
+    } catch (err) {
+        console.error(err);
+        console.log('adding event was unsuccesful')
+    }
+
+    res.redirect('/home');
 });
 
 module.exports = router;

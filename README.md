@@ -29,3 +29,9 @@
 >docker compose up -d
 >docker exec -it sharedspacemysql mysql -u root -p --default-character-set=utf8mb4
 >```
+>
+>### Creating tables and Populating with data:
+>```sql
+>source sql/db_setup.sql
+>source sql/db_populate.sql
+>```
