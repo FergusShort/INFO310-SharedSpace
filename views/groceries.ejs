@@ -24,15 +24,12 @@
                 </thead>
                 <tbody id="checklist"></tbody>
             </table>
-            <div class="estimated-cost">
-                <h3>Estimated Total:</h3>
-                <p id="totalCost">$0.00</p>
-            </div>
+
         </div>
-        <!-- <div class="estimated-cost">
+        <div class="estimated-cost">
             <h3>Estimated Total:</h3>
             <p id="totalCost">$0.00</p>
-        </div> -->
+        </div>
         <div class="buttons">
             <form action="/groceries/add" method="POST" class="add-form" onsubmit="event.preventDefault(); addItem();">
                 <input type="text" name="item" id="itemInput" placeholder="Item" required>
@@ -105,6 +102,10 @@
                 itemInput.value = "";
                 priceInput.value = "";
                 quantityInput.value = "";
+
+                const checklistContainer = document.querySelector(".checklist-container");
+                checklistContainer.scrollTop = checklistContainer.scrollHeight;
+
             }
 
             function clearChecked() {
