@@ -70,6 +70,7 @@
       async function addChore(urgency) {
         const titleInput = document.getElementById(`new-${urgency}-title`);
         const commentInput = document.getElementById(`new-${urgency}-comment`);
+        const list = document.getElementById(`${urgency}-list`); // Get the correct list for the urgency
 
         const choreTitle = titleInput.value.trim();
         const choreComment = commentInput.value.trim();
@@ -90,6 +91,10 @@
 
             if (response.ok) {
               const chore = await response.json();
+
+              // Create a new <li> element for the chore
+              const li = document.createElement("li");
+              li.className = "chore-item";
 
               const titleDiv = document.createElement("div");
               titleDiv.className = "chore-title";
