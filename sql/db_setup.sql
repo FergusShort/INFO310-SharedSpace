@@ -57,7 +57,6 @@ CREATE TABLE Bills (
     Flat_ID VARCHAR(10) NOT NULL,
     Initial_Amount DECIMAL(10, 2), 
     Amount_Left DECIMAL(10, 2),         -- running amount so far
-    Amount_Paid DECIMAL(10, 2) DEFAULT 0,
     Due_Date DATE,
     Payment_Status CHAR(1) DEFAULT 'U' CHECK (Payment_Status IN ('U', 'P', 'F')), -- U: Unpaid, P: Partial, F: Full
     Title VARCHAR(30),
@@ -92,7 +91,7 @@ create table Groceries (
 create table Chores (
     Flat_ID varchar(10) not null,
     Chore_ID int not null unique auto_increment,
-    Priority varchar(30),
+    Priority ENUM('urgent', 'not-so-urgent', 'low-urgency') NOT NULL,
     Title varchar(30),
     Description varchar(150),
     constraint Chore_PK primary key (Flat_ID, Chore_ID),

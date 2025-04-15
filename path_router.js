@@ -44,13 +44,47 @@ router.get("/groceries", async (req, res) => {
   res.render("groceries");
 });
 
+
+
+async function getChoresFromDatabase(flatID) {
+  const db = pool.promise();
+  try {
+      const [chores] = await db.query("SELECT * FROM Chores WHERE Flat_ID = ?", [flatID]);
+      return chores;
+  } catch (error) {
+      console.error("Error fetching chores from database:", error);
+      throw new Error("Unable to fetch chores from the database");
+  }
+}
+
+
 router.get("/chores", async (req, res) => {
   if (!req.session.userId) {
-    return res.render("signup");
-  } else if(!req.session.flat_Id) {
-    return res.render("createGroup");
+      return res.render("signup");
+  } else if (!req.session.flat_Id) {
+      return res.redirect("/createGroup");
   }
-  res.render("chores");
+
+  const flat_id = req.session.flat_Id;
+
+  try {
+      const chores = await getChoresFromDatabase(flat_id);
+
+      chores.forEach((chore) => {
+          chore.timestamp = new Date();
+      });
+
+      const choresByUrgency = {
+          urgent: chores.filter((chore) => chore.Priority === "urgent"),
+          "not-so-urgent": chores.filter((chore) => chore.Priority === "not-so-urgent"),
+          "low-urgency": chores.filter((chore) => chore.Priority === "low-urgency"),
+      };
+
+      res.render("chores", { chores: choresByUrgency });
+  } catch (err) {
+      console.error("Error fetching chores:", err);
+      res.status(500).send("Error fetching chores.");
+  }
 });
 
 async function getUsersInFlat(flatID) {
@@ -118,7 +152,6 @@ async function getBillsFromDatabase(sortType = "all", flatID) {
 router.post("/bills/add", async (req, res) => {
   const flat_ID = req.session.flat_Id;
   const initial_amount = parseFloat(req.body.amount);
-  const amount_paid = 0.0;
   const amount_left = initial_amount;
   const due_date = req.body.due_date ? new Date(req.body.due_date) : null;
   let payment_status = "U";
@@ -127,19 +160,16 @@ router.post("/bills/add", async (req, res) => {
   const time_period = parseInt(req.body.time_period) || null;
   const overdue = req.body.overdue || false;
   const description = req.body.description || "";
-
-  if (initial_amount === 0) {
-    payment_status = "F";
-  }
-
   const db = pool.promise();
+
+
   const insertQuery = `
     INSERT INTO Bills (
-        Flat_ID, Initial_Amount, Amount_Left, Amount_Paid, Due_Date,
+        Flat_ID, Initial_Amount, Amount_Left, Due_Date,
          Payment_Status, Title, Description,
         Recurring, Time_period, Overdue
     )
-    VALUES (?, ?, ?, ?,  ?, ?, ?, ?, ?, ?, ?);`;
+    VALUES (?, ?, ?, ?,  ?, ?, ?, ?, ?, ?);`;
 
   try {
     // Insert the initial bill
@@ -147,7 +177,6 @@ router.post("/bills/add", async (req, res) => {
       flat_ID,
       initial_amount,
       amount_left,
-      amount_paid,
       due_date,
       payment_status,
       title,
@@ -165,82 +194,66 @@ router.post("/bills/add", async (req, res) => {
 });
 
 router.post("/bills/pay", async (req, res) => {
-  const bill_id = req.body.bill_id;
-  const amountPaid = parseFloat(
-    req.body.amount_paid || req.body.shareAmount || 0
-  );
-  const db = pool.promise();
+    const bill_id = req.body.bill_id;
+    const amountPaid = parseFloat(req.body.amount_paid || 0);
+    const db = pool.promise();
 
-  try {
-    const checkQuery = `
-          SELECT Initial_Amount, Amount_Left, Amount_Paid, Due_Date, Recurring, Time_period, Flat_ID, Title, Description, Overdue
-          FROM Bills WHERE Bill_ID = ?;
-      `;
-    const [rows] = await db.query(checkQuery, [bill_id]);
-    const bill = rows[0];
-    const currentAmountLeft = parseFloat(bill.Amount_Left);
-
-    const newAmountLeft = currentAmountLeft - amountPaid;
-
-    const updatedAmountLeft = Math.max(0, newAmountLeft);
-
-    let paymentStatus = "P";
-    if (updatedAmountLeft <= 0) {
-      paymentStatus = "F"; 
+    if (isNaN(amountPaid) || amountPaid <= 0) {
+        return res.status(400).send("Invalid amount paid.");
     }
 
-    const updateQuery = `
-          UPDATE Bills
-          SET Amount_Paid = ?, Amount_Left = ?, Payment_Status = ?
-          WHERE Bill_ID = ?;
-      `;
-    await db.query(updateQuery, [
-      amountPaid,
-      updatedAmountLeft,
-      paymentStatus,
-      bill_id,
-    ]);
+    try {
+        const checkQuery = `SELECT Initial_Amount, Amount_Left, Due_Date, Recurring, Time_period, Flat_ID, Title, Description FROM Bills WHERE Bill_ID = ?;`;
+        const [rows] = await db.query(checkQuery, [bill_id]);
+        if (!rows || rows.length === 0) {
+            return res.status(404).send("Bill not found.");
+        }
+        const bill = rows[0];
 
-    if (updatedAmountLeft <= 0 && bill.Recurring && bill.Time_period) {
-      const nextDueDate = new Date(bill.Due_Date);
-      nextDueDate.setDate(nextDueDate.getDate() + bill.Time_period);
-      const insertRecurringQuery = `
-              INSERT INTO Bills (
-                  Flat_ID, Initial_Amount, Amount_Left, Amount_Paid, Due_Date,
-                   Payment_Status, Title, Description,
-                  Recurring, Time_period, Overdue
-              )
-              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
-          `;
-      await db.query(insertRecurringQuery, [
-        bill.Flat_ID,
-        bill.Initial_Amount,
-        bill.Initial_Amount,
-        0.0,
-        nextDueDate,
-        "U",
-        bill.Title,
-        bill.Description,
-        bill.Recurring,
-        bill.Time_period,
-        bill.Overdue,
-      ]);
+        const currentAmountLeft = parseFloat(bill.Amount_Left);
+        const newAmountLeft = Math.max(0, currentAmountLeft - amountPaid);
+        let paymentStatus = newAmountLeft === 0 ? "F" : "P";
 
-      const deleteQuery = `
-              DELETE FROM Bills WHERE Bill_ID = ?;
-          `;
-      await db.query(deleteQuery, [bill_id]);
-    } else if (updatedAmountLeft <= 0 && !bill.Recurring) {
-      const deleteQuery = `
-              DELETE FROM Bills WHERE Bill_ID = ?;
-          `;
-      await db.query(deleteQuery, [bill_id]);
+        const updateQuery = `UPDATE Bills SET Amount_Left = ?, Payment_Status = ? WHERE Bill_ID = ?;`;
+        await db.query(updateQuery, [newAmountLeft, paymentStatus, bill_id]);
+
+        if (newAmountLeft === 0 && bill.Recurring && bill.Time_period) {
+            // Calculate the next due date
+            const nextDueDate = new Date(bill.Due_Date);
+            nextDueDate.setDate(nextDueDate.getDate() + bill.Time_period);
+
+            const insertRecurringQuery = `
+                INSERT INTO Bills (
+                    Flat_ID, Initial_Amount, Amount_Left, Due_Date,
+                    Payment_Status, Title, Description,
+                    Recurring, Time_period, Overdue
+                )
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+            `;
+            await db.query(insertRecurringQuery, [
+                bill.Flat_ID,
+                bill.Initial_Amount,
+                bill.Initial_Amount,
+                nextDueDate,
+                "U",
+                bill.Title,
+                bill.Description,
+                bill.Recurring,
+                bill.Time_period,
+                0
+            ]);
+        }
+
+        if (newAmountLeft === 0 && !bill.Recurring) {
+            const deleteQuery = `DELETE FROM Bills WHERE Bill_ID = ?`;
+            await db.query(deleteQuery, [bill_id]);
+        }
+
+        return res.redirect("/bills");
+    } catch (error) {
+        console.error("Error paying bill:", error);
+        return res.status(500).send("Error processing payment.");
     }
-
-    return res.redirect("/bills");
-  } catch (err) {
-    console.error("Error in /bills/pay route:", err);
-  }
 });
 
 router.post("/bills/delete", async (req, res) => {
@@ -425,44 +438,37 @@ function generateFlatID() {
   return FlatID;
 }
 
-// Route to add a chore
 router.post("/chores/add", async (req, res) => {
-  const flat_id = req.session.flat_Id; // Replace with actual flat ID later
+  const flat_id = req.session.flat_Id;
   const { title, comment, urgency } = req.body;
   const db = pool.promise();
-  const insertQuery = `
-        INSERT INTO Chores (Flat_ID, Priority, Title, Description)
-        VALUES (?, ?, ?, ?);
-    `;
 
   try {
-    const [result] = await db.query(insertQuery, [
-      flat_id,
-      urgency,
-      title,
-      comment,
-    ]);
-    const choreId = result.insertId; // Get the inserted chore ID
+    const insertQuery = `
+      INSERT INTO Chores (Flat_ID, Priority, Title, Description)
+      VALUES (?, ?, ?, ?);
+    `;
 
-    res.status(201).json({ message: "Chore added successfully", choreId });
+    await db.query(insertQuery, [flat_id, urgency, title, comment]);
+
+    res.redirect("/chores");
   } catch (err) {
     console.error("Error adding chore:", err);
     res.status(500).send("Error adding chore.");
   }
 });
 
-// Route to delete a chore
 router.post("/chores/delete", async (req, res) => {
-  const choreId = req.body.choreId; // Get the chore ID
+  const choreId = req.body.chore_id;
 
   const db = pool.promise();
   const deleteQuery = `DELETE FROM Chores WHERE Chore_ID = ?;`;
 
   try {
     await db.query(deleteQuery, [choreId]);
-    res.status(200).send("Chore deleted successfully");
+    res.redirect("/chores");
   } catch (err) {
-    console.error(deleteQuery, err);
+    console.error("Error deleting chore:", err);
     res.status(500).send("Error deleting chore");
   }
 });

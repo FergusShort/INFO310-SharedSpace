@@ -77,7 +77,7 @@
                                 Status: <% if (bill.Payment_Status === 'F') { %> Paid <% } else if (bill.Payment_Status === 'P') { %> Partially Paid <% } else { %> Unpaid <% } %>
                             </p>
                             <p>
-                                Remaining: $<%= (bill.Initial_Amount - bill.Amount_Paid).toFixed(2) %>
+                                Remaining: $<%= (bill.Amount_Left)%>
                             </p>
                         </div>
                         <div class="bill-actions">
@@ -91,7 +91,7 @@
                                         placeholder="Enter amount"
                                         min="0.01"
                                         step="0.01"
-                                        max="<%= (bill.Initial_Amount - bill.Amount_Paid).toFixed(2) %>"
+                                        max="<%= (bill.Amount_Left) %>"
                                         required
                                     />
                                     <input type="hidden" name="shareAmount" id="shareAmount_<%= bill.Bill_ID %>" />
@@ -99,8 +99,7 @@
                                         type="button"
                                         class="pay-share-button"
                                         data-bill-id="<%= bill.Bill_ID %>"
-                                        data-bill-amount="<%= bill.Initial_Amount %>"
-                                        data-amount-paid="<%= bill.Amount_Paid %>"
+                                        data-amount-left="<%= bill.Amount_Left %>"
                                     >
                                         My Share
                                     </button>
@@ -138,11 +137,8 @@
         document.querySelectorAll(".pay-share-button").forEach((button) => {
             button.addEventListener("click", function () {
                 const billId = this.getAttribute("data-bill-id");
-                const billAmount = parseFloat(this.getAttribute("data-bill-amount"));
-                const amountPaid = parseFloat(this.getAttribute("data-amount-paid"));
-
-                const remainingAmount = billAmount - amountPaid;
-                const shareAmount = remainingAmount / numPeople;
+                const amountLeft = parseFloat(this.getAttribute("data-amount-left"));
+                const shareAmount = amountLeft / numPeople;
 
                 document.getElementById("shareAmount_" + billId).value =
                     shareAmount.toFixed(2);

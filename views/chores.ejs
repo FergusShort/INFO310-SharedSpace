@@ -1,187 +1,102 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
+<head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Chores Board</title>
     <link rel="stylesheet" href="nav.css" />
     <link rel="stylesheet" href="/chores.css" />
-  </head>
-
-  <body>
-    <div class="sidebar-container">
-      <div id="sidebar" class="sidebar">
-        <button class="close-btn" onclick="toggleSidebar()">☰</button>
-        <ul>
-          <li><a href="/home">Home</a></li>
-          <li><a href="/chores">Chores</a></li>
-          <li><a href="/bills">Bills</a></li>
-          <li><a href="/events">Events</a></li>
-          <li><a href="/groceries">Groceries</a></li>
-          <li><a href="/logout">Logout</a></li>
-        </ul>
-      </div>
-      <button class="open-btn" onclick="toggleSidebar()">☰</button>
-    </div>
+</head>
+<body>
+    <%- include('navbar') %>
 
     <div class="container">
-      <div class="compartment" id="urgent">
-        <h2>Urgent</h2>
-        <ul id="urgent-list"></ul>
-        <input type="text" id="new-urgent-title" placeholder="Chore title" />
-        <textarea
-          id="new-urgent-comment"
-          placeholder="Optional comment"
-        ></textarea>
-        <button onclick="addChore('urgent')">Add</button>
-      </div>
-      <div class="compartment" id="sort-of-urgent">
-        <h2>Not So Urgent</h2>
-        <ul id="sort-of-urgent-list"></ul>
-        <input
-          type="text"
-          id="new-sort-of-urgent-title"
-          placeholder="Chore title"
-        />
-        <textarea
-          id="new-sort-of-urgent-comment"
-          placeholder="Optional comment"
-        ></textarea>
-        <button onclick="addChore('sort-of-urgent')">Add</button>
-      </div>
-      <div class="compartment" id="low-urgency">
-        <h2>Low Urgency</h2>
-        <ul id="low-urgency-list"></ul>
-        <input
-          type="text"
-          id="new-low-urgency-title"
-          placeholder="Chore title"
-        />
-        <textarea
-          id="new-low-urgency-comment"
-          placeholder="Optional comment"
-        ></textarea>
-        <button onclick="addChore('low-urgency')">Add</button>
-      </div>
+        <div class="compartment" id="urgent">
+            <h2>Urgent</h2>
+            <ul id="urgent-list">
+                <% if (chores && chores.urgent && chores.urgent.length > 0) { %>
+                    <% chores.urgent.forEach(chore => { %>
+                        <li class="chore-item">
+                            <div class="chore-title"><%= chore.Title %></div>
+                            <% if (chore.Description) { %>
+                                <div class="chore-comment"><%= chore.Description %></div>
+                            <% } %>
+                            <div class="chore-timestamp">
+                                Added on: <%= new Date(chore.timestamp).toLocaleDateString() %> at <%= new Date(chore.timestamp).toLocaleTimeString() %>
+                            </div>
+                            <form action="/chores/delete" method="POST">
+                                <input type="hidden" name="chore_id" value="<%= chore.Chore_ID %>" />
+                                <button type="submit" class="delete-btn">X</button>
+                            </form>
+                        </li>
+                    <% }); %>
+                <% } %>
+            </ul>
+            <form action="/chores/add" method="POST">
+                <input type="text" name="title" placeholder="Chore title" required />
+                <textarea name="comment" placeholder="Optional comment"></textarea>
+                <input type="hidden" name="urgency" value="urgent" />
+                <button type="submit">Add</button>
+            </form>
+        </div>
+
+        <div class="compartment" id="not-so-urgent">
+            <h2>Not So Urgent</h2>
+            <ul id="not-so-urgent-list">
+                <% if (chores && chores['not-so-urgent'] && chores['not-so-urgent'].length > 0) { %>
+                    <% chores['not-so-urgent'].forEach(chore => { %>
+                        <li class="chore-item">
+                            <div class="chore-title"><%= chore.Title %></div>
+                            <% if (chore.Description) { %>
+                                <div class="chore-comment"><%= chore.Description %></div>
+                            <% } %>
+                            <div class="chore-timestamp">
+                                Added on: <%= new Date(chore.timestamp).toLocaleDateString() %> at <%= new Date(chore.timestamp).toLocaleTimeString() %>
+                            </div>
+                            <form action="/chores/delete" method="POST">
+                                <input type="hidden" name="chore_id" value="<%= chore.Chore_ID %>" />
+                                <button type="submit" class="delete-btn">X</button>
+                            </form>
+                        </li>
+                    <% }); %>
+                <% } %>
+            </ul>
+            <form action="/chores/add" method="POST">
+                <input type="text" name="title" placeholder="Chore title" required />
+                <textarea name="comment" placeholder="Optional comment"></textarea>
+                <input type="hidden" name="urgency" value="not-so-urgent" />
+                <button type="submit">Add</button>
+            </form>
+        </div>
+
+        <div class="compartment" id="low-urgency">
+            <h2>Low Urgency</h2>
+            <ul id="low-urgency-list">
+                <% if (chores && chores['low-urgency'] && chores['low-urgency'].length > 0) { %>
+                    <% chores['low-urgency'].forEach(chore => { %>
+                        <li class="chore-item">
+                            <div class="chore-title"><%= chore.Title %></div>
+                            <% if (chore.Description) { %>
+                                <div class="chore-comment"><%= chore.Description %></div>
+                            <% } %>
+                            <div class="chore-timestamp">
+                                Added on: <%= new Date(chore.timestamp).toLocaleDateString() %> at <%= new Date(chore.timestamp).toLocaleTimeString() %>
+                            </div>
+                            <form action="/chores/delete" method="POST">
+                                <input type="hidden" name="chore_id" value="<%= chore.Chore_ID %>" />
+                                <button type="submit" class="delete-btn">X</button>
+                            </form>
+                        </li>
+                    <% }); %>
+                <% } %>
+            </ul>
+            <form action="/chores/add" method="POST">
+                <input type="text" name="title" placeholder="Chore title" required />
+                <textarea name="comment" placeholder="Optional comment"></textarea>
+                <input type="hidden" name="urgency" value="low-urgency" />
+                <button type="submit">Add</button>
+            </form>
+        </div>
     </div>
-
-    <script>
-      // Function to add a chore to the database
-      async function addChore(urgency) {
-        const titleInput = document.getElementById(`new-${urgency}-title`);
-        const commentInput = document.getElementById(`new-${urgency}-comment`);
-        const list = document.getElementById(`${urgency}-list`); // Get the correct list for the urgency
-
-        const choreTitle = titleInput.value.trim();
-        const choreComment = commentInput.value.trim();
-
-        if (choreTitle) {
-          try {
-            const response = await fetch(`/chores/add`, {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                title: choreTitle,
-                comment: choreComment,
-                urgency: urgency,
-              }),
-            });
-
-            if (response.ok) {
-              const chore = await response.json();
-
-              // Create a new <li> element for the chore
-              const li = document.createElement("li");
-              li.className = "chore-item";
-
-              const titleDiv = document.createElement("div");
-              titleDiv.className = "chore-title";
-              titleDiv.textContent = chore.title;
-
-              // Add chore comment (if available)
-              if (chore.comment) {
-                const commentDiv = document.createElement("div");
-                commentDiv.className = "chore-comment";
-                commentDiv.textContent = chore.comment;
-                li.appendChild(commentDiv);
-              }
-
-              li.appendChild(titleDiv);
-
-              // Add timestamp
-              const timestampDiv = document.createElement("div");
-              timestampDiv.className = "chore-timestamp";
-              timestampDiv.textContent = `Added on: ${new Date(
-                chore.timestamp
-              ).toLocaleDateString()} at ${new Date(
-                chore.timestamp
-              ).toLocaleTimeString()}`;
-              li.appendChild(timestampDiv);
-
-              // Add delete button
-              const deleteBtn = document.createElement("button");
-              deleteBtn.textContent = "X";
-              deleteBtn.className = "delete-btn";
-              deleteBtn.onclick = async function () {
-                await deleteChore(chore.id, li, list);
-              };
-
-              li.appendChild(deleteBtn);
-              list.appendChild(li);
-
-              // Clear the input fields
-              titleInput.value = "";
-              commentInput.value = "";
-            } else {
-              alert("Failed to add chore. Please try again.");
-            }
-          } catch (error) {
-            console.error("Error adding chore:", error);
-            alert("An error occurred. Please try again.");
-          }
-        } else {
-          alert("Please enter a chore title");
-        }
-      }
-
-      // Function to delete a chore from the database
-      async function deleteChore(choreId, li, list) {
-        try {
-          const response = await fetch(`/chores/delete/${choreId}`, {
-            method: "DELETE",
-          });
-
-          if (response.ok) {
-            list.removeChild(li);
-          } else {
-            alert("Failed to delete chore. Please try again.");
-          }
-        } catch (error) {
-          console.error("Error deleting chore:", error);
-          alert("An error occurred. Please try again.");
-        }
-      }
-
-      // Add event listeners for "Enter" key
-      document
-        .querySelectorAll('input[type="text"], textarea')
-        .forEach((input) => {
-          input.addEventListener("keypress", function (event) {
-            if (event.key === "Enter") {
-              event.preventDefault(); // Prevent form submission or default behavior
-              const urgency = this.id.split("-")[1];
-              addChore(urgency);
-            }
-          });
-        });
-
-      // Sidebar toggle functionality
-      function toggleSidebar() {
-        const sidebar = document.getElementById("sidebar");
-        sidebar.classList.toggle("hidden");
-      }
-    </script>
-  </body>
+</body>
 </html>
