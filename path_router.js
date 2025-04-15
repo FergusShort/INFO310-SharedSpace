@@ -40,10 +40,20 @@ router.get("/joinGroup", async (req, res) => {
 });
 
 router.get("/groceries", async (req, res) => {
+  if (!req.session.userId) {
+    return res.render("signup");
+  } else if(!req.session.flat_Id) {
+    return res.render("createGroup");
+  }
   res.render("groceries");
 });
 
 router.get("/chores", async (req, res) => {
+  if (!req.session.userId) {
+    return res.render("signup");
+  } else if(!req.session.flat_Id) {
+    return res.render("createGroup");
+  }
   res.render("chores");
 });
 
@@ -56,6 +66,11 @@ async function getUsersInFlat(flatID) {
 }
 
 router.get("/bills", async (req, res) => {
+  if (!req.session.userId) {
+    return res.render("signup");
+  } else if(!req.session.flat_Id) {
+    return res.render("createGroup");
+  }
   const sortType = req.query.sort || "all";
   const errorMessage = req.query.error;
   const flatID = req.session.flat_Id;
@@ -77,6 +92,7 @@ router.get("/bills", async (req, res) => {
 });
 
 async function getBillsFromDatabase(sortType = "all", flatID) {
+  
   const db = pool.promise();
   const today = new Date();
 
@@ -438,7 +454,7 @@ function generateFlatID() {
 
 // Route to add a chore
 router.post("/chores/add", async (req, res) => {
-  const flat_id = 1; // Replace with actual flat ID later
+  const flat_id = req.session.flat_Id; // Replace with actual flat ID later
   const { title, comment, urgency } = req.body;
   const db = pool.promise();
   const insertQuery = `
@@ -480,6 +496,11 @@ router.post("/chores/delete", async (req, res) => {
 
 /* INDEX (HomePage) CODE */
 router.get("/home", async (req, res) => {
+  if (!req.session.userId) {
+    return res.render("signup");
+  } else if(!req.session.flat_Id) {
+    return res.render("createGroup");
+  }
   const db = pool.promise();
   const query = `
     SELECT Event_ID as id, Title as title, Start_Time as start, End_Time as end
