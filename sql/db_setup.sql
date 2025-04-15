@@ -67,8 +67,7 @@ CREATE TABLE Bills (
     PRIMARY KEY (Bill_ID),  -- Set Bill_ID as the primary key
     CONSTRAINT Bills_Flat_FK FOREIGN KEY (Flat_ID) REFERENCES Flat(Flat_ID),
     CONSTRAINT Amount_CHK CHECK (Amount_Left >= 0),
-    CONSTRAINT Initial_Amount_CHK CHECK (Initial_Amount >= 0),
-    CONSTRAINT Amount_Paid_CHK CHECK (Amount_Paid >= 0)
+    CONSTRAINT Initial_Amount_CHK CHECK (Initial_Amount >= 0)
 
 );
 
