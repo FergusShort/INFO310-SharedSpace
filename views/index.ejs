@@ -17,10 +17,33 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@schedule-x/theme-default@2.2.0/dist/index.css">
 
     <link rel="stylesheet" href="index.css">
+    <link rel="stylesheet" href="navbar.css">
 </head>
 <body>
     
-    <%- include('navbar') %>
+    <div class="sidebar-container">
+        <div id="sidebar" class="sidebar">
+            <button class="close-btn" onclick="toggleSidebar()">☰</button>
+            <ul>
+                <li><a href="/home">Home</a></li>
+                <li><a href="/chores">Chores</a></li>
+                <li><a href="/bills">Bills</a></li>
+                <li><a href="/events">Events</a></li>
+                <li><a href="/groceries">Groceries</a></li>
+                <li><a href="/logout">Logout</a></li>
+            </ul>
+        </div>
+        <button class="open-btn" onclick="toggleSidebar()">☰</button>
+    </div>
+    
+    <script>
+        // Sidebar toggle functionality
+        function toggleSidebar() {
+            const sidebar = document.getElementById("sidebar");
+            sidebar.classList.toggle("hidden");
+        }
+    </script>
+    
     <main id="calendar">
         <script type="module">
             const { createCalendar, createViewMonthGrid } = window.SXCalendar;
