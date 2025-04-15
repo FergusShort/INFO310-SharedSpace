@@ -9,22 +9,7 @@
 
 </head>
 <body>
-    <div class="sidebar-container">
-        <div id="sidebar" class="sidebar">
-          <button class="close-btn" onclick="toggleSidebar()">☰</button>
-          <ul>
-            <li><a href="/home">Home</a></li>
-            <li><a href="/chores">Chores</a></li>
-            <li><a href="/bills">Bills</a></li>
-            <li><a href="/events">Events</a></li>
-            <li><a href="/groceries">Groceries</a></li>
-            <li><a href="/logout">Logout</a></li>
-          </ul>
-        </div>
-        <button class="open-btn" onclick="toggleSidebar()">☰</button>
-    </div>
-
-
+    <%- include('navbar') %>
     <div class="container">
         <h1>Bills</h1>
 
@@ -164,11 +149,7 @@
             });
         });
 
-              // Sidebar toggle functionality
-      function toggleSidebar() {
-        const sidebar = document.getElementById("sidebar");
-        sidebar.classList.toggle("hidden");
-      }
+
     </script>
     
 </body>
