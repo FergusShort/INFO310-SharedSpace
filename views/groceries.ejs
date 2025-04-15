@@ -31,7 +31,8 @@
             <p id="totalCost">$0.00</p>
         </div>
         <div class="buttons">
-            <form action="/groceries/add" method="POST" class="add-form" onsubmit="event.preventDefault(); addItem();">
+            <!-- <form action="/groceries/add" method="POST" class="add-form" onsubmit="event.preventDefault(); addItem();"> -->
+            <form class="add-form" onsubmit="event.preventDefault(); addItem();">
                 <input type="text" name="item" id="itemInput" placeholder="Item" required>
                 <div class="price-quantity-row">
                     <input type="number" name="price" step="0.01" min="0.01" placeholder="Price" required>
@@ -41,11 +42,13 @@
             </form>
 
             <div class="buttons-bottom">
-                <form action="/groceries/clear-checked" method="POST">
-                    <button id="clear-checked" onclick="clearChecked()" type="submit">Clear checked</button>
+                <!-- <form action="/groceries/clear-checked" method="POST"> -->
+                <form>
+                    <button id="clear-checked" onclick="clearChecked()" type="button">Clear checked</button>
                 </form>
-                <form action="/groceries/clear-all" method="POST">
-                    <button id="clear-all" onclick="clearAll()" type="submit">Clear all</button>
+                <!-- <form action="/groceries/clear-all" method="POST"> -->
+                <form>
+                    <button id="clear-all" onclick="clearAll()" type="button">Clear all</button>
                 </form>
             </div>
         </div>
