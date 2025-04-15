@@ -289,9 +289,9 @@ router.post("/login/submit", async (req, res) => {
   const pwd = req.body.pwd;
 
   const db = pool.promise();
-  const status_query = `SELECT User_ID, Flat_ID FROM User WHERE Email = ? AND Password = ?;`;
+  const status_query = `SELECT User_ID, Flat_ID FROM User WHERE (Email = ? OR Username = ?) AND Password = ?;`;
   try {
-    const [rows] = await db.query(status_query, [email, pwd]);
+    const [rows] = await db.query(status_query, [email, email, pwd]);
     if (rows.length > 0) {
       req.session.userId = rows[0].User_ID;
       if (rows[0].Flat_ID != null) {
@@ -315,9 +315,9 @@ router.post("/signup/submit", async (req, res) => {
   const pwd = req.body.pwd;
 
   const db = pool.promise();
-  const status_query = `SELECT Email FROM User WHERE Email = ?`;
+  const status_query = `SELECT Email FROM User WHERE Email = ? OR Username = ?`;
   try {
-    const [rows] = await db.query(status_query, [email]);
+    const [rows] = await db.query(status_query, [email, Uname]);
 
     if (rows.length === 0) {
       const dbdel = pool.promise();
@@ -329,7 +329,7 @@ router.post("/signup/submit", async (req, res) => {
         return res.status(500).send("Database error. Please try again later.");
       }
     } else if (rows.length > 0) {
-      return res.status(400).send("Email already exists");
+      return res.status(400).send("Email or Username already exists");
     } else {
       return res.redirect("/signup");
     }
@@ -515,7 +515,6 @@ router.get("/home", async (req, res) => {
 
     const [rows, fields] = await db.query(query, req.session.flat_Id);
     res.status(200);
-    console.log("Flat ID:", req.session.flat_Id); // More descriptive log
     let events = rows; // Declare events with let
     for (let i = 0; i < events.length; i++) {
       events[i].start = format(new Date(events[i].start), "yyyy-MM-dd HH:mm:SS");
@@ -540,8 +539,6 @@ router.post("/home/addevent", async (req, res) => {
   const desc = req.body.desc;
   const start = format(new Date(req.body.start_time), "yyyy-MM-dd HH:mm:SS"); // Corrected format
   const end = format(new Date(req.body.end_time), "yyyy-MM-dd HH:mm:SS");   // Corrected format
-
-  console.log("Adding event:", flat_id, title, desc, start, end); // More descriptive log
 
   try {
     await db.query(stmt, [flat_id, title, desc, start, end]);
