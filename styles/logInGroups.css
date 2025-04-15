@@ -47,11 +47,11 @@ input {
 }
 
 input:focus {
-    border: 1px solid #fa00a7;
+    border: 1px solid rgb(126, 158, 227);;
 }
 
 button {
-    background: #fa00a7;
+    background: rgb(126, 158, 227);;
     color: white;
     padding: 0.8rem;
     border: none;
@@ -62,7 +62,7 @@ button {
 }
 
 button:hover {
-    background: rgb(188, 65, 212);
+    background: #003380;
 }
 
 p {
@@ -71,7 +71,7 @@ p {
 }
 
 a {
-    color: #fa00a7;
+    color: rgb(126, 158, 227);;
     text-decoration: none;
 }
 
