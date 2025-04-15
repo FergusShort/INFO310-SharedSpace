@@ -132,6 +132,8 @@
         recurringCheckbox.addEventListener("change", function () {
             timePeriodInput.disabled = !this.checked;
         });
+        const numPeople = `<%= numPeople %>`;
+
 
         document.querySelectorAll(".pay-share-button").forEach((button) => {
             button.addEventListener("click", function () {
@@ -140,7 +142,7 @@
                 const amountPaid = parseFloat(this.getAttribute("data-amount-paid"));
 
                 const remainingAmount = billAmount - amountPaid;
-                const shareAmount = remainingAmount / numPeoples;
+                const shareAmount = remainingAmount / numPeople;
 
                 document.getElementById("shareAmount_" + billId).value =
                     shareAmount.toFixed(2);

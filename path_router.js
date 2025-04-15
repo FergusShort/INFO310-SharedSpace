@@ -55,11 +55,10 @@ router.get("/chores", async (req, res) => {
 
 async function getUsersInFlat(flatID) {
   const db = pool.promise();
-  const [rows] = await db.query("SELECT * FROM User WHERE Flat_ID = ?", [
-    flatID,
-  ]);
-  return rows;
+  const [rows] = await db.query("SELECT COUNT(*) AS count FROM User WHERE Flat_ID = ?", [flatID]);
+  return rows[0].count;
 }
+
 
 router.get("/bills", async (req, res) => {
   if (!req.session.userId) {
@@ -71,7 +70,7 @@ router.get("/bills", async (req, res) => {
   const errorMessage = req.query.error;
   const flatID = req.session.flat_Id;
   const usersInFlat = await getUsersInFlat(flatID); 
-  const numPeople = usersInFlat.length;
+  const numPeople = usersInFlat > 0 ? usersInFlat : 1;
 
   try {
     const bills = await getBillsFromDatabase(sortType, flatID);
@@ -79,7 +78,7 @@ router.get("/bills", async (req, res) => {
       bills,
       sort: sortType,
       error: errorMessage,
-      numPeople,
+      numPeople: numPeople
     });
   } catch (error) {
     console.error("Error fetching bills:", error);
@@ -178,22 +177,8 @@ router.post("/bills/pay", async (req, res) => {
           FROM Bills WHERE Bill_ID = ?;
       `;
     const [rows] = await db.query(checkQuery, [bill_id]);
-
-    if (rows.length === 0) {
-      return res.status(404).send("Bill not found.");
-    }
-
     const bill = rows[0];
     const currentAmountLeft = parseFloat(bill.Amount_Left);
-
-
-    if (amountPaid > currentAmountLeft) {
-      return res.redirect("/bills?error=amount_too_large");
-    }
-
-    if (currentAmountLeft <= 0) {
-      return res.status(400).send("This bill is already fully paid.");
-    }
 
     const newAmountLeft = currentAmountLeft - amountPaid;
 

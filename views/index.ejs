@@ -50,7 +50,7 @@
             
             const calendar = createCalendar({
                 views: [createViewMonthGrid()],
-                events: <%- JSON.stringify(events) %>,
+                events: `<%- JSON.stringify(events) %>`,
             })
             
             calendar.render(document.getElementById("calendar"));
