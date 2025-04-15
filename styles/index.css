@@ -4,9 +4,10 @@
 } */
 
 body {
+    background-color: #ccc;
     display: grid;
     grid-template-columns: 1fr 3fr;
-    grid-template-rows: 0.1fr 0.6fr 0.5fr;
+    grid-template-rows: 0.6fr 0.5fr;
     font-family: Arial, sans-serif;
     min-height: 100vh;
     max-height: 100vh;
@@ -21,54 +22,19 @@ body {
 #calendar {
     grid-column: span 1;
     grid-row: span 1;
-    grid-row-start: 2;
-    min-height: 80vh;
-    max-height: 80vh;
+    grid-row-start: 1;
+    min-height: 97vh;
+    max-height: 97vh;
 }
 
 aside {
     background-color: #ccc;
     grid-column: span 1;
     grid-row: span 1;
-    grid-row-start: 2;
+    grid-row-start: 1;
     grid-column-start: 1;
-    min-height: 80vh;
-    max-height: 80vh;
-}
-
-footer {
-    background-color: rgb(126, 158, 227);
-    grid-column: span 2;
-    grid-row: span 1;
-    grid-row-start: 3;
-    min-height: 10vh;
-    max-height: 10vh;
-}
-
-/* Navigation Bar Syling */
-nav {
-    background-color: rgb(126, 158, 227);
-    grid-column: span 2;
-    grid-row: span 1;
-    min-height: 10vh;
-    max-height: 10vh;
-}
-
-ul {
-    list-style-type: none;
-    margin: 0;
-    padding: 0;
-}
-
-li {
-    float: left;
-}
-
-li a {
-    display: block;
-    padding: 14px 16px;
-    text-align: center;
-    color: white;
+    min-height: 97vh;
+    max-height: 97vh;
 }
 
 input, label, button {
@@ -80,6 +46,7 @@ form {
     padding: 10px;
     margin: 15px;
     border: 2px solid darkgray;
+    border-radius: 10px;
 }
 
 form button {
@@ -113,4 +80,69 @@ form input[type="datetime-local"] {
     font-size: 1rem;
     color: black;
     background-color: #eaedf4;
+}
+
+/* NavBar Styling */
+.sidebar-container {
+    position: relative;
+}
+
+.sidebar {
+    height: 100%;
+    width: 250px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    background-color: #111;
+    overflow-x: hidden;
+    transition: 0.3s;
+    padding-top: 20px;
+    z-index: 1000;
+}
+
+.sidebar ul {
+    list-style-type: none;
+    padding: 0;
+}
+.sidebar ul li {
+    padding: 8px 16px;
+    text-align: left;
+}
+.sidebar ul li a {
+    color: white;
+    text-decoration: none;
+    display: block;
+    font-size: 18px;
+}
+.sidebar ul li a:hover {
+    background-color: #575757;
+}
+
+.close-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 20px;
+    background: none;
+    border: none;
+    color: white;
+    cursor: pointer;
+}
+
+.open-btn {
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    font-size: 20px;
+    background: none;
+    border: none;
+    color: black;
+    cursor: pointer;
+    z-index: 1001;
+}
+
+.sidebar.hidden {
+    width: 0;
+    padding: 0;
+    overflow: hidden;
 }
