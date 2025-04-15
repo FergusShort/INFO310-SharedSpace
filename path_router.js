@@ -1,10 +1,7 @@
 const express = require("express");
-const session = require("express-session");
 const fileUpload = require("express-fileupload");
 const pool = require("./db");
 const bodyParser = require("body-parser");
-const path = require("path");
-const { get } = require("express/lib/response");
 const { format } = require("date-fns");
 
 router = express.Router();
@@ -13,7 +10,6 @@ router.use(bodyParser.urlencoded({ extended: true }));
 router.use(fileUpload());
 
 router.get("/", async (req, res) => {
-  const db = pool.promise();
   res.render("login");
 });
 
@@ -74,7 +70,7 @@ router.get("/bills", async (req, res) => {
   const sortType = req.query.sort || "all";
   const errorMessage = req.query.error;
   const flatID = req.session.flat_Id;
-  const usersInFlat = await getUsersInFlat(flatID); // ← Create this function
+  const usersInFlat = await getUsersInFlat(flatID); 
   const numPeople = usersInFlat.length;
 
   try {
@@ -177,7 +173,6 @@ router.post("/bills/pay", async (req, res) => {
   const db = pool.promise();
 
   try {
-    // Retrieve the bill data, including Recurring and Time_period
     const checkQuery = `
           SELECT Initial_Amount, Amount_Left, Amount_Paid, Due_Date, Recurring, Time_period, Flat_ID, Title, Description, Overdue
           FROM Bills WHERE Bill_ID = ?;
@@ -190,8 +185,7 @@ router.post("/bills/pay", async (req, res) => {
 
     const bill = rows[0];
     const currentAmountLeft = parseFloat(bill.Amount_Left);
-    const currentAmountPaid = parseFloat(bill.Amount_Paid);
-    const initialAmount = parseFloat(bill.Initial_Amount);
+
 
     if (amountPaid > currentAmountLeft) {
       return res.redirect("/bills?error=amount_too_large");
@@ -201,18 +195,15 @@ router.post("/bills/pay", async (req, res) => {
       return res.status(400).send("This bill is already fully paid.");
     }
 
-    const newAmountPaid = currentAmountPaid + amountPaid;
     const newAmountLeft = currentAmountLeft - amountPaid;
 
-    // Ensure amount_left doesn't go below zero
     const updatedAmountLeft = Math.max(0, newAmountLeft);
 
-    let paymentStatus = "P"; // Partially paid by default
+    let paymentStatus = "P";
     if (updatedAmountLeft <= 0) {
-      paymentStatus = "F"; // Fully paid
+      paymentStatus = "F"; 
     }
 
-    // Update Amount_Paid and Amount_Left
     const updateQuery = `
           UPDATE Bills
           SET Amount_Paid = ?, Amount_Left = ?, Payment_Status = ?
@@ -225,7 +216,6 @@ router.post("/bills/pay", async (req, res) => {
       bill_id,
     ]);
 
-    // Create a new recurring bill and delete the old one if fully paid and recurring
     if (updatedAmountLeft <= 0 && bill.Recurring && bill.Time_period) {
       const nextDueDate = new Date(bill.Due_Date);
       nextDueDate.setDate(nextDueDate.getDate() + bill.Time_period);
@@ -251,7 +241,6 @@ router.post("/bills/pay", async (req, res) => {
         bill.Overdue,
       ]);
 
-      // Delete the original, now fully paid, recurring bill
       const deleteQuery = `
               DELETE FROM Bills WHERE Bill_ID = ?;
           `;
@@ -263,7 +252,6 @@ router.post("/bills/pay", async (req, res) => {
       await db.query(deleteQuery, [bill_id]);
     }
 
-    // Redirect to the bills page
     return res.redirect("/bills");
   } catch (err) {
     console.error("Error in /bills/pay route:", err);
