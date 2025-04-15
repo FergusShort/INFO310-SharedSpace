@@ -5,8 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Bills Management</title>
     <link rel="stylesheet" href="/bills.css" />
+    <link rel="stylesheet" href="nav.css" />
+
 </head>
 <body>
+    <%- include('navbar') %>
     <div class="container">
         <h1>Bills</h1>
 
@@ -145,6 +148,9 @@
                     shareAmount.toFixed(2);
             });
         });
+
+
     </script>
+    
 </body>
 </html>
