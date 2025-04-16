@@ -48,6 +48,8 @@ create table Events (
     constraint Event_PK primary key (Event_ID, Flat_ID),
     constraint Event_Flat_FK foreign key (Flat_ID)
         references Flat(Flat_ID)
+    on delete cascade,
+    constraint Event_Start_End_CHK check (Start_Time < End_Time),
 );
 
 -- Instances represnt a flat bill / expense
@@ -96,6 +98,8 @@ create table Chores (
     constraint Chore_PK primary key (Flat_ID, Chore_ID),
     constraint Chores_Flat_FK foreign key (Flat_ID)
         references Flat(Flat_ID)
+        on delete cascade,
+    constraint Chore_Priority_CHK check (Priority in ('urgent', 'not-so-urgent', 'low-urgency'))
 );
 
 -- Table represents relationship between Users and Chores
