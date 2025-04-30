@@ -29,7 +29,7 @@ create table User (
     User_ID int not null unique auto_increment,
     Email varchar(30) not null unique,
     Username varchar(30) not null unique,
-    Password varchar(15) not null,
+    Password varchar(200) not null,
     Flat_ID varchar(10),
     constraint User_PK primary key (User_ID),
     constraint User_Flat_FK foreign key (Flat_ID)

@@ -1,4 +1,5 @@
 const express = require("express");
+const bcrypt = require('bcrypt');
 const fileUpload = require("express-fileupload");
 const pool = require("./db");
 const bodyParser = require("body-parser");
@@ -44,8 +45,6 @@ router.get("/groceries", async (req, res) => {
   res.render("groceries");
 });
 
-
-
 async function getChoresFromDatabase(flatID) {
   const db = pool.promise();
   try {
@@ -56,7 +55,6 @@ async function getChoresFromDatabase(flatID) {
       throw new Error("Unable to fetch chores from the database");
   }
 }
-
 
 router.get("/chores", async (req, res) => {
   if (!req.session.userId) {
@@ -92,7 +90,6 @@ async function getUsersInFlat(flatID) {
   const [rows] = await db.query("SELECT COUNT(*) AS count FROM User WHERE Flat_ID = ?", [flatID]);
   return rows[0].count;
 }
-
 
 router.get("/bills", async (req, res) => {
   if (!req.session.userId) {
@@ -275,25 +272,36 @@ router.post("/login/submit", async (req, res) => {
   const pwd = req.body.pwd;
 
   const db = pool.promise();
-  const status_query = `SELECT User_ID, Flat_ID FROM User WHERE (Email = ? OR Username = ?) AND Password = ?;`;
+  const status_query = `SELECT User_ID, Flat_ID, Password FROM User WHERE Email = ? OR Username = ?`;
+
   try {
-    const [rows] = await db.query(status_query, [email, email, pwd]);
+    const [rows] = await db.query(status_query, [email, email]);
+
     if (rows.length > 0) {
-      req.session.userId = rows[0].User_ID;
-      if (rows[0].Flat_ID != null) {
-        req.session.flat_Id = rows[0].Flat_ID;
-        return res.redirect("/home");
-      } else {
-        return res.redirect("/createGroup");
+      const storedHash = rows[0].Password;
+      const match = await bcrypt.compare(pwd, storedHash);
+
+      if (match) {
+        req.session.userId = rows[0].User_ID;
+
+        if (rows[0].Flat_ID != null) {
+          req.session.flat_Id = rows[0].Flat_ID;
+          return res.redirect("/home");
+        } else {
+          return res.redirect("/createGroup");
+        }
       }
     }
+
+    return res.status(401).send("Invalid email/username or password");
+
   } catch (err) {
     console.error("Login error:" + err);
-    return res.redirect("/signup");
+    return res.redirect("/login");
   }
-
   return res.redirect("/signup");
 });
+
 
 router.post("/signup/submit", async (req, res) => {
   const Uname = req.body.Uname;
@@ -307,9 +315,13 @@ router.post("/signup/submit", async (req, res) => {
 
     if (rows.length === 0) {
       const dbdel = pool.promise();
+
+      const hashAmount = 10;
+      const hashedPwd = await bcrypt.hash(pwd, hashAmount);
+
       const status_query_del = `INSERT INTO User (Email, Username, Password) VALUES (?, ?, ?);`;
       try {
-        await dbdel.query(status_query_del, [email, Uname, pwd]);
+        await dbdel.query(status_query_del, [email, Uname, hashedPwd]);
       } catch (err) {
         console.error(err + "\n\n\n");
         return res.status(500).send("Database error. Please try again later.");
