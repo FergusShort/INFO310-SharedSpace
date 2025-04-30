@@ -17,18 +17,48 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@schedule-x/theme-default@2.2.0/dist/index.css">
 
     <link rel="stylesheet" href="index.css">
-    <link rel="stylesheet" href="/navbar.css">
+    <link rel="stylesheet" href="/nav.css">
 </head>
+
+<div class="blur"></div>
+
 <body>
     <%- include('navbar') %>
+    <script>
+        /* Add Event Button */
+        d = document.createElement("button");
+        d.setAttribute('class', 'open-btn')
+        d.innerText = "+";
+        d.style.marginTop = "45px";
+        d.onclick = addEventOpenMenu;
+        sidebar = document.querySelector(".sidebar-container");
+        sidebar.appendChild(d);
 
+        function addEventOpenMenu() {
+            document.querySelector("form").style.display = "block";
+            document.querySelector(".blur").style.display = "block";
+        };
+
+        function addEventCloseMenu() {
+            document.querySelector("form").style.display = "none";
+            document.querySelector(".blur").style.display = "none";
+        };
+
+        /* Edit / Delete Event Button */
+        d = document.createElement("button");
+        d.setAttribute('class', 'open-btn')
+        d.innerText = "✎";
+        d.style.marginTop = "90px";
+        sidebar = document.querySelector(".sidebar-container");
+        sidebar.appendChild(d);
+    </script>
     
     <main id="calendar">
         <script type="module">
-            const { createCalendar, createViewMonthGrid } = window.SXCalendar;
+            const { createCalendar, createViewMonthAgenda } = window.SXCalendar;
             
             const calendar = createCalendar({
-                views: [createViewMonthGrid()],
+                views: [createViewMonthAgenda()],
                 events: <%- JSON.stringify(events) %>,
             })
             
@@ -36,23 +66,20 @@
         </script>
     </main>
 
-    <aside>
-        <form action="/home/addevent" method="POST">
-            <label>Add Event</label>
-            <input name="title" type="text" placeholder="Title">
-            <input name="desc" type="text" placeholder="Description">
+    <form action="/home/addevent" method="POST">
+        <label>Add Event</label>
+        <input name="title" type="text" placeholder="Title" required>
+        <input name="desc" type="text" placeholder="Description" required>
 
-            <label for="start_time">Start Time</label>
-            <input name="start_time" type="datetime-local">
+        <label for="start_time">Start Time</label>
+        <input name="start_time" type="datetime-local" required>
 
-            <label for="end_time">End Time</label>
-            <input name="end_time" type="datetime-local">
-
+        <label for="end_time">End Time</label>
+        <input name="end_time" type="datetime-local" required>
+        <div class="buttons">
+            <button id="cancel" type="button" onclick="addEventCloseMenu()">Cancel</button>
             <button type="submit">Submit</button>
-        </form>
-    </aside>
-
-    <footer>
-    </footer>
+        </div>
+    </form>
 </body>
 </html>

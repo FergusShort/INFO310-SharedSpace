@@ -5,12 +5,11 @@
 
 body {
     background-color: #ccc;
-    display: grid;
-    grid-template-columns: 1fr 3fr;
-    grid-template-rows: 0.6fr 0.5fr;
+    display: block;
     font-family: Arial, sans-serif;
-    min-height: 100vh;
-    max-height: 100vh;
+    min-height: 100%;
+    max-height: 100%;
+    /* filter: blur(0.1px); */
 }
 
 /* header {
@@ -20,11 +19,14 @@ body {
 } */
 
 #calendar {
-    grid-column: span 1;
-    grid-row: span 1;
-    grid-row-start: 1;
-    min-height: 97vh;
-    max-height: 97vh;
+    position: absolute;
+    margin-left: 70px;
+    top: 10px;
+    bottom: 10px;
+    left: 7px;
+    right: 10px;
+    border: 1px solid #0052cc;
+    border-radius: 9px;
 }
 
 aside {
@@ -42,9 +44,17 @@ input, label, button {
 }
 
 form {
+    display: none;
+    position: relative;
     background-color: white;
     padding: 10px;
-    margin: 15px;
+    margin: auto;
+    margin-top: 20px;
+    width: 500px;
+    max-width: 60%;
+    height: 280px;
+    z-index: 999;
+    box-shadow: 0.5px 0.5px 15px black;
     border: 2px solid darkgray;
     border-radius: 10px;
 }
@@ -60,8 +70,23 @@ form button {
     cursor: pointer;
     transition: background-color 0.2s ease-in-out, transform 0.1s ease-in-out;
     width: auto; 
-    display: block; 
-    margin: 10px auto; 
+}
+
+.buttons {
+    display: flex;
+    justify-content: center;
+    margin-top: 10px;
+    gap: 10px;
+}
+
+#cancel {
+    background-color: gray;
+    transition: background-color 0.2s ease-in-out, transform 0.1s ease-in-out;
+}
+
+#cancel:hover {
+    background-color: rgb(70, 70, 70);
+    transform: scale(1.01);
 }
 
 form button:hover {
@@ -82,67 +107,14 @@ form input[type="datetime-local"] {
     background-color: #eaedf4;
 }
 
-/* NavBar Styling */
-.sidebar-container {
-    position: relative;
-}
-
-.sidebar {
+.blur {
+    display: none;
+    z-index: 998;
+    width: 100%;
     height: 100%;
-    width: 250px;
+    backdrop-filter: blur(1px);
+    background-color: rgba(0, 0, 0, 0.5);
     position: fixed;
     top: 0;
     left: 0;
-    background-color: #111;
-    overflow-x: hidden;
-    transition: 0.3s;
-    padding-top: 20px;
-    z-index: 1000;
-}
-
-.sidebar ul {
-    list-style-type: none;
-    padding: 0;
-}
-.sidebar ul li {
-    padding: 8px 16px;
-    text-align: left;
-}
-.sidebar ul li a {
-    color: white;
-    text-decoration: none;
-    display: block;
-    font-size: 18px;
-}
-.sidebar ul li a:hover {
-    background-color: #575757;
-}
-
-.close-btn {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    font-size: 20px;
-    background: none;
-    border: none;
-    color: white;
-    cursor: pointer;
-}
-
-.open-btn {
-    position: fixed;
-    top: 10px;
-    left: 10px;
-    font-size: 20px;
-    background: none;
-    border: none;
-    color: black;
-    cursor: pointer;
-    z-index: 1001;
-}
-
-.sidebar.hidden {
-    width: 0;
-    padding: 0;
-    overflow: hidden;
 }
