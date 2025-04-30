@@ -29,7 +29,7 @@ create table User (
     User_ID int not null unique auto_increment,
     Email varchar(30) not null unique,
     Username varchar(30) not null unique,
-    Password varchar(200) not null,
+    Password text not null,
     Flat_ID varchar(10),
     constraint User_PK primary key (User_ID),
     constraint User_Flat_FK foreign key (Flat_ID)
@@ -49,7 +49,7 @@ create table Events (
     constraint Event_Flat_FK foreign key (Flat_ID)
         references Flat(Flat_ID)
     on delete cascade,
-    constraint Event_Start_End_CHK check (Start_Time < End_Time),
+    constraint Event_Start_End_CHK check (Start_Time < End_Time)
 );
 
 -- Instances represnt a flat bill / expense
