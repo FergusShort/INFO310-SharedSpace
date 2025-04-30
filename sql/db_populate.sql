@@ -8,13 +8,6 @@ INSERT INTO Flat (Flat_ID, GroupName) VALUES
 ('1', '123 Main Street'),
 ('WXYZ', '456 Oak Avenue');
 
--- Insert Users
-INSERT INTO User (Email, Username, Password, Flat_ID) VALUES
-('alice@example.com', 'Alice', 'password123', 'ABCD'),
-('bob@example.com', 'Bob', 'password123', 'ABCD'),
-('charlie@example.com', 'Charlie', 'password123', 'WXYZ'),
-('dana@example.com', 'Dana', 'password123', 'WXYZ');
-
 -- Insert Events (DATETIME-based)
 INSERT INTO Events (Flat_ID, Title, Description, Start_Time, End_Time) VALUES
 ('ABCD', 'Flat Party', 'Weekend party for all', '2025-04-10 18:00:00', '2025-04-10 23:00:00'),
