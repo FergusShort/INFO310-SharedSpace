@@ -43,7 +43,7 @@ input, label, button {
     width: 97%;
 }
 
-form {
+#addevent {
     display: none;
     position: relative;
     background-color: white;
@@ -59,7 +59,33 @@ form {
     border-radius: 10px;
 }
 
-form button {
+#editevent {
+    display: none;
+    z-index: 999;
+    background-color: white;
+    color: black;
+    margin: auto;
+    margin-top: 20px;
+    position: relative;
+    width: 500px;
+    max-width: 60%;
+    min-height: 90%;
+    height: 600px;
+    padding: 10px;
+    margin-top: 20px;
+    overflow-y: scroll;
+    border: 2px solid darkgray;
+    border-radius: 10px;
+    box-shadow: 0.5px 0.5px 15px black;
+}
+
+#event {
+    background-color: #eaedf4;
+    padding: 5px;
+    margin: 10px;
+}
+
+#addevent button {
     background-color: rgb(126, 158, 227);
     color: white;
     border: none;
@@ -79,17 +105,17 @@ form button {
     gap: 10px;
 }
 
-#cancel {
+#addevent #cancel {
     background-color: gray;
     transition: background-color 0.2s ease-in-out, transform 0.1s ease-in-out;
 }
 
-#cancel:hover {
+#addevent #cancel:hover {
     background-color: rgb(70, 70, 70);
     transform: scale(1.01);
 }
 
-form button:hover {
+#addevent button:hover {
     background-color: #003380;
     transform: scale(1.01);
 }

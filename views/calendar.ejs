@@ -16,7 +16,7 @@
    
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@schedule-x/theme-default@2.2.0/dist/index.css">
 
-    <link rel="stylesheet" href="index.css">
+    <link rel="stylesheet" href="calendar.css">
     <link rel="stylesheet" href="/nav.css">
 </head>
 
@@ -35,12 +35,13 @@
         sidebar.appendChild(d);
 
         function addEventOpenMenu() {
-            document.querySelector("form").style.display = "block";
+            document.querySelector("#addevent").style.display = "block";
+            document.querySelector("#editevent").style.display = "none";
             document.querySelector(".blur").style.display = "block";
         };
 
         function addEventCloseMenu() {
-            document.querySelector("form").style.display = "none";
+            document.querySelector("#addevent").style.display = "none";
             document.querySelector(".blur").style.display = "none";
         };
 
@@ -49,14 +50,27 @@
         d.setAttribute('class', 'open-btn')
         d.innerText = "✎";
         d.style.marginTop = "90px";
+        d.onclick = editEventOpenMenu;
         sidebar = document.querySelector(".sidebar-container");
         sidebar.appendChild(d);
+
+        function editEventOpenMenu() {
+            document.querySelector("#editevent").style.display = "block";
+            document.querySelector("#addevent").style.display = "none";
+            document.querySelector(".blur").style.display = "block";
+        };
+
+        function editEventCloseMenu() {
+            document.querySelector("#editevent").style.display = "none";
+            document.querySelector(".blur").style.display = "none";
+        };
+
     </script>
     
     <main id="calendar">
         <script type="module">
             const { createCalendar, createViewMonthAgenda } = window.SXCalendar;
-            
+
             const calendar = createCalendar({
                 views: [createViewMonthAgenda()],
                 events: <%- JSON.stringify(events) %>,
@@ -66,7 +80,7 @@
         </script>
     </main>
 
-    <form action="/home/addevent" method="POST">
+    <form id="addevent" action="/calendar/addevent" method="POST">
         <label>Add Event</label>
         <input name="title" type="text" placeholder="Title" required>
         <input name="desc" type="text" placeholder="Description" required>
@@ -81,5 +95,12 @@
             <button type="submit">Submit</button>
         </div>
     </form>
+
+    <div id="editevent">
+        <h3>All Events:</h3>
+        <% for (let i = 0; i < events.length; i++){ %>
+            <%- include('partials/event', {event: events[i]}) %>
+        <% } %>
+    </div>
 </body>
 </html>
