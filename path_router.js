@@ -4,6 +4,11 @@ const fileUpload = require("express-fileupload");
 const pool = require("./db");
 const bodyParser = require("body-parser");
 const { format } = require("date-fns");
+const app = express();
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
 
 router = express.Router();
 
@@ -38,11 +43,24 @@ router.get("/joinGroup", async (req, res) => {
 
 router.get("/groceries", async (req, res) => {
   if (!req.session.userId) {
-    return res.render("signup");
-  } else if(!req.session.flat_Id) {
-    return res.render("createGroup");
+      return res.render("signup");
+  } else if (!req.session.flat_Id) {
+      return res.render("createGroup");
   }
-  res.render("groceries");
+
+  const db = pool.promise();
+  const flatId = req.session.flat_Id;
+  
+  try {
+      const [groceries] = await db.query(
+          `SELECT * FROM Groceries WHERE Flat_ID = ?`,
+          [flatId]
+      );
+      res.render("groceries", { groceries });
+  } catch (err) {
+      console.error("Error fetching groceries:", err);
+      res.status(500).send("Error fetching groceries.");
+  }
 });
 
 async function getChoresFromDatabase(flatID) {
@@ -51,7 +69,7 @@ async function getChoresFromDatabase(flatID) {
       const [chores] = await db.query("SELECT * FROM Chores WHERE Flat_ID = ?", [flatID]);
       return chores;
   } catch (error) {
-      console.error("Error fetching chores from database:", error);
+      console.error("Error fetc`  hing chores from database:", error);
       throw new Error("Unable to fetch chores from the database");
   }
 }
@@ -539,5 +557,62 @@ router.post("/calendar/addevent", async (req, res) => {
     res.status(500).send("Error adding event."); // Send error response
   }
 });
+
+
+
+
+router.post('/groceries/add', async (req, res) => {
+    const { item, price, quantity } = req.body;
+    const flatId = req.session.flat_Id;
+
+    const db = pool.promise();
+    const insertQuery = `
+        INSERT INTO Groceries (Flat_ID, Item, Price, Quantity)
+        VALUES (?, ?, ?, ?);
+    `;
+    try {
+
+        await db.query(insertQuery, [flatId, item, price, quantity]);
+        res.redirect('/groceries');
+    } catch (err) {
+        console.error("Error adding grocery item:", err);
+        res.status(500).send("Error adding grocery item.");
+    }
+});
+
+router.post('/groceries/clear-checked', async (req, res) => {
+    const checkedItems = req.body.checkedItems; // Array of checked item IDs
+
+    const db = pool.promise();
+    const deleteQuery = `
+        DELETE FROM Groceries WHERE Grocery_ID IN (?);
+    `;
+
+    try {
+        await db.query(deleteQuery, [checkedItems]);
+        res.redirect('/groceries');
+    } catch (err) {
+        console.error("Error clearing checked grocery items:", err);
+        res.status(500).send("Error clearing checked grocery items.");
+    }
+});
+
+router.post("/groceries/clear-all", async (req, res) => { 
+    const flatId = req.session.flat_Id;
+
+    const db = pool.promise();
+    const deleteQuery = `
+        DELETE FROM Groceries WHERE Flat_ID = ?;
+    `;
+
+    try {
+        await db.query(deleteQuery, [flatId]);
+        res.redirect('/groceries');
+    } catch (err) {
+        console.error("Error clearing all grocery items:", err);
+        res.status(500).send("Error clearing all grocery items.");
+    }
+});
+
 
 module.exports = router;
