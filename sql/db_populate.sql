@@ -33,14 +33,4 @@ INSERT INTO Chores (Flat_ID, Priority, Title, Description) VALUES
 ('ABCD', 'urgent', 'Vacuum Living Room', 'Vacuum and clean the living room'),
 ('ABCD', 'not-so-urgent', 'Wash Dishes', 'Wash all dishes from the sink');
 
--- Insert Chore Assignments
-INSERT INTO Chore_Assignment (User_ID, Chore_ID) VALUES
-(1, 1), -- Alice assigned to vacuuming
-(3, 2); -- Charlie assigned to dishwashing
 
--- Insert Users_Events
-INSERT INTO Users_Events (User_ID, Event_ID) VALUES
-(1, 1), -- Alice attending Flat Party
-(2, 1), -- Bob attending Flat Party
-(3, 2), -- Charlie attending Cleaning Day
-(4, 2); -- Dana attending Cleaning Day
