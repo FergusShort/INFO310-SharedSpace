@@ -41,6 +41,27 @@ router.get("/joinGroup", async (req, res) => {
   res.render("joinGroup");
 });
 
+router.get("/home", async (req, res) => {
+  if (!req.session.userId) {
+      return res.render("signup");
+  } else if (!req.session.flat_Id) {
+      return res.render("createGroup");
+  }
+
+  res.render("home");
+});
+
+
+
+
+
+
+
+
+
+
+
+
 router.get("/groceries", async (req, res) => {
   if (!req.session.userId) {
       return res.render("signup");
