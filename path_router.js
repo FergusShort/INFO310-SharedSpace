@@ -4,6 +4,11 @@ const fileUpload = require("express-fileupload");
 const pool = require("./db");
 const bodyParser = require("body-parser");
 const { format } = require("date-fns");
+const app = express();
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
 
 router = express.Router();
 
@@ -38,11 +43,24 @@ router.get("/joinGroup", async (req, res) => {
 
 router.get("/groceries", async (req, res) => {
   if (!req.session.userId) {
-    return res.render("signup");
-  } else if(!req.session.flat_Id) {
-    return res.render("createGroup");
+      return res.render("signup");
+  } else if (!req.session.flat_Id) {
+      return res.render("createGroup");
   }
-  res.render("groceries");
+
+  const db = pool.promise();
+  const flatId = req.session.flat_Id;
+  
+  try {
+      const [groceries] = await db.query(
+          `SELECT * FROM Groceries WHERE Flat_ID = ?`,
+          [flatId]
+      );
+      res.render("groceries", { groceries });
+  } catch (err) {
+      console.error("Error fetching groceries:", err);
+      res.status(500).send("Error fetching groceries.");
+  }
 });
 
 async function getChoresFromDatabase(flatID) {
@@ -51,7 +69,7 @@ async function getChoresFromDatabase(flatID) {
       const [chores] = await db.query("SELECT * FROM Chores WHERE Flat_ID = ?", [flatID]);
       return chores;
   } catch (error) {
-      console.error("Error fetching chores from database:", error);
+      console.error("Error fetc`  hing chores from database:", error);
       throw new Error("Unable to fetch chores from the database");
   }
 }
@@ -292,7 +310,7 @@ router.post("/login/submit", async (req, res) => {
 
         if (rows[0].Flat_ID != null) {
           req.session.flat_Id = rows[0].Flat_ID;
-          return res.redirect("/home");
+          return res.redirect("/calendar");
         } else {
           return res.redirect("/createGroup");
         }
@@ -373,7 +391,7 @@ router.post("/createGroup/create", async (req, res) => {
     console.error("You havent set up the database yet!!!" + err);
   }
 
-  return res.redirect("/home");
+  return res.redirect("/calendar");
 });
 
 router.post("/joinGroup/join", async (req, res) => {
@@ -398,7 +416,7 @@ router.post("/joinGroup/join", async (req, res) => {
     console.error("You havent set up the database yet!!" + err);
   }
 
-  return res.redirect("/home");
+  return res.redirect("/calendar");
 });
 
 async function makeFlatID() {
@@ -512,7 +530,7 @@ router.post("/chores/toggle/:id", async (req, res) => {
 });
 
 /* INDEX (HomePage) CODE */
-router.get("/home", async (req, res) => {
+router.get("/calendar", async (req, res) => {
   if (!req.session.userId) {
     return res.render("signup");
   } else if(!req.session.flat_Id) {
@@ -520,7 +538,7 @@ router.get("/home", async (req, res) => {
   }
   const db = pool.promise();
   const query = `
-    SELECT Event_ID as id, Title as title, Start_Time as start, End_Time as end
+    SELECT Event_ID as id, Title as title, Description as descr, Start_Time as start, End_Time as end
     FROM Events where Flat_ID = ?;
   `;
 
@@ -538,14 +556,14 @@ router.get("/home", async (req, res) => {
       events[i].end = format(new Date(events[i].end), "yyyy-MM-dd HH:mm:SS");
     }
 
-    res.render("index", { events: events });
+    res.render("calendar", { events: events });
   } catch (err) {
     console.error("Error fetching events:", err); // More descriptive error log
     res.status(500).send("Server error.");
   }
 });
 
-router.post("/home/addevent", async (req, res) => {
+router.post("/calendar/addevent", async (req, res) => {
   const db = pool.promise();
   const stmt = `
     INSERT INTO Events(Flat_ID, Title, Description, Start_Time, End_Time)
@@ -559,11 +577,68 @@ router.post("/home/addevent", async (req, res) => {
 
   try {
     await db.query(stmt, [flat_id, title, desc, start, end]);
-    res.redirect("/home"); // Redirect on success
+    res.redirect("/calendar"); // Redirect on success
   } catch (err) {
     console.error("Error adding event:", err);
     res.status(500).send("Error adding event."); // Send error response
   }
 });
+
+
+
+
+router.post('/groceries/add', async (req, res) => {
+    const { item, price, quantity } = req.body;
+    const flatId = req.session.flat_Id;
+
+    const db = pool.promise();
+    const insertQuery = `
+        INSERT INTO Groceries (Flat_ID, Item, Price, Quantity)
+        VALUES (?, ?, ?, ?);
+    `;
+    try {
+
+        await db.query(insertQuery, [flatId, item, price, quantity]);
+        res.redirect('/groceries');
+    } catch (err) {
+        console.error("Error adding grocery item:", err);
+        res.status(500).send("Error adding grocery item.");
+    }
+});
+
+router.post('/groceries/clear-checked', async (req, res) => {
+    const checkedItems = req.body.checkedItems; // Array of checked item IDs
+
+    const db = pool.promise();
+    const deleteQuery = `
+        DELETE FROM Groceries WHERE Grocery_ID IN (?);
+    `;
+
+    try {
+        await db.query(deleteQuery, [checkedItems]);
+        res.redirect('/groceries');
+    } catch (err) {
+        console.error("Error clearing checked grocery items:", err);
+        res.status(500).send("Error clearing checked grocery items.");
+    }
+});
+
+router.post("/groceries/clear-all", async (req, res) => { 
+    const flatId = req.session.flat_Id;
+
+    const db = pool.promise();
+    const deleteQuery = `
+        DELETE FROM Groceries WHERE Flat_ID = ?;
+    `;
+
+    try {
+        await db.query(deleteQuery, [flatId]);
+        res.redirect('/groceries');
+    } catch (err) {
+        console.error("Error clearing all grocery items:", err);
+        res.status(500).send("Error clearing all grocery items.");
+    }
+});
+
 
 module.exports = router;
