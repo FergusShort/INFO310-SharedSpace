@@ -66,7 +66,13 @@ router.get("/chores", async (req, res) => {
   const flat_id = req.session.flat_Id;
 
   try {
-      const chores = await getChoresFromDatabase(flat_id);
+      const db = pool.promise();
+      const [chores] = await db.query(`
+          SELECT Chore_ID, Title, Description, Priority, timestamp, Completed 
+          FROM Chores 
+          WHERE Flat_ID = ?
+          ORDER BY timestamp DESC
+      `, [flat_id]);
 
       chores.forEach((chore) => {
           chore.timestamp = new Date();
@@ -482,6 +488,26 @@ router.post("/chores/delete", async (req, res) => {
   } catch (err) {
     console.error("Error deleting chore:", err);
     res.status(500).send("Error deleting chore");
+  }
+});
+
+router.post("/chores/toggle/:id", async (req, res) => {
+  const choreId = req.params.id;
+  const completed = req.body.completed === 'true';
+  const db = pool.promise();
+
+  try {
+      const updateQuery = `
+          UPDATE Chores 
+          SET Completed = ? 
+          WHERE Chore_ID = ?;
+      `;
+
+      await db.query(updateQuery, [completed, choreId]);
+      res.redirect('/chores');
+  } catch (err) {
+      console.error("Error toggling chore:", err);
+      res.status(500).send("Error updating chore status");
   }
 });
 
