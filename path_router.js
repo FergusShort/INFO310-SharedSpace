@@ -69,44 +69,39 @@ async function getChoresFromDatabase(flatID) {
       const [chores] = await db.query("SELECT * FROM Chores WHERE Flat_ID = ?", [flatID]);
       return chores;
   } catch (error) {
-      console.error("Error fetc`  hing chores from database:", error);
+      console.error("Error fetching chores from database:", error);
       throw new Error("Unable to fetch chores from the database");
   }
 }
 
 router.get("/chores", async (req, res) => {
-  if (!req.session.userId) {
-      return res.render("signup");
-  } else if (!req.session.flat_Id) {
-      return res.redirect("/createGroup");
-  }
+    if (!req.session.userId) {
+        return res.render("signup");
+    } else if (!req.session.flat_Id) {
+        return res.redirect("/createGroup");
+    }
 
-  const flat_id = req.session.flat_Id;
+    const flat_id = req.session.flat_Id;
 
-  try {
-      const db = pool.promise();
-      const [chores] = await db.query(`
-          SELECT Chore_ID, Title, Description, Priority, timestamp, Completed 
-          FROM Chores 
-          WHERE Flat_ID = ?
-          ORDER BY timestamp DESC
-      `, [flat_id]);
+    try {
+        const db = pool.promise();
+        const [chores] = await db.query(`
+            SELECT Chore_ID, Title, Description, Priority
+            FROM Chores 
+            WHERE Flat_ID = ?
+        `, [flat_id]);
 
-      chores.forEach((chore) => {
-          chore.timestamp = new Date();
-      });
+        const choresByUrgency = {
+            urgent: chores.filter((chore) => chore.Priority === "urgent"),
+            "not-so-urgent": chores.filter((chore) => chore.Priority === "not-so-urgent"),
+            "low-urgency": chores.filter((chore) => chore.Priority === "low-urgency"),
+        };
 
-      const choresByUrgency = {
-          urgent: chores.filter((chore) => chore.Priority === "urgent"),
-          "not-so-urgent": chores.filter((chore) => chore.Priority === "not-so-urgent"),
-          "low-urgency": chores.filter((chore) => chore.Priority === "low-urgency"),
-      };
-
-      res.render("chores", { chores: choresByUrgency });
-  } catch (err) {
-      console.error("Error fetching chores:", err);
-      res.status(500).send("Error fetching chores.");
-  }
+        res.render("chores", { chores: choresByUrgency });
+    } catch (err) {
+        console.error("Error fetching chores:", err);
+        res.status(500).send("Error fetching chores.");
+    }
 });
 
 async function getUsersInFlat(flatID) {
@@ -506,26 +501,6 @@ router.post("/chores/delete", async (req, res) => {
   } catch (err) {
     console.error("Error deleting chore:", err);
     res.status(500).send("Error deleting chore");
-  }
-});
-
-router.post("/chores/toggle/:id", async (req, res) => {
-  const choreId = req.params.id;
-  const completed = req.body.completed === 'true';
-  const db = pool.promise();
-
-  try {
-      const updateQuery = `
-          UPDATE Chores 
-          SET Completed = ? 
-          WHERE Chore_ID = ?;
-      `;
-
-      await db.query(updateQuery, [completed, choreId]);
-      res.redirect('/chores');
-  } catch (err) {
-      console.error("Error toggling chore:", err);
-      res.status(500).send("Error updating chore status");
   }
 });
 

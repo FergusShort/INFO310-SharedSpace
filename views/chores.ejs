@@ -20,8 +20,8 @@
                         <% chores.urgent.forEach(chore=> { %>
                             <li class="chore-item">
                                 <div class="chore-content">
-                                    <input type="checkbox" class="chore-checkbox" data-chore-id="<%= chore.Chore_ID %>"
-                                        onchange="toggleChore(this)" <%=chore.Completed ? 'checked' : '' %>>
+                                        <input type="checkbox" class="chore-checkbox">
+                                    </form>
                                     <div class="chore-info <%= chore.Completed ? 'completed' : '' %>">
                                         <div class="chore-title">
                                             <%= chore.Title %>
@@ -60,8 +60,8 @@
                         <% chores['not-so-urgent'].forEach(chore=> { %>
                             <li class="chore-item">
                                 <div class="chore-content">
-                                    <input type="checkbox" class="chore-checkbox" data-chore-id="<%= chore.Chore_ID %>"
-                                        onchange="toggleChore(this)" <%=chore.Completed ? 'checked' : '' %>>
+                                        <input type="checkbox" class="chore-checkbox">
+                                    </form>
                                     <div class="chore-info <%= chore.Completed ? 'completed' : '' %>">
                                         <div class="chore-title">
                                             <%= chore.Title %>
@@ -100,8 +100,8 @@
                         <% chores['low-urgency'].forEach(chore=> { %>
                             <li class="chore-item">
                                 <div class="chore-content">
-                                    <input type="checkbox" class="chore-checkbox" data-chore-id="<%= chore.Chore_ID %>"
-                                        onchange="toggleChore(this)" <%=chore.Completed ? 'checked' : '' %>>
+                                        <input type="checkbox" class="chore-checkbox">
+                                    </form>
                                     <div class="chore-info <%= chore.Completed ? 'completed' : '' %>">
                                         <div class="chore-title">
                                             <%= chore.Title %>
