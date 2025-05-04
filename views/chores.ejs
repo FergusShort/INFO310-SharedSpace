@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -7,96 +8,131 @@
     <link rel="stylesheet" href="nav.css" />
     <link rel="stylesheet" href="/chores.css" />
 </head>
+
 <body>
     <%- include('navbar') %>
 
-    <div class="container">
-        <div class="compartment" id="urgent">
-            <h2>Urgent</h2>
-            <ul id="urgent-list">
-                <% if (chores && chores.urgent && chores.urgent.length > 0) { %>
-                    <% chores.urgent.forEach(chore => { %>
-                        <li class="chore-item">
-                            <div class="chore-title"><%= chore.Title %></div>
-                            <% if (chore.Description) { %>
-                                <div class="chore-comment"><%= chore.Description %></div>
-                            <% } %>
-                            <div class="chore-timestamp">
-                                Added on: <%= new Date(chore.timestamp).toLocaleDateString() %> at <%= new Date(chore.timestamp).toLocaleTimeString() %>
-                            </div>
-                            <form action="/chores/delete" method="POST">
-                                <input type="hidden" name="chore_id" value="<%= chore.Chore_ID %>" />
-                                <button type="submit" class="delete-btn">X</button>
-                            </form>
-                        </li>
-                    <% }); %>
-                <% } %>
-            </ul>
-            <form action="/chores/add" method="POST">
-                <input type="text" name="title" placeholder="Chore title" required />
-                <textarea name="comment" placeholder="Optional comment"></textarea>
-                <input type="hidden" name="urgency" value="urgent" />
-                <button type="submit">Add</button>
-            </form>
-        </div>
+        <div class="container">
+            <div class="compartment" id="urgent">
+                <h2>Urgent</h2>
+                <ul id="urgent-list">
+                    <% if (chores && chores.urgent && chores.urgent.length> 0) { %>
+                        <% chores.urgent.forEach(chore=> { %>
+                            <li class="chore-item">
+                                <div class="chore-content">
+                                        <input type="checkbox" class="chore-checkbox">
+                                    </form>
+                                    <div class="chore-info <%= chore.Completed ? 'completed' : '' %>">
+                                        <div class="chore-title">
+                                            <%= chore.Title %>
+                                        </div>
+                                        <% if (chore.Description) { %>
+                                            <div class="chore-comment">
+                                                <%= chore.Description %>
+                                            </div>
+                                            <% } %>
+                                                <div class="chore-timestamp">
+                                                    Added on: <%= new Date(chore.timestamp).toLocaleDateString() %> at
+                                                        <%= new Date(chore.timestamp).toLocaleTimeString() %>
+                                                </div>
+                                    </div>
+                                </div>
+                                <form action="/chores/delete" method="POST">
+                                    <input type="hidden" name="chore_id" value="<%= chore.Chore_ID %>" />
+                                    <button type="submit" class="delete-btn">X</button>
+                                </form>
+                            </li>
+                            <% }); %>
+                                <% } %>
+                </ul>
+                <form action="/chores/add" method="POST">
+                    <input type="text" name="title" placeholder="Chore title" required />
+                    <textarea name="comment" placeholder="Optional comment"></textarea>
+                    <input type="hidden" name="urgency" value="urgent" />
+                    <button type="submit">Add</button>
+                </form>
+            </div>
 
-        <div class="compartment" id="not-so-urgent">
-            <h2>Not So Urgent</h2>
-            <ul id="not-so-urgent-list">
-                <% if (chores && chores['not-so-urgent'] && chores['not-so-urgent'].length > 0) { %>
-                    <% chores['not-so-urgent'].forEach(chore => { %>
-                        <li class="chore-item">
-                            <div class="chore-title"><%= chore.Title %></div>
-                            <% if (chore.Description) { %>
-                                <div class="chore-comment"><%= chore.Description %></div>
-                            <% } %>
-                            <div class="chore-timestamp">
-                                Added on: <%= new Date(chore.timestamp).toLocaleDateString() %> at <%= new Date(chore.timestamp).toLocaleTimeString() %>
-                            </div>
-                            <form action="/chores/delete" method="POST">
-                                <input type="hidden" name="chore_id" value="<%= chore.Chore_ID %>" />
-                                <button type="submit" class="delete-btn">X</button>
-                            </form>
-                        </li>
-                    <% }); %>
-                <% } %>
-            </ul>
-            <form action="/chores/add" method="POST">
-                <input type="text" name="title" placeholder="Chore title" required />
-                <textarea name="comment" placeholder="Optional comment"></textarea>
-                <input type="hidden" name="urgency" value="not-so-urgent" />
-                <button type="submit">Add</button>
-            </form>
-        </div>
+            <div class="compartment" id="not-so-urgent">
+                <h2>Not So Urgent</h2>
+                <ul id="not-so-urgent-list">
+                    <% if (chores && chores['not-so-urgent'] && chores['not-so-urgent'].length> 0) { %>
+                        <% chores['not-so-urgent'].forEach(chore=> { %>
+                            <li class="chore-item">
+                                <div class="chore-content">
+                                        <input type="checkbox" class="chore-checkbox">
+                                    </form>
+                                    <div class="chore-info <%= chore.Completed ? 'completed' : '' %>">
+                                        <div class="chore-title">
+                                            <%= chore.Title %>
+                                        </div>
+                                        <% if (chore.Description) { %>
+                                            <div class="chore-comment">
+                                                <%= chore.Description %>
+                                            </div>
+                                            <% } %>
+                                                <div class="chore-timestamp">
+                                                    Added on: <%= new Date(chore.timestamp).toLocaleDateString() %> at
+                                                        <%= new Date(chore.timestamp).toLocaleTimeString() %>
+                                                </div>
+                                    </div>
+                                </div>
+                                <form action="/chores/delete" method="POST">
+                                    <input type="hidden" name="chore_id" value="<%= chore.Chore_ID %>" />
+                                    <button type="submit" class="delete-btn">X</button>
+                                </form>
+                            </li>
+                            <% }); %>
+                                <% } %>
+                </ul>
+                <form action="/chores/add" method="POST">
+                    <input type="text" name="title" placeholder="Chore title" required />
+                    <textarea name="comment" placeholder="Optional comment"></textarea>
+                    <input type="hidden" name="urgency" value="not-so-urgent" />
+                    <button type="submit">Add</button>
+                </form>
+            </div>
 
-        <div class="compartment" id="low-urgency">
-            <h2>Low Urgency</h2>
-            <ul id="low-urgency-list">
-                <% if (chores && chores['low-urgency'] && chores['low-urgency'].length > 0) { %>
-                    <% chores['low-urgency'].forEach(chore => { %>
-                        <li class="chore-item">
-                            <div class="chore-title"><%= chore.Title %></div>
-                            <% if (chore.Description) { %>
-                                <div class="chore-comment"><%= chore.Description %></div>
-                            <% } %>
-                            <div class="chore-timestamp">
-                                Added on: <%= new Date(chore.timestamp).toLocaleDateString() %> at <%= new Date(chore.timestamp).toLocaleTimeString() %>
-                            </div>
-                            <form action="/chores/delete" method="POST">
-                                <input type="hidden" name="chore_id" value="<%= chore.Chore_ID %>" />
-                                <button type="submit" class="delete-btn">X</button>
-                            </form>
-                        </li>
-                    <% }); %>
-                <% } %>
-            </ul>
-            <form action="/chores/add" method="POST">
-                <input type="text" name="title" placeholder="Chore title" required />
-                <textarea name="comment" placeholder="Optional comment"></textarea>
-                <input type="hidden" name="urgency" value="low-urgency" />
-                <button type="submit">Add</button>
-            </form>
+            <div class="compartment" id="low-urgency">
+                <h2>Low Urgency</h2>
+                <ul id="low-urgency-list">
+                    <% if (chores && chores['low-urgency'] && chores['low-urgency'].length> 0) { %>
+                        <% chores['low-urgency'].forEach(chore=> { %>
+                            <li class="chore-item">
+                                <div class="chore-content">
+                                        <input type="checkbox" class="chore-checkbox">
+                                    </form>
+                                    <div class="chore-info <%= chore.Completed ? 'completed' : '' %>">
+                                        <div class="chore-title">
+                                            <%= chore.Title %>
+                                        </div>
+                                        <% if (chore.Description) { %>
+                                            <div class="chore-comment">
+                                                <%= chore.Description %>
+                                            </div>
+                                            <% } %>
+                                                <div class="chore-timestamp">
+                                                    Added on: <%= new Date(chore.timestamp).toLocaleDateString() %> at
+                                                        <%= new Date(chore.timestamp).toLocaleTimeString() %>
+                                                </div>
+                                    </div>
+                                </div>
+                                <form action="/chores/delete" method="POST">
+                                    <input type="hidden" name="chore_id" value="<%= chore.Chore_ID %>" />
+                                    <button type="submit" class="delete-btn">X</button>
+                                </form>
+                            </li>
+                            <% }); %>
+                                <% } %>
+                </ul>
+                <form action="/chores/add" method="POST">
+                    <input type="text" name="title" placeholder="Chore title" required />
+                    <textarea name="comment" placeholder="Optional comment"></textarea>
+                    <input type="hidden" name="urgency" value="low-urgency" />
+                    <button type="submit">Add</button>
+                </form>
+            </div>
         </div>
-    </div>
 </body>
+
 </html>

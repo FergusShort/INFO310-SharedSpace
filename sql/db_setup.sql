@@ -95,6 +95,7 @@ create table Chores (
     Priority ENUM('urgent', 'not-so-urgent', 'low-urgency') NOT NULL,
     Title varchar(30),
     Description varchar(150),
+    Completed BOOLEAN DEFAULT FALSE,
     constraint Chore_PK primary key (Flat_ID, Chore_ID),
     constraint Chores_Flat_FK foreign key (Flat_ID)
         references Flat(Flat_ID)

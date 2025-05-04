@@ -11,7 +11,7 @@
 
 [Milestone Presentation](https://otagouni-my.sharepoint.com/:p:/r/personal/gorma749_student_otago_ac_nz/Documents/Milestone.pptx?d=w434e1499660e404ab87cfafbfc58066e&csf=1&web=1&e=UFEolp)
 
-[Risk Planning](https://otagouni-my.sharepoint.com/:x:/r/personal/gorma749_student_otago_ac_nz/Documents/Risk%20Management.xlsx?d=w3bd40ad4ca694bc9b2ed45d73c4c531f&csf=1&web=1&e=i4VzNe)
+[Risk Management](https://otagouni-my.sharepoint.com/:x:/r/personal/gorma749_student_otago_ac_nz/_layouts/15/Doc.aspx?sourcedoc=%7B3BD40AD4-CA69-4BC9-B2ED-45D73C4C531F%7D&file=Risk%20Management.xlsx&action=default&mobileredirect=true&DefaultItemOpen=1&ct=1746232799650&wdOrigin=OFFICECOM-WEB.START.EDGEWORTH&cid=d71edbd5-d6b3-4e4e-b612-faa8bf0a0cdd&wdPreviousSessionSrc=HarmonyWeb&wdPreviousSession=a52b87e3-7d08-415a-89a6-128d68be09f5)
 
 ## Files / Folders:
 `mysql-data/` - Holds all the mysql and DB files\

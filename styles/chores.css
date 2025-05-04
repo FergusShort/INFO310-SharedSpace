@@ -172,3 +172,26 @@ textarea:focus {
     font-style: italic; /* Optional: make it italic for emphasis */
     text-align: right; /* Align the timestamp to the right */
 }
+
+.chore-content {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    width: 100%;
+}
+
+.chore-checkbox {
+    margin-top: 5px;
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+}
+
+.chore-info {
+    flex-grow: 1;
+}
+
+.completed {
+    text-decoration: line-through;
+    opacity: 0.7;
+}
