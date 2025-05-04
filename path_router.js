@@ -558,7 +558,21 @@ router.post("/calendar/addevent", async (req, res) => {
   }
 });
 
+router.post("/calendar/:id/deleteevent", async (req, res) => {
+  const db = pool.promise();
+  const stmt = `
+    DELETE FROM Events WHERE Event_ID = ?;
+  `
+  const id = req.params.id;
 
+  try {
+    await db.query(stmt, id);
+    res.redirect("/calendar");
+  } catch (err) {
+    console.error("Error deleting event:", err);
+    res.status(500).send("Error adding event.");
+  }
+});
 
 
 router.post('/groceries/add', async (req, res) => {

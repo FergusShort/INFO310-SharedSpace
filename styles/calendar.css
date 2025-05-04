@@ -29,20 +29,11 @@ body {
     border-radius: 9px;
 }
 
-aside {
-    background-color: #ccc;
-    grid-column: span 1;
-    grid-row: span 1;
-    grid-row-start: 1;
-    grid-column-start: 1;
-    min-height: 97vh;
-    max-height: 97vh;
-}
-
 input, label, button {
     width: 97%;
 }
 
+/* FORM STYLES */
 #addevent {
     display: none;
     position: relative;
@@ -83,6 +74,8 @@ input, label, button {
     background-color: #eaedf4;
     padding: 5px;
     margin: 10px;
+    border-radius: 10px;
+    border: 1px solid gray;
 }
 
 #addevent button {
@@ -131,6 +124,31 @@ form input[type="datetime-local"] {
     font-size: 1rem;
     color: black;
     background-color: #eaedf4;
+}
+
+.editbutton {
+    display: inline;
+    max-width: 40px;
+    float: right;
+    margin: 5px;
+    font-size: 25px;
+    color: white;
+    border-radius: 10px;
+    border: 0px;
+    background-color: #3498db;
+}
+
+.editbutton:hover {
+    background-color: #2980b9;
+    transform: scale(1.05);
+}
+
+#deletebutton {
+    background-color: rgb(255, 129, 129);
+}
+
+#deletebutton:hover {
+    background-color: rgb(205, 74, 74);
 }
 
 .blur {

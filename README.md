@@ -11,6 +11,8 @@
 
 [Milestone Presentation](https://otagouni-my.sharepoint.com/:p:/r/personal/gorma749_student_otago_ac_nz/Documents/Milestone.pptx?d=w434e1499660e404ab87cfafbfc58066e&csf=1&web=1&e=UFEolp)
 
+[Risk Planning](https://otagouni-my.sharepoint.com/:x:/r/personal/gorma749_student_otago_ac_nz/Documents/Risk%20Management.xlsx?d=w3bd40ad4ca694bc9b2ed45d73c4c531f&csf=1&web=1&e=i4VzNe)
+
 ## Files / Folders:
 `mysql-data/` - Holds all the mysql and DB files\
 `node_modules/` - Contains modules used by node\
