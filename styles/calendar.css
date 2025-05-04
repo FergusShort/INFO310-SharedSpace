@@ -1,7 +1,45 @@
-/* * {
-    margin: auto;
-    padding: auto;
-} */
+:root {
+  --sx-color-primary: #3498db; /* Main blue */
+  --sx-color-on-primary: #ffffff;
+  --sx-color-primary-container: #d0e9f9;
+  --sx-color-on-primary-container: #0a2d42;
+
+  --sx-color-secondary: #2c3e50; /* Darker blue-gray for contrast */
+  --sx-color-on-secondary: #ffffff;
+  --sx-color-secondary-container: #b9c9d6;
+  --sx-color-on-secondary-container: #1c2a36;
+
+  --sx-color-tertiary: #2980b9; /* Another shade of blue */
+  --sx-color-on-tertiary: #ffffff;
+  --sx-color-tertiary-container: #d6ecfa;
+  --sx-color-on-tertiary-container: #083554;
+
+  --sx-color-surface: #f5fbff;
+  --sx-color-surface-dim: #d8e6f1;
+  --sx-color-surface-bright: #f5fbff;
+  --sx-color-on-surface: #1c1b1f;
+
+  --sx-color-surface-container: #e7f1f8;
+  --sx-color-surface-container-low: #edf6fb;
+  --sx-color-surface-container-high: #dfeaf2;
+
+  --sx-color-background: #ffffff;
+  --sx-color-on-background: #1c1b1f;
+
+  --sx-color-outline: #5d90b0;
+  --sx-color-outline-variant: #a3c9de;
+
+  --sx-color-shadow: #000000;
+  --sx-color-surface-tint: #3498db;
+
+  --sx-color-neutral: var(--sx-color-outline);
+  --sx-color-neutral-variant: var(--sx-color-outline-variant);
+
+  /* Internal app-specific colors */
+  --sx-internal-color-gray-ripple-background: #d0e6f2;
+  --sx-internal-color-light-gray: #f0f8fc;
+  --sx-internal-color-text: #000000;
+}
 
 body {
     background-color: #ccc;
@@ -9,14 +47,7 @@ body {
     font-family: Arial, sans-serif;
     min-height: 100%;
     max-height: 100%;
-    /* filter: blur(0.1px); */
 }
-
-/* header {
-    background-color: blue;
-    grid-column: span 2;
-    grid-row: span 1;
-} */
 
 #calendar {
     position: absolute;
@@ -61,25 +92,34 @@ input, label, button {
     width: 500px;
     max-width: 60%;
     min-height: 90%;
-    height: 600px;
+    height: 660px;
     padding: 10px;
     margin-top: 20px;
-    overflow-y: scroll;
     border: 2px solid darkgray;
     border-radius: 10px;
     box-shadow: 0.5px 0.5px 15px black;
 }
 
-#event {
+#events {
+    overflow-y: scroll;
+    max-height: 80%;
     background-color: #eaedf4;
+    border-radius: 10px;
+    box-shadow: 0.2px 0.2px 5px gray inset;
+}
+
+#event {
     padding: 5px;
     margin: 10px;
+    background-color: #d0e9f9;
+    color: #0a2d42;
     border-radius: 10px;
-    border: 1px solid gray;
+    border: 2px solid #3498db;
+    box-shadow: 0.2px 0.2px 5px gray;
 }
 
 #addevent button {
-    background-color: rgb(126, 158, 227);
+    background-color: #3498db;
     color: white;
     border: none;
     padding: 10px 15px; 
@@ -109,7 +149,7 @@ input, label, button {
 }
 
 #addevent button:hover {
-    background-color: #003380;
+    background-color: #2980b9;
     transform: scale(1.01);
 }
 
@@ -136,6 +176,7 @@ form input[type="datetime-local"] {
     border-radius: 10px;
     border: 0px;
     background-color: #3498db;
+    cursor: pointer;
 }
 
 .editbutton:hover {
@@ -149,6 +190,28 @@ form input[type="datetime-local"] {
 
 #deletebutton:hover {
     background-color: rgb(205, 74, 74);
+}
+
+#editevent #cancel {
+    color: white;
+    border: none;
+    padding: 10px 15px; 
+    border-radius: 5px;
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    width: auto; 
+    display: block;
+    margin: auto;
+    margin-top: 20px;
+    gap: 10px;
+    background-color: gray;
+    transition: background-color 0.2s ease-in-out, transform 0.1s ease-in-out;
+}
+
+#editevent #cancel:hover {
+    background-color: rgb(70, 70, 70);
+    transform: scale(1.01);
 }
 
 .blur {

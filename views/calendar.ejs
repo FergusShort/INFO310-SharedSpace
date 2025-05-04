@@ -98,9 +98,12 @@
 
     <div id="editevent">
         <h3>All Events:</h3>
-        <% for (let i = 0; i < events.length; i++){ %>
-            <%- include('partials/event', {event: events[i]}) %>
-        <% } %>
+        <div id="events">
+            <% for (let i = 0; i < events.length; i++){ %>
+                <%- include('partials/event', {event: events[i]}) %>
+            <% } %>
+        </div>
+        <button id="cancel" type="button" onclick="editEventCloseMenu()">Cancel</button>
     </div>
 </body>
 </html>
