@@ -504,7 +504,7 @@ router.post("/chores/delete", async (req, res) => {
   }
 });
 
-/* INDEX (HomePage) CODE */
+/* Calendar / Events */
 router.get("/calendar", async (req, res) => {
   if (!req.session.userId) {
     return res.render("signup");
@@ -525,7 +525,7 @@ router.get("/calendar", async (req, res) => {
 
     const [rows, fields] = await db.query(query, req.session.flat_Id);
     res.status(200);
-    let events = rows; // Declare events with let
+    let events = rows;
     for (let i = 0; i < events.length; i++) {
       events[i].start = format(new Date(events[i].start), "yyyy-MM-dd HH:mm:SS");
       events[i].end = format(new Date(events[i].end), "yyyy-MM-dd HH:mm:SS");
@@ -533,7 +533,7 @@ router.get("/calendar", async (req, res) => {
 
     res.render("calendar", { events: events });
   } catch (err) {
-    console.error("Error fetching events:", err); // More descriptive error log
+    console.error("Error fetching events:", err);
     res.status(500).send("Server error.");
   }
 });
@@ -547,15 +547,15 @@ router.post("/calendar/addevent", async (req, res) => {
   const flat_id = req.session.flat_Id;
   const title = req.body.title;
   const desc = req.body.desc;
-  const start = format(new Date(req.body.start_time), "yyyy-MM-dd HH:mm:SS"); // Corrected format
-  const end = format(new Date(req.body.end_time), "yyyy-MM-dd HH:mm:SS");   // Corrected format
+  const start = format(new Date(req.body.start_time), "yyyy-MM-dd HH:mm:SS");
+  const end = format(new Date(req.body.end_time), "yyyy-MM-dd HH:mm:SS");
 
   try {
     await db.query(stmt, [flat_id, title, desc, start, end]);
-    res.redirect("/calendar"); // Redirect on success
+    res.redirect("/calendar");
   } catch (err) {
     console.error("Error adding event:", err);
-    res.status(500).send("Error adding event."); // Send error response
+    res.status(500).send("Error adding event.");
   }
 });
 
@@ -571,10 +571,32 @@ router.post("/calendar/:id/deleteevent", async (req, res) => {
     res.redirect("/calendar");
   } catch (err) {
     console.error("Error deleting event:", err);
-    res.status(500).send("Error adding event.");
+    res.status(500).send("Error deleting event.");
   }
 });
 
+router.post("/calendar/editevent", async (req, res) => {
+  const db = pool.promise();
+  const stmt = `
+    UPDATE Events 
+    SET Title = ?, Description = ?, Start_Time = ?, End_Time = ?
+    WHERE Event_ID = ?;
+  `
+  const id = req.body.id;
+  const title = req.body.title;
+  const desc = req.body.desc;
+  const start = format(new Date(req.body.start_time), "yyyy-MM-dd HH:mm:SS");
+  const end = format(new Date(req.body.end_time), "yyyy-MM-dd HH:mm:SS");
+
+  try {
+    await db.query(stmt, [title, desc, start, end, id]);
+    res.redirect("/calendar");
+  } catch (err) {
+    console.error("Error editing event:", err);
+    res.status(500).send("Error editing event.");
+  }
+
+});
 
 router.post('/groceries/add', async (req, res) => {
     const { item, price, quantity } = req.body;
