@@ -63,16 +63,6 @@ router.get("/groceries", async (req, res) => {
   }
 });
 
-async function getChoresFromDatabase(flatID) {
-  const db = pool.promise();
-  try {
-      const [chores] = await db.query("SELECT * FROM Chores WHERE Flat_ID = ?", [flatID]);
-      return chores;
-  } catch (error) {
-      console.error("Error fetching chores from database:", error);
-      throw new Error("Unable to fetch chores from the database");
-  }
-}
 
 router.get("/chores", async (req, res) => {
     if (!req.session.userId) {
@@ -260,7 +250,7 @@ router.post("/bills/pay", async (req, res) => {
             ]);
         }
 
-        if (newAmountLeft === 0 && !bill.Recurring) {
+        if (newAmountLeft === 0) {
             const deleteQuery = `DELETE FROM Bills WHERE Bill_ID = ?`;
             await db.query(deleteQuery, [bill_id]);
         }
@@ -351,7 +341,7 @@ router.post("/signup/submit", async (req, res) => {
       return res.redirect("/signup");
     }
   } catch (err) {
-    console.error("You havent set up the database yet!");
+    console.error("You haven't set up the database yet!");
   }
 
   const dbb = pool.promise();
@@ -360,7 +350,7 @@ router.post("/signup/submit", async (req, res) => {
     const [rows] = await dbb.query(status_queryy, email);
     req.session.userId = rows[0].User_ID;
   } catch (err) {
-    console.error("An error occured: " + err);
+    console.error("An error occurred: " + err);
   }
   return res.redirect("/createGroup");
 });
@@ -374,7 +364,7 @@ router.post("/createGroup/create", async (req, res) => {
   try {
     const [rows] = await db.query(status_query, [groupID, groupName]);
   } catch (err) {
-    console.error("You havent set up the database yet!!" + err);
+    console.error("You haven't set up the database yet!!" + err);
   }
 
   const dbb = pool.promise();
@@ -383,7 +373,7 @@ router.post("/createGroup/create", async (req, res) => {
     const [row] = await dbb.query(status_queryy, [groupID, req.session.userId]);
     req.session.flat_Id = groupID;
   } catch (err) {
-    console.error("You havent set up the database yet!!!" + err);
+    console.error("You haven't set up the database yet!!!" + err);
   }
 
   return res.redirect("/calendar");
@@ -404,11 +394,11 @@ router.post("/joinGroup/join", async (req, res) => {
         const [row] = await dbb.query(status_queryy, [groupCode, userID]);
         req.session.flat_Id = groupCode;
       } catch (err) {
-        console.error("You havent set up the database yet!!!" + err);
+        console.error("You haven't set up the database yet!!!" + err);
       }
     }
   } catch (err) {
-    console.error("You havent set up the database yet!!" + err);
+    console.error("You haven't set up the database yet!!" + err);
   }
 
   return res.redirect("/calendar");
@@ -425,7 +415,7 @@ async function makeFlatID() {
       iD = makeFlatID();
     }
   } catch (err) {
-    console.error("You havent set up the database yet!" + err);
+    console.error("You haven't set up the database yet!" + err);
   }
   return iD;
 }
