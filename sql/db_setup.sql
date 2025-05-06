@@ -8,6 +8,7 @@ grant all on *.* to 'sharedspace' with grant option;
 
 use SharedSpace;
 
+drop table if exists user_payments;
 drop table if exists Chore_Assignment;
 drop table if exists Users_Events;
 drop table if exists User;
@@ -72,6 +73,19 @@ CREATE TABLE Bills (
     CONSTRAINT Initial_Amount_CHK CHECK (Initial_Amount >= 0)
 
 );
+
+
+CREATE TABLE user_payments (
+    Payment_ID SERIAL PRIMARY KEY,
+    User_ID INT NOT NULL,
+    Bill_ID INT NOT NULL,
+    User_Amount_paid DECIMAL(10, 2) DEFAULT 0.00,
+    User_Share_amount DECIMAL(10, 2),
+    User_Payment_status VARCHAR(20) DEFAULT 'not paid',
+    FOREIGN KEY (User_ID) REFERENCES User(User_ID),
+    FOREIGN KEY (Bill_ID) REFERENCES Bills(Bill_ID)
+);
+
 
 
 -- Instances represent grocery items for grocery list 
