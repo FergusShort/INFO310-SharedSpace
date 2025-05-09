@@ -26,14 +26,19 @@
                         </tr>
                     </thead>
                     <tbody id="checklist">
-                        <% groceries.forEach(grocery => { %>
+                        <% groceries.forEach(grocery=> { %>
                             <tr>
-                              <td><input type="checkbox" name="checkedItems" value="<%= grocery.ID %>"></td>
-                              <td><%= grocery.Item %></td>
-                              <td><%= grocery.Quantity %></td>
-                              <td>$<%= parseFloat(grocery.Price).toFixed(2) %></td>
+                                <td><input type="checkbox" name="checkedItems" value="<%= grocery.ID %>"></td>
+                                <td>
+                                    <%= grocery.Item %>
+                                </td>
+                                <td>
+                                    <%= grocery.Quantity %>
+                                </td>
+                                <td>$<%= parseFloat(grocery.Price).toFixed(2) %>
+                                </td>
                             </tr>
-                          <% }) %>
+                            <% }) %>
                     </tbody>
                 </table>
 
@@ -63,6 +68,32 @@
                 </div>
             </div>
         </div>
+        <script>
+            function calculateTotal() {
+                let total = 0;
+                const rows = document.querySelectorAll("#checklist tr");
+
+                rows.forEach(row => {
+                    const quantityCell = row.children[2];
+                    const priceCell = row.children[3];
+
+                    if (quantityCell && priceCell) {
+                        const quantity = parseInt(quantityCell.textContent.trim(), 10);
+                        const priceText = priceCell.textContent.trim().replace("$", "");
+                        const price = parseFloat(priceText);
+
+                        if (!isNaN(quantity) && !isNaN(price)) {
+                            total += quantity * price;
+                        }
+                    }
+                });
+
+                document.getElementById("totalCost").textContent = `$${total.toFixed(2)}`;
+            }
+
+            window.addEventListener("DOMContentLoaded", calculateTotal);
+        </script>
+
 </body>
 
 </html>
