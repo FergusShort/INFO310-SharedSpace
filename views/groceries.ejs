@@ -27,15 +27,14 @@
                     </thead>
                     <tbody id="checklist">
                         <% groceries.forEach(grocery => { %>
-                          <tr>
-                            <td><input type="checkbox" name="checkedItems[]" value="<%= grocery.Flat_ID %>,<%= grocery.Item %>"></td>
-                            <td><%= grocery.Item %></td>
-                            <td><%= grocery.Quantity %></td>
-                            <td>$<%= parseFloat(grocery.Price).toFixed(2) %></td>
-                          </tr>
-                        <% }) %>
-                      </tbody>
-                      
+                            <tr>
+                              <td><input type="checkbox" name="checkedItems" value="<%= grocery.ID %>"></td>
+                              <td><%= grocery.Item %></td>
+                              <td><%= grocery.Quantity %></td>
+                              <td>$<%= parseFloat(grocery.Price).toFixed(2) %></td>
+                            </tr>
+                          <% }) %>
+                    </tbody>
                 </table>
 
             </div>

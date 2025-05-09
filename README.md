@@ -23,6 +23,7 @@
 ## Useful Commands:
 >### Starting the application locally:
 >```bash
+>npm install
 >npm start
 >```
 > 
@@ -37,3 +38,24 @@
 >source sql/db_setup.sql
 >source sql/db_populate.sql
 >```
+
+## Instruction on Website Usage
+> ### Starting:
+>
+> Create a new account
+> 
+> Create or Join Group (Pre-populated requires joining group)
+>
+> ### Home
+> 
+>
+> ### Events
+> 
+>
+> ### Chores
+> 
+>
+> ### Groceries
+> 
+>
+> ### Bills
