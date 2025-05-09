@@ -100,7 +100,7 @@ create table Groceries (
         references Flat(Flat_ID),
     constraint Price_Quantity_CHK check (Quantity > 0 and Price > 0)
 );
-after table Groceries drop index Item;
+alter table Groceries drop index Item;
 
 
 -- Instances represent jobs / chores to do for chore list
