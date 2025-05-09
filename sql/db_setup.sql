@@ -92,7 +92,7 @@ CREATE TABLE user_payments (
 -- A flat can have multiple groceries, a grocery item must be associated with a flat
 create table Groceries (
     Flat_ID varchar(10) not null,
-    Item varchar(30) unique not null,
+    Item varchar(30) not null,
     Price decimal(7, 2),
     Quantity int,
     constraint Grocery_PK primary key (Flat_ID, Item),
@@ -100,6 +100,8 @@ create table Groceries (
         references Flat(Flat_ID),
     constraint Price_Quantity_CHK check (Quantity > 0 and Price > 0)
 );
+alter table Groceries drop index Item;
+
 
 -- Instances represent jobs / chores to do for chore list
 -- A Flat can have multiple chores, a chore must be associated with a flat
