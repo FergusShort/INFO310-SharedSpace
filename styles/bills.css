@@ -71,6 +71,9 @@ form input[type="date"] {
     outline: none;
     transition: border 0.3s;
     background-color: #fff;
+    min-width: 0; /* Prevent content from overflowing */
+    flex-grow: 1; /* Make input/textarea take remaining space */
+
 }
 
 form input:focus {

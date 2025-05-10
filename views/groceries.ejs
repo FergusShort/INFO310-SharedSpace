@@ -25,7 +25,21 @@
                             <th id="price">Price</th>
                         </tr>
                     </thead>
-                    <tbody id="checklist"></tbody>
+                    <tbody id="checklist">
+                        <% groceries.forEach(grocery=> { %>
+                            <tr>
+                                <td><input type="checkbox" name="checkedItems" value="<%= grocery.ID %>"></td>
+                                <td>
+                                    <%= grocery.Item %>
+                                </td>
+                                <td>
+                                    <%= grocery.Quantity %>
+                                </td>
+                                <td>$<%= parseFloat(grocery.Price).toFixed(2) %>
+                                </td>
+                            </tr>
+                            <% }) %>
+                    </tbody>
                 </table>
 
             </div>
@@ -45,14 +59,41 @@
 
                 <div class="buttons-bottom">
                     <form action="/groceries/clear-checked" method="POST">
-                        <button id="clear-checked" onclick="clearChecked()" type="button">Clear checked</button>
+                        <button id="clear-checked" type="submit">Clear checked</button>
                     </form>
+
                     <form action="/groceries/clear-all" method="POST">
-                        <button id="clear-all" onclick="clearAll()" type="button">Clear all</button>
+                        <button id="clear-all" type="submit">Clear all</button>
                     </form>
                 </div>
             </div>
         </div>
+        <script>
+            function calculateTotal() {
+                let total = 0;
+                const rows = document.querySelectorAll("#checklist tr");
+
+                rows.forEach(row => {
+                    const quantityCell = row.children[2];
+                    const priceCell = row.children[3];
+
+                    if (quantityCell && priceCell) {
+                        const quantity = parseInt(quantityCell.textContent.trim(), 10);
+                        const priceText = priceCell.textContent.trim().replace("$", "");
+                        const price = parseFloat(priceText);
+
+                        if (!isNaN(quantity) && !isNaN(price)) {
+                            total += quantity * price;
+                        }
+                    }
+                });
+
+                document.getElementById("totalCost").textContent = `$${total.toFixed(2)}`;
+            }
+
+            window.addEventListener("DOMContentLoaded", calculateTotal);
+        </script>
+
 </body>
 
 </html>

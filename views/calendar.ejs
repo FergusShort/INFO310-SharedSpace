@@ -35,33 +35,35 @@
         sidebar.appendChild(d);
 
         function addEventOpenMenu() {
-            document.querySelector("#addevent").style.display = "block";
-            document.querySelector("#editevent").style.display = "none";
+            document.querySelector("#add").style.display = "block";
+            document.querySelector("#all").style.display = "none";
+            document.querySelector("#edit").style.display = "none";
             document.querySelector(".blur").style.display = "block";
         };
 
         function addEventCloseMenu() {
-            document.querySelector("#addevent").style.display = "none";
+            document.querySelector("#add").style.display = "none";
             document.querySelector(".blur").style.display = "none";
         };
 
         /* Edit / Delete Event Button */
         d = document.createElement("button");
-        d.setAttribute('class', 'open-btn')
+        d.setAttribute('class', 'open-btn');
         d.innerText = "✎";
         d.style.marginTop = "90px";
-        d.onclick = editEventOpenMenu;
+        d.onclick = allEventsOpenMenu;
         sidebar = document.querySelector(".sidebar-container");
         sidebar.appendChild(d);
 
-        function editEventOpenMenu() {
-            document.querySelector("#editevent").style.display = "block";
-            document.querySelector("#addevent").style.display = "none";
+        function allEventsOpenMenu() {
+            document.querySelector("#all").style.display = "block";
+            document.querySelector("#add").style.display = "none";
+            document.querySelector("#edit").style.display = "none";
             document.querySelector(".blur").style.display = "block";
         };
 
-        function editEventCloseMenu() {
-            document.querySelector("#editevent").style.display = "none";
+        function allEventsCloseMenu() {
+            document.querySelector("#all").style.display = "none";
             document.querySelector(".blur").style.display = "none";
         };
 
@@ -80,9 +82,11 @@
         </script>
     </main>
 
-    <form id="addevent" action="/calendar/addevent" method="POST">
-        <label>Add Event</label>
+    <form class="eventmenu" id="add" action="/calendar/addevent" method="POST">
+        <h2>Add Event:</h2>
+        <label for="title">Title</label>
         <input name="title" type="text" placeholder="Title" required>
+        <label for="desc">Description</label>
         <input name="desc" type="text" placeholder="Description" required>
 
         <label for="start_time">Start Time</label>
@@ -92,15 +96,46 @@
         <input name="end_time" type="datetime-local" required>
         <div class="buttons">
             <button id="cancel" type="button" onclick="addEventCloseMenu()">Cancel</button>
-            <button type="submit">Submit</button>
+            <button id="submit" type="submit">Submit</button>
         </div>
     </form>
 
-    <div id="editevent">
-        <h3>All Events:</h3>
-        <% for (let i = 0; i < events.length; i++){ %>
-            <%- include('partials/event', {event: events[i]}) %>
-        <% } %>
+    <div class="eventmenu" id="all">
+        <h2>All Events:</h2>
+        <div id="events">
+            <% for (let i = 0; i < events.length; i++){ %>
+                <%- include('partials/event', {event: events[i]}) %>
+            <% } %>
+        </div>
+        <div class="buttons">
+            <button id="cancel" type="button" onclick="allEventsCloseMenu()">Cancel</button>
+        </div>
     </div>
+
+    <script>
+        function editEventCloseMenu() {
+            document.querySelector("#edit").style.display = "none";
+            document.querySelector(".blur").style.display = "none";
+        };
+    </script>
+
+    <form class="eventmenu" id="edit" action="/calendar/editevent" method="POST">
+        <h2>Edit Event:</h2>
+        <input type="hidden" name="id">
+        <label for="title">Title</label>
+        <input name="title" type="text" required>
+        <label for="desc">Description</label>
+        <input name="desc" type="text" required>
+
+        <label for="start_time">Start Time</label>
+        <input name="start_time" type="datetime-local" required>
+
+        <label for="end_time">End Time</label>
+        <input name="end_time" type="datetime-local" required>
+        <div class="buttons">
+            <button id="cancel" type="button" onclick="editEventCloseMenu()">Cancel</button>
+            <button id="submit" type="submit">Submit</button>
+        </div>
+    </form>
 </body>
 </html>

@@ -1,7 +1,25 @@
 <div id="event">
-    <p>Name: <%- event.title %></p>
-    <p>Description:</p>
+    <script>
+        function editEventOpenMenu(event) {
+            document.querySelector("#edit").style.display = "block";
+            document.querySelector("#all").style.display = "none";
+            document.querySelector(".blur").style.display = "block";
+            
+            document.querySelector("#edit input[name='id']").value = event.id;
+            document.querySelector("#edit input[name='title']").value = event.title;
+            document.querySelector("#edit input[name='desc']").value = event.descr;
+            document.querySelector("#edit input[name='start_time']").value = event.start;
+            document.querySelector("#edit input[name='end_time']").value = event.end;
+        };
+    </script>
+
+    <form method="POST" action="/calendar/<%= event.id %>/deleteevent">
+        <button class="updatebutton" id="deletebutton" type="submit">🗑</button>
+    </form>
+    <button class="updatebutton" id="editbutton" onclick='editEventOpenMenu(<%- JSON.stringify(event) %>)'>✎</button>
+    <p><b>Name:</b> <%- event.title %></p>
+    <p><b>Description:</b></p>
     <p><%- event.descr %></p>
-    <p>Start: <%- event.start %></p>
-    <p>End: <%- event.end %></p>
+    <p><b>Start:</b> <%- event.start %></p>
+    <p><b>End:</b> <%- event.end %></p>
 </div>

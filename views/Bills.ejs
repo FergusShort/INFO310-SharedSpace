@@ -31,8 +31,11 @@
                     placeholder="Description (optional)"
                     maxlength="100"
                     />
-                <input type="date" name="due_date" id="due_date" required />
-                <div class="recurring-container">
+                    <div>
+                        <label for="due_date">Due Date:</label>
+                        <input type="date" name="due_date" id="due_date" max="9999-12-31" required />
+                    </div>
+                    <div class="recurring-container">
                     <label for="recurring">Recurring:</label>
                     <input type="checkbox" name="recurring" id="recurring" />
                     <label for="time_period">Till Next Bill (Days):</label>
@@ -74,11 +77,20 @@
                                 Due Date: <%= new Date(bill.Due_Date).toLocaleDateString() || 'N/A' %>
                             </p>
                             <p>
-                                Status: <% if (bill.Payment_Status === 'F') { %> Paid <% } else if (bill.Payment_Status === 'P') { %> Partially Paid <% } else { %> Unpaid <% } %>
-                            </p>
-                            <p>
                                 Remaining: $<%= (bill.Amount_Left)%>
                             </p>
+                            <% if (bill.User_Payment_Status) { %>
+                                <p>Your Status: <span class="<%= bill.User_Payment_Status %>"><%= bill.User_Payment_Status.toUpperCase() %></span></p>
+                                <p>You Paid: $<%= bill.User_Amount_paid ? bill.User_Amount_paid : '0.00' %></p>
+                                <p>You Owe:
+                                    <% if (bill.User_Share_amount && bill.User_Amount_paid) { %>
+                                      $<%= Math.max(0, (bill.User_Share_amount - bill.User_Amount_paid)).toFixed(2) %>
+                                    <% } else if (bill.User_Share_amount) { %>
+                                      $<%= bill.User_Share_amount.toFixed(2) %>
+                                    <% } else { %>
+                                      N/A
+                                    <% } %>
+                                  </p>                            <% } %>
                         </div>
                         <div class="bill-actions">
                             <% if (bill.Payment_Status !== 'F') { %>
@@ -100,6 +112,7 @@
                                         class="pay-share-button"
                                         data-bill-id="<%= bill.Bill_ID %>"
                                         data-amount-left="<%= bill.Amount_Left %>"
+                                        data-num-people="<%= numPeople %>"
                                     >
                                         My Share
                                     </button>
@@ -131,13 +144,13 @@
         recurringCheckbox.addEventListener("change", function () {
             timePeriodInput.disabled = !this.checked;
         });
-        const numPeople = `<%= numPeople %>`;
 
 
         document.querySelectorAll(".pay-share-button").forEach((button) => {
             button.addEventListener("click", function () {
                 const billId = this.getAttribute("data-bill-id");
                 const amountLeft = parseFloat(this.getAttribute("data-amount-left"));
+                const numPeople = parseInt(this.getAttribute("data-num-people"));
                 const shareAmount = amountLeft / numPeople;
 
                 document.getElementById("shareAmount_" + billId).value =
@@ -149,6 +162,6 @@
 
 
     </script>
-    
+
 </body>
 </html>

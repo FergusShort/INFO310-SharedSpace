@@ -1,5 +1,5 @@
 const express = require("express");
-const bcrypt = require('bcrypt');
+const bcrypt = require("bcrypt");
 const fileUpload = require("express-fileupload");
 const pool = require("./db");
 const bodyParser = require("body-parser");
@@ -8,7 +8,6 @@ const app = express();
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
 
 router = express.Router();
 
@@ -95,92 +94,89 @@ router.get("/home", async (req, res) => {
 
 router.get("/groceries", async (req, res) => {
   if (!req.session.userId) {
-      return res.render("signup");
+    return res.render("signup");
   } else if (!req.session.flat_Id) {
-      return res.render("createGroup");
+    return res.render("createGroup");
   }
 
   const db = pool.promise();
   const flatId = req.session.flat_Id;
-  
+
   try {
-      const [groceries] = await db.query(
-          `SELECT * FROM Groceries WHERE Flat_ID = ?`,
-          [flatId]
-      );
-      res.render("groceries", { groceries });
+    const [groceries] = await db.query(
+      `SELECT * FROM Groceries WHERE Flat_ID = ?`,
+      [flatId]
+    );
+    res.render("groceries", { groceries });
   } catch (err) {
-      console.error("Error fetching groceries:", err);
-      res.status(500).send("Error fetching groceries.");
+    console.error("Error fetching groceries:", err);
+    res.status(500).send("Error fetching groceries.");
   }
 });
 
-async function getChoresFromDatabase(flatID) {
-  const db = pool.promise();
-  try {
-      const [chores] = await db.query("SELECT * FROM Chores WHERE Flat_ID = ?", [flatID]);
-      return chores;
-  } catch (error) {
-      console.error("Error fetching chores from database:", error);
-      throw new Error("Unable to fetch chores from the database");
-  }
-}
-
 router.get("/chores", async (req, res) => {
-    if (!req.session.userId) {
-        return res.render("signup");
-    } else if (!req.session.flat_Id) {
-        return res.redirect("/createGroup");
-    }
+  if (!req.session.userId) {
+    return res.render("signup");
+  } else if (!req.session.flat_Id) {
+    return res.redirect("/createGroup");
+  }
 
-    const flat_id = req.session.flat_Id;
+  const flat_id = req.session.flat_Id;
 
-    try {
-        const db = pool.promise();
-        const [chores] = await db.query(`
+  try {
+    const db = pool.promise();
+    const [chores] = await db.query(
+      `
             SELECT Chore_ID, Title, Description, Priority
             FROM Chores 
             WHERE Flat_ID = ?
-        `, [flat_id]);
+        `,
+      [flat_id]
+    );
 
-        const choresByUrgency = {
-            urgent: chores.filter((chore) => chore.Priority === "urgent"),
-            "not-so-urgent": chores.filter((chore) => chore.Priority === "not-so-urgent"),
-            "low-urgency": chores.filter((chore) => chore.Priority === "low-urgency"),
-        };
+    const choresByUrgency = {
+      urgent: chores.filter((chore) => chore.Priority === "urgent"),
+      "not-so-urgent": chores.filter(
+        (chore) => chore.Priority === "not-so-urgent"
+      ),
+      "low-urgency": chores.filter((chore) => chore.Priority === "low-urgency"),
+    };
 
-        res.render("chores", { chores: choresByUrgency });
-    } catch (err) {
-        console.error("Error fetching chores:", err);
-        res.status(500).send("Error fetching chores.");
-    }
+    res.render("chores", { chores: choresByUrgency });
+  } catch (err) {
+    console.error("Error fetching chores:", err);
+    res.status(500).send("Error fetching chores.");
+  }
 });
 
 async function getUsersInFlat(flatID) {
   const db = pool.promise();
-  const [rows] = await db.query("SELECT COUNT(*) AS count FROM User WHERE Flat_ID = ?", [flatID]);
+  const [rows] = await db.query(
+    "SELECT COUNT(*) AS count FROM User WHERE Flat_ID = ?",
+    [flatID]
+  );
   return rows[0].count;
 }
-
 router.get("/bills", async (req, res) => {
   if (!req.session.userId) {
     return res.render("signup");
-  } else if(!req.session.flat_Id) {
+  } else if (!req.session.flat_Id) {
     return res.render("createGroup");
   }
   const sortType = req.query.sort || "all";
   const errorMessage = req.query.error;
   const flatID = req.session.flat_Id;
-  const usersInFlat = await getUsersInFlat(flatID); 
+  const userId = req.session.userId; // Get the current user's ID
+  const usersInFlat = await getUsersInFlat(flatID);
   const numPeople = usersInFlat > 0 ? usersInFlat : 1;
 
   try {
-    const bills = await getBillsFromDatabase(sortType, flatID);
+    const bills = await getBillsWithUserPaymentStatus(sortType, flatID, userId);
     res.render("bills", {
       bills,
       sort: sortType,
       error: errorMessage,
-      numPeople: numPeople
+      numPeople: numPeople,
     });
   } catch (error) {
     console.error("Error fetching bills:", error);
@@ -188,28 +184,40 @@ router.get("/bills", async (req, res) => {
   }
 });
 
-async function getBillsFromDatabase(sortType = "all", flatID) {
-  
+async function getBillsWithUserPaymentStatus(sortType = "all", flatID, userId) {
   const db = pool.promise();
   const today = new Date();
 
-  let query = "SELECT * FROM Bills WHERE Flat_ID = ?";
-  let params = [flatID];
+  let billQuery = `
+    SELECT b.*,
+           COALESCE((SELECT up.User_Payment_status
+                     FROM user_payments up
+                     WHERE up.Bill_ID = b.Bill_ID AND up.User_ID = ?), NULL) AS User_Payment_Status,
+           COALESCE((SELECT up.User_Amount_paid
+                     FROM user_payments up
+                     WHERE up.Bill_ID = b.Bill_ID AND up.User_ID = ?), 0.00) AS User_Amount_paid,
+           COALESCE((SELECT up.User_Share_amount
+                     FROM user_payments up
+                     WHERE up.Bill_ID = b.Bill_ID AND up.User_ID = ?), NULL) AS User_Share_amount
+    FROM Bills b
+    WHERE b.Flat_ID = ?
+  `;
+  let billParams = [userId, userId, userId, flatID];
 
   if (sortType === "week") {
     const nextWeek = new Date(today);
     nextWeek.setDate(today.getDate() + 7);
-    query = `SELECT * FROM Bills WHERE Flat_ID = ? AND Due_Date BETWEEN ? AND ?`;
-    params = [flatID, today, nextWeek];
+    billQuery += ` AND b.Due_Date BETWEEN ? AND ?`;
+    billParams = [userId, userId, userId, flatID, today, nextWeek];
   } else if (sortType === "month") {
     const nextMonth = new Date(today);
     nextMonth.setMonth(today.getMonth() + 1);
-    query = `SELECT * FROM Bills WHERE Flat_ID = ? AND Due_Date BETWEEN ? AND ?`;
-    params = [flatID, today, nextMonth];
+    billQuery += ` AND b.Due_Date BETWEEN ? AND ?`;
+    billParams = [userId, userId, userId, flatID, today, nextMonth];
   }
 
   try {
-    const [rows] = await db.query(query, params);
+    const [rows] = await db.query(billQuery, billParams);
     return rows;
   } catch (error) {
     console.error("Error fetching bills from database:", error);
@@ -229,7 +237,6 @@ router.post("/bills/add", async (req, res) => {
   const overdue = req.body.overdue || false;
   const description = req.body.description || "";
   const db = pool.promise();
-
 
   const insertQuery = `
     INSERT INTO Bills (
@@ -262,74 +269,119 @@ router.post("/bills/add", async (req, res) => {
 });
 
 router.post("/bills/pay", async (req, res) => {
-    const bill_id = req.body.bill_id;
-    const amountPaid = parseFloat(req.body.amount_paid || 0);
-    const db = pool.promise();
+  const bill_id = req.body.bill_id;
+  const amountPaid = parseFloat(req.body.amount_paid || 0);
+  const userId = req.session.userId;
+  const db = pool.promise();
 
-    if (isNaN(amountPaid) || amountPaid <= 0) {
-        return res.status(400).send("Invalid amount paid.");
+  if (isNaN(amountPaid) || amountPaid <= 0) {
+    return res.status(400).send("Invalid amount paid.");
+  }
+
+  try {
+    const checkBillQuery = `SELECT Initial_Amount, Amount_Left, Due_Date, Recurring, Time_period, Flat_ID, Title, Description FROM Bills WHERE Bill_ID = ?;`;
+    const [billRows] = await db.query(checkBillQuery, [bill_id]);
+    if (!billRows || billRows.length === 0) {
+      return res.status(404).send("Bill not found.");
+    }
+    const bill = billRows[0];
+
+    const currentAmountLeft = parseFloat(bill.Amount_Left);
+    const newAmountLeft = Math.max(0, currentAmountLeft - amountPaid);
+    let paymentStatus = newAmountLeft === 0 ? "F" : "P";
+
+    const updateBillQuery = `UPDATE Bills SET Amount_Left = ?, Payment_Status = ? WHERE Bill_ID = ?;`;
+    await db.query(updateBillQuery, [newAmountLeft, paymentStatus, bill_id]);
+
+    // Get the number of users in the flat
+    const [billUsers] = await db.query(
+      "SELECT User_ID FROM User WHERE Flat_ID = ?",
+      [bill.Flat_ID]
+    );
+    const numPeople = billUsers.length;
+    const userShareAmount = numPeople > 0 ? bill.Initial_Amount / numPeople : 0;
+
+    // Get the user's existing payment
+    const selectUserPaymentQuery = `SELECT  User_Amount_paid FROM user_payments WHERE User_ID = ? AND Bill_ID = ?`;
+    const [userPaymentRows] = await db.query(selectUserPaymentQuery, [
+      userId,
+      bill_id,
+    ]);
+    let existingUserAmountPaid = 0;
+
+    if (userPaymentRows.length > 0) {
+      existingUserAmountPaid = parseFloat(userPaymentRows[0].User_Amount_paid);
     }
 
-    try {
-        const checkQuery = `SELECT Initial_Amount, Amount_Left, Due_Date, Recurring, Time_period, Flat_ID, Title, Description FROM Bills WHERE Bill_ID = ?;`;
-        const [rows] = await db.query(checkQuery, [bill_id]);
-        if (!rows || rows.length === 0) {
-            return res.status(404).send("Bill not found.");
-        }
-        const bill = rows[0];
+    const newUserAmountPaid = existingUserAmountPaid + amountPaid;
 
-        const currentAmountLeft = parseFloat(bill.Amount_Left);
-        const newAmountLeft = Math.max(0, currentAmountLeft - amountPaid);
-        let paymentStatus = newAmountLeft === 0 ? "F" : "P";
-
-        const updateQuery = `UPDATE Bills SET Amount_Left = ?, Payment_Status = ? WHERE Bill_ID = ?;`;
-        await db.query(updateQuery, [newAmountLeft, paymentStatus, bill_id]);
-
-        if (newAmountLeft === 0 && bill.Recurring && bill.Time_period) {
-            // Calculate the next due date
-            const nextDueDate = new Date(bill.Due_Date);
-            nextDueDate.setDate(nextDueDate.getDate() + bill.Time_period);
-
-            const insertRecurringQuery = `
-                INSERT INTO Bills (
-                    Flat_ID, Initial_Amount, Amount_Left, Due_Date,
-                    Payment_Status, Title, Description,
-                    Recurring, Time_period, Overdue
-                )
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
-            `;
-            await db.query(insertRecurringQuery, [
-                bill.Flat_ID,
-                bill.Initial_Amount,
-                bill.Initial_Amount,
-                nextDueDate,
-                "U",
-                bill.Title,
-                bill.Description,
-                bill.Recurring,
-                bill.Time_period,
-                0
-            ]);
-        }
-
-        if (newAmountLeft === 0 && !bill.Recurring) {
-            const deleteQuery = `DELETE FROM Bills WHERE Bill_ID = ?`;
-            await db.query(deleteQuery, [bill_id]);
-        }
-
-        return res.redirect("/bills");
-    } catch (error) {
-        console.error("Error paying bill:", error);
-        return res.status(500).send("Error processing payment.");
+    // Update or insert the user's payment information
+    if (userPaymentRows.length > 0) {
+      await db.query(
+        `UPDATE user_payments SET User_Amount_paid = ?, User_Payment_status = ? WHERE User_ID = ? AND Bill_ID = ?`,
+        [
+          newUserAmountPaid.toFixed(2),
+          newUserAmountPaid >= userShareAmount ? "Paid" : "Not Paid",
+          userId,
+          bill_id,
+        ]
+      );
+    } else {
+      await db.query(
+        `INSERT INTO user_payments (User_ID, Bill_ID, User_Amount_paid, User_Share_amount, User_Payment_status)
+               VALUES (?, ?, ?, ?, ?)`,
+        [
+          userId,
+          bill_id,
+          amountPaid.toFixed(2),
+          userShareAmount.toFixed(2),
+          amountPaid >= userShareAmount ? "Paid" : "Not Paid",
+        ]
+      );
     }
+
+    if (newAmountLeft === 0 && bill.Recurring && bill.Time_period) {
+      const nextDueDate = new Date(bill.Due_Date);
+      nextDueDate.setDate(nextDueDate.getDate() + bill.Time_period);
+      const insertRecurringQuery = `
+        INSERT INTO Bills (
+        Flat_ID, Initial_Amount, Amount_Left, Due_Date,
+        Payment_Status, Title, Description,
+        Recurring, Time_period, Overdue
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+        `;
+      await db.query(insertRecurringQuery, [
+        bill.Flat_ID,
+        bill.Initial_Amount,
+        bill.Initial_Amount,
+        nextDueDate,
+        "U",
+        bill.Title,
+        bill.Description,
+        bill.Recurring,
+        bill.Time_period,
+        0,
+      ]);
+    }
+    if (newAmountLeft === 0) {
+      await db.query(`DELETE FROM user_payments WHERE Bill_ID = ?`, [bill_id]);
+      await db.query(`DELETE FROM Bills WHERE Bill_ID = ?`, [bill_id]);
+    }
+
+    return res.redirect("/bills");
+  } catch (error) {
+    console.error("Error paying bill:", error);
+    return res.status(500).send("Error processing payment.");
+  }
 });
 
 router.post("/bills/delete", async (req, res) => {
   const bill_id = req.body.bill_id;
-
   const db = pool.promise();
 
   try {
+    await db.query(`DELETE FROM user_payments WHERE Bill_ID = ?;`, [bill_id]);
     await db.query(`DELETE FROM Bills WHERE Bill_ID = ?;`, [bill_id]);
     return res.redirect("/bills");
   } catch (err) {
@@ -365,14 +417,12 @@ router.post("/login/submit", async (req, res) => {
     }
 
     return res.status(401).send("Invalid email/username or password");
-
   } catch (err) {
     console.error("Login error:" + err);
     return res.redirect("/login");
   }
   return res.redirect("/signup");
 });
-
 
 router.post("/signup/submit", async (req, res) => {
   const Uname = req.body.Uname;
@@ -403,7 +453,7 @@ router.post("/signup/submit", async (req, res) => {
       return res.redirect("/signup");
     }
   } catch (err) {
-    console.error("You havent set up the database yet!");
+    console.error("You haven't set up the database yet!");
   }
 
   const dbb = pool.promise();
@@ -412,7 +462,7 @@ router.post("/signup/submit", async (req, res) => {
     const [rows] = await dbb.query(status_queryy, email);
     req.session.userId = rows[0].User_ID;
   } catch (err) {
-    console.error("An error occured: " + err);
+    console.error("An error occurred: " + err);
   }
   return res.redirect("/createGroup");
 });
@@ -426,7 +476,7 @@ router.post("/createGroup/create", async (req, res) => {
   try {
     const [rows] = await db.query(status_query, [groupID, groupName]);
   } catch (err) {
-    console.error("You havent set up the database yet!!" + err);
+    console.error("You haven't set up the database yet!!" + err);
   }
 
   const dbb = pool.promise();
@@ -435,7 +485,7 @@ router.post("/createGroup/create", async (req, res) => {
     const [row] = await dbb.query(status_queryy, [groupID, req.session.userId]);
     req.session.flat_Id = groupID;
   } catch (err) {
-    console.error("You havent set up the database yet!!!" + err);
+    console.error("You haven't set up the database yet!!!" + err);
   }
 
   return res.redirect("/calendar");
@@ -456,11 +506,11 @@ router.post("/joinGroup/join", async (req, res) => {
         const [row] = await dbb.query(status_queryy, [groupCode, userID]);
         req.session.flat_Id = groupCode;
       } catch (err) {
-        console.error("You havent set up the database yet!!!" + err);
+        console.error("You haven't set up the database yet!!!" + err);
       }
     }
   } catch (err) {
-    console.error("You havent set up the database yet!!" + err);
+    console.error("You haven't set up the database yet!!" + err);
   }
 
   return res.redirect("/calendar");
@@ -477,7 +527,7 @@ async function makeFlatID() {
       iD = makeFlatID();
     }
   } catch (err) {
-    console.error("You havent set up the database yet!" + err);
+    console.error("You haven't set up the database yet!" + err);
   }
   return iD;
 }
@@ -556,11 +606,11 @@ router.post("/chores/delete", async (req, res) => {
   }
 });
 
-/* INDEX (HomePage) CODE */
+/* Calendar / Events */
 router.get("/calendar", async (req, res) => {
   if (!req.session.userId) {
     return res.render("signup");
-  } else if(!req.session.flat_Id) {
+  } else if (!req.session.flat_Id) {
     return res.render("createGroup");
   }
   const db = pool.promise();
@@ -577,15 +627,18 @@ router.get("/calendar", async (req, res) => {
 
     const [rows, fields] = await db.query(query, req.session.flat_Id);
     res.status(200);
-    let events = rows; // Declare events with let
+    let events = rows;
     for (let i = 0; i < events.length; i++) {
-      events[i].start = format(new Date(events[i].start), "yyyy-MM-dd HH:mm:SS");
+      events[i].start = format(
+        new Date(events[i].start),
+        "yyyy-MM-dd HH:mm:SS"
+      );
       events[i].end = format(new Date(events[i].end), "yyyy-MM-dd HH:mm:SS");
     }
 
     res.render("calendar", { events: events });
   } catch (err) {
-    console.error("Error fetching events:", err); // More descriptive error log
+    console.error("Error fetching events:", err);
     res.status(500).send("Server error.");
   }
 });
@@ -599,73 +652,106 @@ router.post("/calendar/addevent", async (req, res) => {
   const flat_id = req.session.flat_Id;
   const title = req.body.title;
   const desc = req.body.desc;
-  const start = format(new Date(req.body.start_time), "yyyy-MM-dd HH:mm:SS"); // Corrected format
-  const end = format(new Date(req.body.end_time), "yyyy-MM-dd HH:mm:SS");   // Corrected format
+  const start = format(new Date(req.body.start_time), "yyyy-MM-dd HH:mm:SS");
+  const end = format(new Date(req.body.end_time), "yyyy-MM-dd HH:mm:SS");
 
   try {
     await db.query(stmt, [flat_id, title, desc, start, end]);
-    res.redirect("/calendar"); // Redirect on success
+    res.redirect("/calendar");
   } catch (err) {
     console.error("Error adding event:", err);
-    res.status(500).send("Error adding event."); // Send error response
+    res.status(500).send("Error adding event.");
   }
 });
 
+router.post("/calendar/:id/deleteevent", async (req, res) => {
+  const db = pool.promise();
+  const stmt = `
+    DELETE FROM Events WHERE Event_ID = ?;
+  `;
+  const id = req.params.id;
 
+  try {
+    await db.query(stmt, id);
+    res.redirect("/calendar");
+  } catch (err) {
+    console.error("Error deleting event:", err);
+    res.status(500).send("Error deleting event.");
+  }
+});
 
+router.post("/calendar/editevent", async (req, res) => {
+  const db = pool.promise();
+  const stmt = `
+    UPDATE Events 
+    SET Title = ?, Description = ?, Start_Time = ?, End_Time = ?
+    WHERE Event_ID = ?;
+  `;
+  const id = req.body.id;
+  const title = req.body.title;
+  const desc = req.body.desc;
+  const start = format(new Date(req.body.start_time), "yyyy-MM-dd HH:mm:SS");
+  const end = format(new Date(req.body.end_time), "yyyy-MM-dd HH:mm:SS");
 
-router.post('/groceries/add', async (req, res) => {
-    const { item, price, quantity } = req.body;
-    const flatId = req.session.flat_Id;
+  try {
+    await db.query(stmt, [title, desc, start, end, id]);
+    res.redirect("/calendar");
+  } catch (err) {
+    console.error("Error editing event:", err);
+    res.status(500).send("Error editing event.");
+  }
+});
 
-    const db = pool.promise();
-    const insertQuery = `
+router.post("/groceries/add", async (req, res) => {
+  const { item, price, quantity } = req.body;
+  const flatId = req.session.flat_Id;
+
+  const db = pool.promise();
+  const insertQuery = `
         INSERT INTO Groceries (Flat_ID, Item, Price, Quantity)
         VALUES (?, ?, ?, ?);
     `;
-    try {
-
-        await db.query(insertQuery, [flatId, item, price, quantity]);
-        res.redirect('/groceries');
-    } catch (err) {
-        console.error("Error adding grocery item:", err);
-        res.status(500).send("Error adding grocery item.");
-    }
+  try {
+    await db.query(insertQuery, [flatId, item, price, quantity]);
+    res.redirect("/groceries");
+  } catch (err) {
+    console.error("Error adding grocery item:", err);
+    res.status(500).send("Error adding grocery item.");
+  }
 });
 
-router.post('/groceries/clear-checked', async (req, res) => {
-    const checkedItems = req.body.checkedItems; // Array of checked item IDs
+router.post("/groceries/clear-checked", async (req, res) => {
+  const checkedItems = req.body.checkedItems; // Array of checked item IDs
 
-    const db = pool.promise();
-    const deleteQuery = `
+  const db = pool.promise();
+  const deleteQuery = `
         DELETE FROM Groceries WHERE Grocery_ID IN (?);
     `;
 
-    try {
-        await db.query(deleteQuery, [checkedItems]);
-        res.redirect('/groceries');
-    } catch (err) {
-        console.error("Error clearing checked grocery items:", err);
-        res.status(500).send("Error clearing checked grocery items.");
-    }
+  try {
+    await db.query(deleteQuery, [checkedItems]);
+    res.redirect("/groceries");
+  } catch (err) {
+    console.error("Error clearing checked grocery items:", err);
+    res.status(500).send("Error clearing checked grocery items.");
+  }
 });
 
-router.post("/groceries/clear-all", async (req, res) => { 
-    const flatId = req.session.flat_Id;
+router.post("/groceries/clear-all", async (req, res) => {
+  const flatId = req.session.flat_Id;
 
-    const db = pool.promise();
-    const deleteQuery = `
+  const db = pool.promise();
+  const deleteQuery = `
         DELETE FROM Groceries WHERE Flat_ID = ?;
     `;
 
-    try {
-        await db.query(deleteQuery, [flatId]);
-        res.redirect('/groceries');
-    } catch (err) {
-        console.error("Error clearing all grocery items:", err);
-        res.status(500).send("Error clearing all grocery items.");
-    }
+  try {
+    await db.query(deleteQuery, [flatId]);
+    res.redirect("/groceries");
+  } catch (err) {
+    console.error("Error clearing all grocery items:", err);
+    res.status(500).send("Error clearing all grocery items.");
+  }
 });
-
 
 module.exports = router;
