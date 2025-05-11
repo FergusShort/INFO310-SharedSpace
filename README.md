@@ -53,7 +53,19 @@
 > 
 >
 > ### Chores
-> 
+> **How to Use:**
+> 1. Add a new chore:
+>    - Fill in the title (required)
+>    - Add description (optional)
+>    - Select priority level (Urgent/Not So Urgent/Low Urgency)
+>    - Click 'Add' button
+>
+> 2. Manage chores:
+>    - View chores organized by priority sections
+>    - Check the box next to a chore to mark it as complete
+>    - Click 'X' button to remove completed chores
+>
+> Note: Chores are shared with all flatmates in your group
 >
 > ### Groceries
 > 

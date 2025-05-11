@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SharedSpace Home</title>
+  <link rel="stylesheet" href="nav.css" />
+  <link rel="stylesheet" href="/home.css" />
+</head>
+<body>
+  <%- include('navbar') %>
+  <div class="container">
+    <header>
+      <h1>Welcome to Your Flat Dashboard</h1>
+    </header>
+
+    <main>
+      <section class="dashboard-section">
+        <h2>Events This Week</h2>
+        <ul>
+          <% if (events && events.length > 0) { %>
+            <% events.forEach(event => { %>
+              <li>
+                <strong><%= event.title %></strong>
+                <%= new Date(event.date).toLocaleString() %>
+              </li>
+            <% }) %>
+          <% } else { %>
+            <li>No upcoming events</li>
+          <% } %>
+        </ul>
+      </section>
+
+      <section class="dashboard-section">
+        <h2>Tasks To Do</h2>
+        <ul>
+          <% if (tasks && tasks.length > 0) { %>
+            <% tasks.forEach(task => { %>
+              <li>
+                <strong><%= task.name %></strong> – <%= task.Description %>
+              </li>
+            <% }) %>
+          <% } else { %>
+            <li>No tasks assigned</li>
+          <% } %>
+        </ul>
+      </section>
+
+      <section class="dashboard-section">
+        <h2>Upcoming Bills</h2>
+        <ul>
+          <% if (bills && bills.length > 0) { %>
+            <% bills.forEach(bill => { %>
+              <li>
+                <strong><%= bill.name %></strong> – $<%= bill.amount.toFixed(2) %>, due 
+                <%= new Date(bill.dueDate).toLocaleDateString() %>
+              </li>
+            <% }) %>
+          <% } else { %>
+            <li>No bills due this week</li>
+          <% } %>
+        </ul>
+      </section>
+    </main>
+  </div>
+</body>
+</html>

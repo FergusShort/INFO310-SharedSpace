@@ -26,6 +26,17 @@ router.get("/signup", async (req, res) => {
   res.render("signup");
 });
 
+router.get("/logout", async (req, res) => {
+  req.session.destroy(err => {
+    if (err) {
+      console.error("Error destroying session:", err);
+      return res.status(500).send("Could not log out. Try again.");
+    }
+    res.clearCookie("connect.sid"); // optional, clears session cookie
+    res.redirect("/login");         // or wherever your login page is
+  });
+});
+
 router.get("/createGroup", async (req, res) => {
   if (!req.session.userId) {
     return res.render("signup");
@@ -39,6 +50,58 @@ router.get("/joinGroup", async (req, res) => {
   }
   res.render("joinGroup");
 });
+
+/*router.get("/home", async (req, res) => {
+  if (!req.session.userId) {
+      return res.render("signup");
+  } else if (!req.session.flat_Id) {
+      return res.render("createGroup");
+  }
+
+  res.render("home");
+});*/
+
+router.get("/home", async (req, res) => {
+  if (!req.session.userId || !req.session.flat_Id) {
+    return res.redirect("/login");
+  }
+
+  const flatId = req.session.flat_Id;
+  const db = pool.promise();
+
+  const events_query = `SELECT Title AS title, Start_Time AS date FROM Events WHERE Flat_ID = ? AND Start_Time BETWEEN NOW() AND DATE_ADD(NOW(), INTERVAL 7 DAY) ORDER BY Start_Time ASC;`;
+
+  const tasks_query = `SELECT Title AS name, Description, Chore_ID FROM Chores WHERE Flat_ID = ? AND Completed = FALSE ORDER BY Priority DESC;`;
+
+  const bills_query = `SELECT Title AS name, Initial_Amount AS amount, Due_Date AS dueDate FROM Bills WHERE Flat_ID = ? AND Due_Date BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 7 DAY) ORDER BY Due_Date ASC;`;
+
+  try {
+    const [eventRows] = await db.query(events_query, [flatId]);
+    const [taskRows] = await db.query(tasks_query, [flatId]);
+    const [billRows] = await db.query(bills_query, [flatId]);
+
+    return res.render("home", {
+      events: eventRows,
+      tasks: taskRows,
+      bills: billRows,
+    });
+
+  } catch (err) {
+    console.error("Home route error:\n", err);
+    return res.status(500).send("Error loading dashboard. Please try again.");
+  }
+});
+
+
+
+
+
+
+
+
+
+
+
 
 router.get("/groceries", async (req, res) => {
   if (!req.session.userId) {
@@ -357,9 +420,9 @@ router.post("/login/submit", async (req, res) => {
 
         if (rows[0].Flat_ID != null) {
           req.session.flat_Id = rows[0].Flat_ID;
-          return res.redirect("/calendar");
+          return res.redirect("/home");
         } else {
-          return res.redirect("/createGroup");
+          return res.redirect("/joinGroup");
         }
       }
     }
@@ -412,7 +475,7 @@ router.post("/signup/submit", async (req, res) => {
   } catch (err) {
     console.error("An error occurred: " + err);
   }
-  return res.redirect("/createGroup");
+  return res.redirect("/joinGroup");
 });
 
 router.post("/createGroup/create", async (req, res) => {
@@ -436,7 +499,7 @@ router.post("/createGroup/create", async (req, res) => {
     console.error("You haven't set up the database yet!!!" + err);
   }
 
-  return res.redirect("/calendar");
+  return res.redirect("/home");
 });
 
 router.post("/joinGroup/join", async (req, res) => {
@@ -461,7 +524,7 @@ router.post("/joinGroup/join", async (req, res) => {
     console.error("You haven't set up the database yet!!" + err);
   }
 
-  return res.redirect("/calendar");
+  return res.redirect("/home");
 });
 
 async function makeFlatID() {
