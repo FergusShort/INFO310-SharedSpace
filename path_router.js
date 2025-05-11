@@ -26,6 +26,17 @@ router.get("/signup", async (req, res) => {
   res.render("signup");
 });
 
+router.get("/logout", async (req, res) => {
+  req.session.destroy(err => {
+    if (err) {
+      console.error("Error destroying session:", err);
+      return res.status(500).send("Could not log out. Try again.");
+    }
+    res.clearCookie("connect.sid"); // optional, clears session cookie
+    res.redirect("/login");         // or wherever your login page is
+  });
+});
+
 router.get("/createGroup", async (req, res) => {
   if (!req.session.userId) {
     return res.render("signup");
