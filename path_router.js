@@ -668,12 +668,32 @@ router.post("/groceries/add", async (req, res) => {
   }
 });
 
+router.post("/groceries/update-status", async (req, res) => {
+  const { flatId, item, checked } = req.body;
+
+  const db = pool.promise();
+  const updateQuery = `
+      UPDATE Groceries 
+      SET Checked_State = ? 
+      WHERE Flat_ID = ? AND Item = ?;
+  `;
+
+  try {
+    await db.query(updateQuery, [checked, flatId, item]);
+    res.status(200).send("Status updated");
+  } catch (err) {
+    console.error("Error updating grocery item status:", err);
+    res.status(500).send("Error updating grocery item status.");
+  }
+});
+
+
 router.post("/groceries/clear-checked", async (req, res) => {
-  const checkedItems = req.body.checkedItems; // Array of checked item IDs
+  const checkedItems = req.body.checkedItems;
 
   const db = pool.promise();
   const deleteQuery = `
-        DELETE FROM Groceries WHERE Grocery_ID IN (?);
+        DELETE FROM Groceries WHERE (Flat_ID, Item) IN (?);
     `;
 
   try {

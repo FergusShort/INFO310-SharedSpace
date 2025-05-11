@@ -28,7 +28,12 @@
                     <tbody id="checklist">
                         <% groceries.forEach(grocery=> { %>
                             <tr>
-                                <td><input type="checkbox" name="checkedItems" value="<%= grocery.ID %>"></td>
+                                <td><input type="checkbox" name="checkedItems"
+                                        value='["<%= grocery.Flat_ID %>", "<%= grocery.Item %>"]' <% if
+                                        (grocery.Checked_State) { %> checked <% } %>
+                                        onchange="updateStatus('<%= grocery.Flat_ID %>', '<%= grocery.Item %>',
+                                                this.checked)">
+                                </td>
                                 <td>
                                     <%= grocery.Item %>
                                 </td>
@@ -92,6 +97,20 @@
             }
 
             window.addEventListener("DOMContentLoaded", calculateTotal);
+
+            function updateStatus(flatId, item, checked) {
+                const xhr = new XMLHttpRequest();
+                xhr.open("POST", "/groceries/update-status", true);
+                xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+                xhr.onload = function () {
+                    if (xhr.status === 200) {
+                        console.log("Item status updated successfully");
+                    } else {
+                        console.log("Error updating item status");
+                    }
+                };
+                xhr.send("flatId=" + flatId + "&item=" + item + "&checked=" + (checked ? 1 : 0));
+            }
         </script>
 
 </body>
