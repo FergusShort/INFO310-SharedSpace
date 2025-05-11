@@ -420,9 +420,9 @@ router.post("/login/submit", async (req, res) => {
 
         if (rows[0].Flat_ID != null) {
           req.session.flat_Id = rows[0].Flat_ID;
-          return res.redirect("/calendar");
+          return res.redirect("/home");
         } else {
-          return res.redirect("/createGroup");
+          return res.redirect("/joinGroup");
         }
       }
     }
@@ -475,7 +475,7 @@ router.post("/signup/submit", async (req, res) => {
   } catch (err) {
     console.error("An error occurred: " + err);
   }
-  return res.redirect("/createGroup");
+  return res.redirect("/joinGroup");
 });
 
 router.post("/createGroup/create", async (req, res) => {
@@ -499,7 +499,7 @@ router.post("/createGroup/create", async (req, res) => {
     console.error("You haven't set up the database yet!!!" + err);
   }
 
-  return res.redirect("/calendar");
+  return res.redirect("/home");
 });
 
 router.post("/joinGroup/join", async (req, res) => {
@@ -524,7 +524,7 @@ router.post("/joinGroup/join", async (req, res) => {
     console.error("You haven't set up the database yet!!" + err);
   }
 
-  return res.redirect("/calendar");
+  return res.redirect("/home");
 });
 
 async function makeFlatID() {
