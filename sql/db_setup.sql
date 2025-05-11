@@ -95,6 +95,7 @@ create table Groceries (
     Item varchar(30) not null,
     Price decimal(7, 2),
     Quantity int,
+    Checked_State boolean default false,
     constraint Grocery_PK primary key (Flat_ID, Item),
     constraint Grocery_Flat_FK foreign key (Flat_ID)
         references Flat(Flat_ID),
