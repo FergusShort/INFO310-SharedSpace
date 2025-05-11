@@ -38,7 +38,8 @@
                                     <%= grocery.Item %>
                                 </td>
                                 <td>
-                                    <%= grocery.Quantity %>
+                                    <input type="number" name="quantity" value="<%= grocery.Quantity %>" min="1"
+                                        onchange="updateQuantity('<%= grocery.Flat_ID %>', '<%= grocery.Item %>', this.value)">
                                 </td>
                                 <td>$<%= parseFloat(grocery.Price).toFixed(2) %>
                                 </td>
@@ -74,16 +75,17 @@
             </div>
         </div>
         <script>
+            // Calculate the total
             function calculateTotal() {
                 let total = 0;
                 const rows = document.querySelectorAll("#checklist tr");
 
                 rows.forEach(row => {
-                    const quantityCell = row.children[2];
+                    const quantityInput = row.children[2].querySelector('input'); // Get the input field for quantity
                     const priceCell = row.children[3];
 
-                    if (quantityCell && priceCell) {
-                        const quantity = parseInt(quantityCell.textContent.trim(), 10);
+                    if (quantityInput && priceCell) {
+                        const quantity = parseInt(quantityInput.value, 10); // Get the value from the input field
                         const priceText = priceCell.textContent.trim().replace("$", "");
                         const price = parseFloat(priceText);
 
@@ -96,8 +98,31 @@
                 document.getElementById("totalCost").textContent = `$${total.toFixed(2)}`;
             }
 
+            // update item quantity
+            function updateQuantity(flatId, item, quantity) {
+                const xhr = new XMLHttpRequest();
+                xhr.open("POST", "/groceries/update-quantity", true);
+                xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+                xhr.onload = function () {
+                    if (xhr.status === 200) {
+                        console.log("Quantity updated successfully");
+                        calculateTotal();
+                    } else {
+                        console.log("Error updating quantity");
+                    }
+                };
+                xhr.send("flatId=" + flatId + "&item=" + item + "&quantity=" + quantity);
+            }
+
+            document.querySelectorAll("input[name='quantity']").forEach(input => {
+                input.addEventListener("input", function () {
+                    calculateTotal();
+                });
+            });
+
             window.addEventListener("DOMContentLoaded", calculateTotal);
 
+            // update checkbox status
             function updateStatus(flatId, item, checked) {
                 const xhr = new XMLHttpRequest();
                 xhr.open("POST", "/groceries/update-status", true);
@@ -111,6 +136,22 @@
                 };
                 xhr.send("flatId=" + flatId + "&item=" + item + "&checked=" + (checked ? 1 : 0));
             }
+
+            //clear checked items
+            document.getElementById("clear-checked").addEventListener("click", (event) => {
+                event.preventDefault();
+
+                fetch("/groceries/clear-checked", { method: "POST" })
+                    .then(response => {
+                        if (response.ok) {
+                            location.reload();
+                        } else {
+                            console.error("Failed to clear checked items");
+                        }
+                    })
+                    .catch(error => console.error("Error:", error));
+            });
+
         </script>
 
 </body>

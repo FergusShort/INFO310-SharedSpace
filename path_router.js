@@ -731,6 +731,26 @@ router.post("/groceries/add", async (req, res) => {
   }
 });
 
+router.post("/groceries/update-quantity", async (req, res) => {
+  const { flatId, item, quantity } = req.body;
+
+  const db = pool.promise();
+  const updateQuery = `
+      UPDATE Groceries
+      SET Quantity = ?
+      WHERE Flat_ID = ? AND Item = ?
+  `;
+
+  try {
+      await db.query(updateQuery, [quantity, flatId, item]);
+      res.status(200).send("Quantity updated successfully");
+  } catch (err) {
+      console.error("Error updating quantity:", err);
+      res.status(500).send("Error updating quantity.");
+  }
+});
+
+
 router.post("/groceries/update-status", async (req, res) => {
   const { flatId, item, checked } = req.body;
 
@@ -752,21 +772,20 @@ router.post("/groceries/update-status", async (req, res) => {
 
 
 router.post("/groceries/clear-checked", async (req, res) => {
-  const checkedItems = req.body.checkedItems;
-
-  const db = pool.promise();
-  const deleteQuery = `
-        DELETE FROM Groceries WHERE (Flat_ID, Item) IN (?);
-    `;
+  const clearCheckedQuery = `
+  DELETE FROM Groceries WHERE Checked_State = 1;
+`;
 
   try {
-    await db.query(deleteQuery, [checkedItems]);
+    await pool.promise().query(clearCheckedQuery);
     res.redirect("/groceries");
-  } catch (err) {
-    console.error("Error clearing checked grocery items:", err);
-    res.status(500).send("Error clearing checked grocery items.");
+  } catch (error) {
+    console.error("Error clearing checked items:", error);
+    res.status(500).send("Internal Server Error");
   }
 });
+
+
 
 router.post("/groceries/clear-all", async (req, res) => {
   const flatId = req.session.flat_Id;
