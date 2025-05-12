@@ -16,7 +16,15 @@
 
     <main>
       <section class="dashboard-section">
-        <h2>Events This Week</h2>
+        <div class="dashboard-header">
+  <h2>Events This Week</h2>
+  <a href="/events" class="arrow-icon" title="Go to Events Page">
+    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M9 6l6 6-6 6" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </a>
+</div>
+
         <ul>
           <% if (events && events.length > 0) { %>
             <% events.forEach(event => { %>
@@ -32,12 +40,18 @@
       </section>
 
       <section class="dashboard-section">
-        <h2>Tasks To Do</h2>
-        <ul>
+        <div class="dashboard-header">
+  <h2>Tasks To Do</h2>
+  <a href="/chores" class="arrow-icon" title="Go to Tasks Page">
+    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M9 6l6 6-6 6" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </a>
+</div>
           <% if (tasks && tasks.length > 0) { %>
             <% tasks.forEach(task => { %>
               <li>
-                <strong><%= task.name %></strong> – <%= task.Description %>
+                <strong><%= task.name %></strong> - <%= task.Description %>
               </li>
             <% }) %>
           <% } else { %>
@@ -47,12 +61,19 @@
       </section>
 
       <section class="dashboard-section">
-        <h2>Upcoming Bills</h2>
+        <div class="dashboard-header">
+  <h2>Upcoming Bills</h2>
+  <a href="/bills" class="arrow-icon" title="Go to Bills Page">
+    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M9 6l6 6-6 6" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </a>
+</div>
         <ul>
           <% if (bills && bills.length > 0) { %>
             <% bills.forEach(bill => { %>
               <li>
-                <strong><%= bill.name %></strong> – $<%= bill.amount.toFixed(2) %>, due 
+                <strong><%= bill.name %></strong> - $<%= bill.amount.toFixed(2) %>, due 
                 <%= new Date(bill.dueDate).toLocaleDateString() %>
               </li>
             <% }) %>
