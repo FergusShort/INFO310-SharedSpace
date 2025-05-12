@@ -51,9 +51,13 @@
         <ul>
           <% if (bills && bills.length > 0) { %>
             <% bills.forEach(bill => { %>
+              <% const isOverdue = new Date(bill.dueDate) < new Date(); %>
               <li>
-                <strong><%= bill.name %></strong> – $<%= bill.amount.toFixed(2) %>, due 
+                <strong><%= bill.name %></strong> – $<%= bill.amount %>,
                 <%= new Date(bill.dueDate).toLocaleDateString() %>
+                <% if (isOverdue) { %>
+                  <span class="overdue-label">(Overdue)</span>
+                <% } %>
               </li>
             <% }) %>
           <% } else { %>

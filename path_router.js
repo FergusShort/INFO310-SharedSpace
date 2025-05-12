@@ -73,7 +73,7 @@ router.get("/home", async (req, res) => {
 
   const tasks_query = `SELECT Title AS name, Description, Chore_ID FROM Chores WHERE Flat_ID = ? AND Completed = FALSE ORDER BY Priority DESC;`;
 
-  const bills_query = `SELECT Title AS name, Initial_Amount AS amount, Due_Date AS dueDate FROM Bills WHERE Flat_ID = ? AND Due_Date BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 7 DAY) ORDER BY Due_Date ASC;`;
+  const bills_query = `SELECT Title AS name, Initial_Amount AS amount, Due_Date AS dueDate FROM Bills WHERE Flat_ID = ? AND (Due_Date BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 7 DAY) OR Due_Date < CURDATE()) ORDER BY Due_Date ASC;`;
 
   try {
     const [eventRows] = await db.query(events_query, [flatId]);
@@ -215,17 +215,22 @@ async function getBillsWithUserPaymentStatus(sortType = "all", flatID, userId) {
   `;
   let billParams = [userId, userId, userId, flatID];
 
-  if (sortType === "week") {
-    const nextWeek = new Date(today);
-    nextWeek.setDate(today.getDate() + 7);
-    billQuery += ` AND b.Due_Date BETWEEN ? AND ?`;
-    billParams = [userId, userId, userId, flatID, today, nextWeek];
-  } else if (sortType === "month") {
-    const nextMonth = new Date(today);
-    nextMonth.setMonth(today.getMonth() + 1);
-    billQuery += ` AND b.Due_Date BETWEEN ? AND ?`;
-    billParams = [userId, userId, userId, flatID, today, nextMonth];
-  }
+
+if (sortType === "week") {
+  const nextWeek = new Date(today);
+  nextWeek.setDate(today.getDate() + 7);
+  billQuery += ` AND (Due_Date BETWEEN ? AND ? OR Due_Date < CURDATE()) ORDER BY Due_Date ASC`;
+  billParams.push(today, nextWeek);
+} else if (sortType === "month") {
+  const nextMonth = new Date(today);
+  nextMonth.setMonth(today.getMonth() + 1);
+  billQuery += ` AND (Due_Date BETWEEN ? AND ? OR Due_Date < CURDATE()) ORDER BY Due_Date ASC`;
+  billParams.push(today, nextMonth);
+} else {
+  // Default case: Show all upcoming and past due bills?
+  billQuery += ` AND Due_Date <= DATE_ADD(CURDATE(), INTERVAL 7 DAY) OR Due_Date < CURDATE() ORDER BY Due_Date ASC`;
+  // If you want to show all past and future, you might remove the date condition entirely
+}
 
   try {
     const [rows] = await db.query(billQuery, billParams);

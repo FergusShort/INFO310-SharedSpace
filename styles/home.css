@@ -61,3 +61,8 @@ body {
     color: #2c3e50;
   }
   
+  .overdue-label {
+    color: red;
+    font-weight: bold;
+    margin-left: 5px;
+  }

@@ -7,7 +7,7 @@
 
 body {
     background-color: white;
-    color: #172b4d;
+    color: #3498db;
     height: 100vh;
     display: flex;
     justify-content: center;
@@ -22,7 +22,7 @@ body {
     background-color: white;
     border-radius: 10px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    border: 1px solid #0052cc;
+    border: 1px solid #3498db;
     overflow-y: auto;
     max-height: 99vh;
 
@@ -77,7 +77,7 @@ form input[type="date"] {
 }
 
 form input:focus {
-    border: 1px solid #0052cc;
+    border: 1px solid #3498db;
 }
 
 .recurring-wrapper {
@@ -97,7 +97,7 @@ form button,
 .pay-share-button,
 .pay-button,
 .delete-button {
-    background: rgb(126, 158, 227);
+    background: #3498db;
     color: white;
     padding: 0.8rem;
     border: none;
@@ -111,7 +111,7 @@ form button:hover,
 .pay-share-button:hover,
 .pay-button:hover,
 .delete-button:hover {
-    background: #003380;
+    background: #3498db;
 }
 
 /* --- BILL CARDS --- */
@@ -152,7 +152,7 @@ form button:hover,
 
 .bill-info p.remaining {
     font-weight: bold;
-    color: #0052cc;
+    color: #3498db;
 }
 
 .bill-info p.paid {
@@ -179,7 +179,7 @@ form button:hover,
 }
 
 .pay-button {
-    background-color: rgb(126, 158, 227);
+    background-color: #3498db;
 }
 
 .pay-button:hover {
@@ -187,7 +187,7 @@ form button:hover,
 }
 
 .delete-button {
-    background-color: rgb(126, 158, 227);
+    background-color: #3498db
 }
 
 .delete-button:hover {
@@ -196,7 +196,7 @@ form button:hover,
 
 /* --- PAY SHARE BUTTON --- */
 .pay-share-button {
-    background-color: rgb(126, 158, 227);
+    background-color: #3498db;
     transition: background 0.3s;
 }
 
@@ -204,23 +204,116 @@ form button:hover,
     background-color: rgb(188, 65, 212);
 }
 
-/* --- MOBILE --- */
-@media (max-width: 600px) {
+
+
+  
+  .bill-card.overdue-bill {
+    background-color: #ffe0e0; /* Light red background */
+    border: 1px solid #ffaaaa; /* Red border */
+  }@media (max-width: 600px) {
     .bill-card {
-        width: 100%; 
+        width: 100%;
         flex-direction: column;
-        align-items: flex-start;
+        align-items: stretch;
         gap: 15px;
     }
 
-    .bill-actions {
-        flex-direction: row;
-        width: 100%; 
-        justify-content: space-between;
+    .bill-info {
+        margin-right: 0;
+        margin-bottom: 15px;
     }
 
-    .bill-actions button {
+    .bill-actions {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        gap: 10px;
+    }
+
+    .bill-actions form {
+        display: flex;
+        flex-direction: row;
+        gap: 10px;
+        align-items: center;
+    }
+
+    .bill-actions form input[type="number"] {
         flex-grow: 1;
+        min-width: 0;
+        padding: 0.6rem;
+        font-size: 0.9rem;
+        border-radius: 15px;
+    }
+
+
+    .pay-share-button,
+    .pay-button {
+        flex-grow: 1;
+        padding: 0.6rem;
+        font-size: 0.9rem;
+        border-radius: 15px;
+        min-width: 0;
+        text-align: center;
+        height: 2.5em; /* Adjust this value as needed */
+        line-height: 1.2em; /* Adjust line height for better text wrapping */
+    }
+    .pay-button {
+        font-size: 0.9rem; /* Keep the "Pay" button's original size */
+    }
+
+    .pay-share-button {
+        font-size: 0.8rem; /* Slightly smaller font size for "My Share" */
+        line-height: 1em; /* Adjust line height for the smaller text */
+    }
+
+
+    .delete-button {
+        width: 100%;
+        padding: 0.6rem;
+        font-size: 0.9rem;
+        border-radius: 15px;
+    }
+
+    .recurring-container {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    .recurring-container > div { 
+        display: flex;
+        align-items: center; 
+        justify-content: flex-start; 
+        gap: 5px;
+    }
+    .recurring-label {
+        display: flex;
+        align-items: center; /* Vertically align label and checkbox */
+        justify-content: flex-start; /* Align to the left */
+        width: 100%; /* Take full width */
+        padding-left: 20%; /* Add left padding to visually center */
+        box-sizing: border-box; /* Include padding in width calculation */
+    }
+
+    .recurring-label label {
+        text-align: left; /* Ensure label text is left-aligned */
+        flex-shrink: 0;
+    }
+
+    .recurring-label input[type="checkbox"] {
+        width: auto;
+    }
+
+  
+
+
+
+    .recurring-container input[type="number"] {
+        width: 100%;
+        padding: 0.6rem;
+        border: 1px solid lightgray;
+        border-radius: 25px;
+        outline: none;
+        box-sizing: border-box;
     }
 }
-
