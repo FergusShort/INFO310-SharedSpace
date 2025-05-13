@@ -7,7 +7,7 @@
             
             document.querySelector("#edit input[name='id']").value = event.id;
             document.querySelector("#edit input[name='title']").value = event.title;
-            document.querySelector("#edit input[name='desc']").value = event.descr;
+            document.querySelector("#edit input[name='desc']").value = event.description;
             document.querySelector("#edit input[name='start_time']").value = event.start;
             document.querySelector("#edit input[name='end_time']").value = event.end;
         };
@@ -19,7 +19,14 @@
     <button class="updatebutton" id="editbutton" onclick='editEventOpenMenu(<%- JSON.stringify(event) %>)'>✎</button>
     <p><b>Name:</b> <%- event.title %></p>
     <p><b>Description:</b></p>
-    <p><%- event.descr %></p>
+    <p><%- event.description %></p>
     <p><b>Start:</b> <%- event.start %></p>
     <p><b>End:</b> <%- event.end %></p>
+    <p><b>People:</b> 
+        <% if (event.people.length > 0) { %> 
+        <%- event.people.join(', ') %>
+        <% } else { %>
+        --
+        <% } %>
+    </p>
 </div>

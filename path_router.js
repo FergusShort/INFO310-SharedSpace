@@ -512,9 +512,18 @@ router.get("/calendar", async (req, res) => {
     return res.render("createGroup");
   }
   const db = pool.promise();
-  const query = `
-    SELECT Event_ID as id, Title as title, Description as descr, Start_Time as start, End_Time as end
+  const events_query = `
+    SELECT Event_ID as id, Title as title, Description as description, Start_Time as start, End_Time as end
     FROM Events where Flat_ID = ?;
+  `;
+  const flat_query = `
+    SELECT User_ID, Username FROM User WHERE Flat_ID = ?;
+  `;
+  const people_query = `
+    SELECT Username 
+    FROM Users_Events 
+    INNER JOIN User on User.User_ID=Users_Events.User_ID 
+    WHERE Event_ID=?;
   `;
 
   try {
@@ -523,15 +532,28 @@ router.get("/calendar", async (req, res) => {
       return res.status(400).send("Flat ID is missing.");
     }
 
-    const [rows, fields] = await db.query(query, req.session.flat_Id);
+    let [rows, fields] = await db.query(events_query, [req.session.flat_Id]);
     res.status(200);
     let events = rows;
     for (let i = 0; i < events.length; i++) {
       events[i].start = format(new Date(events[i].start), "yyyy-MM-dd HH:mm:SS");
       events[i].end = format(new Date(events[i].end), "yyyy-MM-dd HH:mm:SS");
+
+      [rows, fields] = await db.query(people_query, [events[i].id]);
+      people = [];
+
+      for (let j = 0; j < rows.length; j++) {
+        people.push(rows[j].Username);
+      }
+
+      console.log(people);
+      events[i].people = people;
     }
 
-    res.render("calendar", { events: events });
+    [rows, fields] = await db.query(flat_query, [req.session.flat_Id]);
+    let flatmates = rows
+
+    res.render("calendar", { events: events, flatmates: flatmates });
   } catch (err) {
     console.error("Error fetching events:", err);
     res.status(500).send("Server error.");
@@ -540,22 +562,41 @@ router.get("/calendar", async (req, res) => {
 
 router.post("/calendar/addevent", async (req, res) => {
   const db = pool.promise();
-  const stmt = `
+  const event_stmt = `
     INSERT INTO Events(Flat_ID, Title, Description, Start_Time, End_Time)
     VALUES (?, ?, ?, ?, ?);
   `;
+  const flat_stmt = `
+    INSERT INTO Users_Events(User_ID, Event_ID)
+    VALUES (?, ?);
+  `;
+
   const flat_id = req.session.flat_Id;
   const title = req.body.title;
   const desc = req.body.desc;
   const start = format(new Date(req.body.start_time), "yyyy-MM-dd HH:mm:SS");
   const end = format(new Date(req.body.end_time), "yyyy-MM-dd HH:mm:SS");
 
+  console.log(req.body);
+
   try {
-    await db.query(stmt, [flat_id, title, desc, start, end]);
+    const [eventResult] = await db.query(event_stmt, [flat_id, title, desc, start, end]);
+    const event_id = eventResult.insertId;
+
+    for (let i = 0; i < req.body.flatmates.length; i++) {
+      await db.query(flat_stmt, [req.body.flatmates[i], event_id]);
+    };
+
     res.redirect("/calendar");
   } catch (err) {
     console.error("Error adding event:", err);
-    res.status(500).send("Error adding event.");
+    console.log(err);
+    res.status(500).send(`
+      <script>
+        window.location.href = '/calendar';
+        alert('Error adding event, please try again.');
+      </script>
+    `);
   }
 });
 
@@ -571,7 +612,12 @@ router.post("/calendar/:id/deleteevent", async (req, res) => {
     res.redirect("/calendar");
   } catch (err) {
     console.error("Error deleting event:", err);
-    res.status(500).send("Error deleting event.");
+    res.status(500).send(`
+      <script>
+        window.location.href = '/calendar';
+        alert('Error deleting event, please try again.');
+      </script>
+    `);
   }
 });
 
@@ -593,9 +639,13 @@ router.post("/calendar/editevent", async (req, res) => {
     res.redirect("/calendar");
   } catch (err) {
     console.error("Error editing event:", err);
-    res.status(500).send("Error editing event.");
+    res.status(500).send(`
+      <script>
+        window.location.href = '/calendar';
+        alert('Error editing event, please try again.');
+      </script>
+    `);
   }
-
 });
 
 router.post('/groceries/add', async (req, res) => {
