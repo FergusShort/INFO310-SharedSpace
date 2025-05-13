@@ -8,6 +8,7 @@ grant all on *.* to 'sharedspace' with grant option;
 
 use SharedSpace;
 
+drop table if exists user_payments;
 drop table if exists Chore_Assignment;
 drop table if exists Users_Events;
 drop table if exists User;
@@ -74,18 +75,34 @@ CREATE TABLE Bills (
 );
 
 
+CREATE TABLE user_payments (
+    Payment_ID SERIAL PRIMARY KEY,
+    User_ID INT NOT NULL,
+    Bill_ID INT NOT NULL,
+    User_Amount_paid DECIMAL(10, 2) DEFAULT 0.00,
+    User_Share_amount DECIMAL(10, 2),
+    User_Payment_status VARCHAR(20) DEFAULT 'not paid',
+    FOREIGN KEY (User_ID) REFERENCES User(User_ID),
+    FOREIGN KEY (Bill_ID) REFERENCES Bills(Bill_ID)
+);
+
+
+
 -- Instances represent grocery items for grocery list 
 -- A flat can have multiple groceries, a grocery item must be associated with a flat
 create table Groceries (
     Flat_ID varchar(10) not null,
-    Item varchar(30) unique not null,
+    Item varchar(30) not null,
     Price decimal(7, 2),
     Quantity int,
+    Checked_State boolean default false,
     constraint Grocery_PK primary key (Flat_ID, Item),
     constraint Grocery_Flat_FK foreign key (Flat_ID)
         references Flat(Flat_ID),
     constraint Price_Quantity_CHK check (Quantity > 0 and Price > 0)
 );
+alter table Groceries drop index Item;
+
 
 -- Instances represent jobs / chores to do for chore list
 -- A Flat can have multiple chores, a chore must be associated with a flat

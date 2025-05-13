@@ -127,12 +127,8 @@
     box-shadow: none;
 }
 
-/* Add smooth transition to main content */
 .container {
-    transition: margin-left 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    margin-left: 20px;
-}
-
-.container.sidebar-hidden {
-    margin-left: 0;
+  transition: filter 0.3s ease;
+  position: relative;
+  z-index: 1;
 }

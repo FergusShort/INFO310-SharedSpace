@@ -25,7 +25,27 @@
                             <th id="price">Price</th>
                         </tr>
                     </thead>
-                    <tbody id="checklist"></tbody>
+                    <tbody id="checklist">
+                        <% groceries.forEach(grocery=> { %>
+                            <tr>
+                                <td><input type="checkbox" name="checkedItems"
+                                        value='["<%= grocery.Flat_ID %>", "<%= grocery.Item %>"]' <% if
+                                        (grocery.Checked_State) { %> checked <% } %>
+                                        onchange="updateStatus('<%= grocery.Flat_ID %>', '<%= grocery.Item %>',
+                                                this.checked)">
+                                </td>
+                                <td>
+                                    <%= grocery.Item %>
+                                </td>
+                                <td>
+                                    <input type="number" name="quantity" value="<%= grocery.Quantity %>" min="1"
+                                        onchange="updateQuantity('<%= grocery.Flat_ID %>', '<%= grocery.Item %>', this.value)">
+                                </td>
+                                <td>$<%= parseFloat(grocery.Price).toFixed(2) %>
+                                </td>
+                            </tr>
+                            <% }) %>
+                    </tbody>
                 </table>
 
             </div>
@@ -45,14 +65,95 @@
 
                 <div class="buttons-bottom">
                     <form action="/groceries/clear-checked" method="POST">
-                        <button id="clear-checked" onclick="clearChecked()" type="button">Clear checked</button>
+                        <button id="clear-checked" type="submit">Clear checked</button>
                     </form>
+
                     <form action="/groceries/clear-all" method="POST">
-                        <button id="clear-all" onclick="clearAll()" type="button">Clear all</button>
+                        <button id="clear-all" type="submit">Clear all</button>
                     </form>
                 </div>
             </div>
         </div>
+        <script>
+            // Calculate the total
+            function calculateTotal() {
+                let total = 0;
+                const rows = document.querySelectorAll("#checklist tr");
+
+                rows.forEach(row => {
+                    const quantityInput = row.children[2].querySelector('input'); // Get the input field for quantity
+                    const priceCell = row.children[3];
+
+                    if (quantityInput && priceCell) {
+                        const quantity = parseInt(quantityInput.value, 10); // Get the value from the input field
+                        const priceText = priceCell.textContent.trim().replace("$", "");
+                        const price = parseFloat(priceText);
+
+                        if (!isNaN(quantity) && !isNaN(price)) {
+                            total += quantity * price;
+                        }
+                    }
+                });
+
+                document.getElementById("totalCost").textContent = `$${total.toFixed(2)}`;
+            }
+
+            // update item quantity
+            function updateQuantity(flatId, item, quantity) {
+                const xhr = new XMLHttpRequest();
+                xhr.open("POST", "/groceries/update-quantity", true);
+                xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+                xhr.onload = function () {
+                    if (xhr.status === 200) {
+                        console.log("Quantity updated successfully");
+                        calculateTotal();
+                    } else {
+                        console.log("Error updating quantity");
+                    }
+                };
+                xhr.send("flatId=" + flatId + "&item=" + item + "&quantity=" + quantity);
+            }
+
+            document.querySelectorAll("input[name='quantity']").forEach(input => {
+                input.addEventListener("input", function () {
+                    calculateTotal();
+                });
+            });
+
+            window.addEventListener("DOMContentLoaded", calculateTotal);
+
+            // update checkbox status
+            function updateStatus(flatId, item, checked) {
+                const xhr = new XMLHttpRequest();
+                xhr.open("POST", "/groceries/update-status", true);
+                xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+                xhr.onload = function () {
+                    if (xhr.status === 200) {
+                        console.log("Item status updated successfully");
+                    } else {
+                        console.log("Error updating item status");
+                    }
+                };
+                xhr.send("flatId=" + flatId + "&item=" + item + "&checked=" + (checked ? 1 : 0));
+            }
+
+            //clear checked items
+            document.getElementById("clear-checked").addEventListener("click", (event) => {
+                event.preventDefault();
+
+                fetch("/groceries/clear-checked", { method: "POST" })
+                    .then(response => {
+                        if (response.ok) {
+                            location.reload();
+                        } else {
+                            console.error("Failed to clear checked items");
+                        }
+                    })
+                    .catch(error => console.error("Error:", error));
+            });
+
+        </script>
+
 </body>
 
 </html>

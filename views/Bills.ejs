@@ -25,26 +25,52 @@
                     min="0.01"
                     required
                      />
-                    <input
-                    type="text"
-                    name="description"
-                    placeholder="Description (optional)"
-                    maxlength="100"
-                    />
-                <input type="date" name="due_date" id="due_date" required />
-                <div class="recurring-container">
-                    <label for="recurring">Recurring:</label>
-                    <input type="checkbox" name="recurring" id="recurring" />
-                    <label for="time_period">Till Next Bill (Days):</label>
-                    <input
-                        type="number"
-                        name="time_period"
-                        id="time_period"
-                        placeholder="e.g., 7 days"
-                        disabled
-                        required
-                    />
-                </div>
+
+                    <div>
+                        <label for="due_date">Due Date:</label>
+                        <input type="date" name="due_date" id="due_date" max="9999-12-31" required />
+                    </div>
+                    <div class="recurring-container">
+                        <label for="recurring">Reoccurring:</label>
+                        <input type="checkbox" name="recurring" id="recurring" />
+                        <label for="time_period"> Next Bill (Days):</label>
+                        <input
+                            type="number"
+                            name="time_period"
+                            id="time_period"
+                            placeholder="e.g., 7 days"
+                            disabled
+                            required
+                        />
+                    </div>
+                    
+                    <script>
+                        function adjustRecurringLabel() {
+                            const recurringContainer = document.querySelector('.recurring-container');
+                            const recurringLabel = recurringContainer.querySelector('label[for="recurring"]');
+                            const recurringCheckbox = recurringContainer.querySelector('input[name="recurring"]');
+                    
+                            if (window.innerWidth <= 600) {
+                                const labelDiv = document.createElement('div');
+                                labelDiv.classList.add('recurring-label');
+                                recurringContainer.insertBefore(labelDiv, recurringLabel); 
+                                labelDiv.appendChild(recurringLabel);
+                                labelDiv.appendChild(recurringCheckbox);
+                            } else {
+                                const labelDiv = recurringContainer.querySelector('.recurring-label');
+                                if (labelDiv) {
+                                    recurringContainer.insertBefore(recurringLabel, labelDiv); 
+                                    recurringContainer.insertBefore(recurringCheckbox, recurringLabel.nextSibling); 
+                                    labelDiv.remove(); 
+                                }
+                            }
+                        }
+                    
+                
+                        adjustRecurringLabel();
+                    
+      
+                    </script>
 
                 <button type="submit">Add Bill</button>
             </form>
@@ -58,27 +84,34 @@
                 <option value="/bills?sort=all" <% if (sort === 'all') { %> selected <% } %>>All Bills</option>
             </select>
         </div>
-
+<br> <br/>
         <div class="bills-container">
             <% if (bills && bills.length > 0) { %>
                 <% bills.forEach(bill => { %>
-                    <div class="bill-card">
+                    <% const isOverdue = new Date(bill.Due_Date) < new Date(); %>
+                    <div class="bill-card <%= isOverdue ? 'overdue-bill' : '' %>">
                         <div class="bill-info">
                             <h2 class="bill-title"><%= bill.Title %></h2>
-                            <% if (bill.Description) { %>
-                                <p class="bill-description"><%= bill.Description %></p>
-                            <% } %>
-
                             <p>Amount: $<%= bill.Initial_Amount %></p>
                             <p>
                                 Due Date: <%= new Date(bill.Due_Date).toLocaleDateString() || 'N/A' %>
                             </p>
                             <p>
-                                Status: <% if (bill.Payment_Status === 'F') { %> Paid <% } else if (bill.Payment_Status === 'P') { %> Partially Paid <% } else { %> Unpaid <% } %>
-                            </p>
-                            <p>
                                 Remaining: $<%= (bill.Amount_Left)%>
                             </p>
+                            <% if (bill.User_Payment_Status) { %>
+                                <p>Your Status: <span class="<%= bill.User_Payment_Status %>"><%= bill.User_Payment_Status.toUpperCase() %></span></p>
+                                <p>You Paid: $<%= bill.User_Amount_paid ? bill.User_Amount_paid : '0.00' %></p>
+                                <p>You Owe:
+                                    <% if (bill.User_Share_amount && bill.User_Amount_paid) { %>
+                                      $<%= Math.max(0, (bill.User_Share_amount - bill.User_Amount_paid)).toFixed(2) %>
+                                    <% } else if (bill.User_Share_amount) { %>
+                                      $<%= bill.User_Share_amount.toFixed(2) %>
+                                    <% } else { %>
+                                      N/A
+                                    <% } %>
+                                  </p>
+                            <% } %>
                         </div>
                         <div class="bill-actions">
                             <% if (bill.Payment_Status !== 'F') { %>
@@ -88,7 +121,7 @@
                                         type="number"
                                         name="amount_paid"
                                         id="customAmount_<%= bill.Bill_ID %>"
-                                        placeholder="Enter amount"
+                                        placeholder="Amount"
                                         min="0.01"
                                         step="0.01"
                                         max="<%= (bill.Amount_Left) %>"
@@ -100,6 +133,7 @@
                                         class="pay-share-button"
                                         data-bill-id="<%= bill.Bill_ID %>"
                                         data-amount-left="<%= bill.Amount_Left %>"
+                                        data-num-people="<%= numPeople %>"
                                     >
                                         My Share
                                     </button>
@@ -131,13 +165,13 @@
         recurringCheckbox.addEventListener("change", function () {
             timePeriodInput.disabled = !this.checked;
         });
-        const numPeople = `<%= numPeople %>`;
 
 
         document.querySelectorAll(".pay-share-button").forEach((button) => {
             button.addEventListener("click", function () {
                 const billId = this.getAttribute("data-bill-id");
                 const amountLeft = parseFloat(this.getAttribute("data-amount-left"));
+                const numPeople = parseInt(this.getAttribute("data-num-people"));
                 const shareAmount = amountLeft / numPeople;
 
                 document.getElementById("shareAmount_" + billId).value =
@@ -149,6 +183,6 @@
 
 
     </script>
-    
+
 </body>
 </html>
