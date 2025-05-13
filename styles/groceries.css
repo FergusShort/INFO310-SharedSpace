@@ -2,164 +2,160 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+    font-family: Arial, sans-serif;
 }
 
 body {
-    font-family: Arial, sans-serif;
-    background-color: #f8f8f8;
-    color: #333;
-    padding: 20px;
+    background-color: white;
+    height: 100vh;
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100vh;
-    margin: 0;
+    padding: 20px;
 }
 
 .container {
-    width: 45%;
-    height: 100%;
-    border: 1px solid #ccc;
-    padding: 30px;
-    background-color: #fff;
-    border-radius: 5px;
     display: flex;
     flex-direction: column;
-    position: relative;
-    align-items: center;
+    justify-content: flex-start;
+    width: 100%;
+    max-width: 600px;
+    padding: 30px;
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    border: 1px solid #3498db;
+    height: 90vh;
 }
 
-h1 {
-    font-size: 2em;
-    margin-bottom: 20px;
-    right: 0;
+h1,
+th {
+    color: #3498db;
+    text-align: center;
 }
 
 .checklist-container {
-    max-height: 50%; 
+    padding: 20px;
+    margin-bottom: 20px;
+    text-align: center;
+    width: 90%;
+    margin-left: 40px;
+    height: 60%;
     overflow-y: auto;
-    width: 80%;
 }
 
-#item {
-    width: 50%;
-}
-table {
+.table {
+    margin: 0 auto;
     width: 100%;
+    border-collapse: collapse;
 }
 
-.table th, .table td {
-    padding: 10px;
-    text-align: left;
+input[name="quantity2"] {
+    width: 50px;
+    text-align: center;
 }
 
-.row-checkbox {
-    vertical-align: middle;
+.estimated-cost {
+    margin-left: 70px;
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+
 }
 
 h3 {
-    position: absolute;
-    bottom: 240px;
-    right: 120px;
+    color: #3498db;
 }
 
 p {
-    position: absolute;
-    bottom: 220px;
-    right: 120px;
+    font-weight: bold;
+    font-size: 18px;
 }
 
-input {
-    width: 100%;
-    padding: 0.8rem;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    outline: none;
-    transition: border 0.3s;
-    margin-bottom: 1rem;
-}
-
-button {
-    background: rgb(126, 158, 227);
-    height: 40px;
-    color: white;
-    padding: 0.8rem;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 0.8rem;
-    transition: background 0.3s;
-    margin: 0 0.3rem;
-}
-
-.buttons {
+.input-row {
     display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: 90%;
-    margin: 0 auto;
-    position: absolute;
-    bottom: 20px;
-}
-
-button:hover {
-    background-color: #003380;
-    transform: scale(1.01);
-}
-
-.add-form {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-}
-
-#itemInput {
-    width: 100%;
-    box-sizing: border-box;
-    margin-bottom: 0px;
-}
-
-.price-quantity-row {
-    display: flex;
+    flex-wrap: wrap;
     gap: 10px;
+    margin-top: -8px;
+    margin-bottom: 30px;
 }
 
-.price-quantity-row input {
-    flex: 1;
-    padding: 8px;
-    box-sizing: border-box;
+.input-row input[type="text"],
+.input-row input[type="number"] {
+    flex: 1 1 auto;
+    min-width: 100px;
+    padding: 0.8rem;
+    border: 1px solid lightgray;
+    border-radius: 25px;
+    text-align: center;
+    background-color: #fff;
 }
 
-.add-form button {
+.button-row {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
     width: 100%;
-    padding: 10px;
+    margin-top: 0.5rem;
+}
+
+.button-row button,
+.add-form .button-row button {
+    flex: 1 1 auto;
+    min-width: 100px;
+    max-width: 100%;
+    padding: 0.8rem;
+    font-size: 1rem;
+    border-radius: 25px;
+    background: #3498db;
+    color: white;
     border: none;
     cursor: pointer;
-    margin-top: -15px;
-    margin-bottom: 10px;
+    text-align: center;
+    transition: background 0.3s;
 }
 
-.buttons-bottom {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 20px;
+.button-row button:hover {
+    background: #2980b9;
+}
+
+input,
+button {
+    max-width: 100%;
+}
+.input-row,
+.button-row {
     width: 100%;
-    margin-top: 10px;
 }
 
-.buttons-bottom form {
-    flex: 1;
-    max-width: 150px;
+
+@media (max-width: 600px) {
+    .input-row {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .button-row {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .checklist-container {
+        margin-left: 0;
+        width: 100%;
+    }
+
+    .estimated-cost {
+        margin-left: 0;
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .container {
+        padding: 15px;
+        height: auto;
+    }
 }
 
-.buttons-bottom button {
-    width: 100%;
-    height: 40px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    white-space: nowrap;
-    font-size: 0.8rem;
-    margin-top: -10px;
-}
+
