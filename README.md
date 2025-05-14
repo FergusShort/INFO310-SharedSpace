@@ -39,7 +39,7 @@
 >source sql/db_populate.sql
 >```
 
-## Instruction on Website Usage
+## Instruction on Website Usage:
 > ### Starting:
 >
 > Create a new account
@@ -50,7 +50,19 @@
 > 
 >
 > ### Events
-> 
+> **How to Use:**
+> 1. Schedule an Event:
+>    - Click the blue plus button in the corner
+>    - Enter details of the event
+>    - Submit the even which be saved and displayed on the calendar
+>
+> 2. Editing an Event:
+>    - Click the blue button with a pen icon, here you can see all events scheduled for your flat
+>    - Click the red trash icon to delete an event
+>    - Click the edit button to edit the details of an event, here you can edit the details of a pre-existing event
+>
+> **Notes:**
+> This page uses an external calendar component the repo can be found here: [Schedule-X-Calendar](https://github.com/schedule-x/schedule-x)
 >
 > ### Chores
 > **How to Use:**
