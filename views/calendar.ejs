@@ -76,9 +76,7 @@
             const { createEventModalPlugin } = window.SXEventModal;
 
             const eventModal = createEventModalPlugin();
-
-            console.log(<%- JSON.stringify(events) %>);
-
+            
             const calendar = createCalendar({
                 views: [createViewMonthAgenda()],
                 events: <%- JSON.stringify(events) %>,
@@ -98,28 +96,31 @@
             
         <script>
             function addDropDown() {
-                document.querySelector(".dropdown-content").style.display = "flex";
-                document.querySelector(".dropbtn").classList.toggle("active");
+                document.querySelector("#add .dropdown-content").style.display = "flex";
+                document.querySelector("#add .dropbtn").classList.toggle("active");
             };
 
-            window.onclick = function(event) {
-                const dropdown = document.querySelector(".dropdown");
+            window.addEventListener('click', function(event) {
+                const dropdown = document.querySelector("#add .dropdown");
                 if (!dropdown.contains(event.target)) {
-                    document.querySelector(".dropdown-content").style.display = "none";
-                    document.querySelector(".dropbtn").classList.remove("active");
+                    document.querySelector("#add .dropdown-content").style.display = "none";
+                    document.querySelector("#add .dropbtn").classList.remove("active");
                 }
-            }
+            });
         </script>
-        <div class="dropdown">
-            <button type="button" onclick="addDropDown()" class="dropbtn">People</button>
-            <div id="myDropdown" class="dropdown-content">
-                <% for (let i = 0; i < flatmates.length; i++) { %>
-                    <label>
-                        <input name="flatmates" value="<%- flatmates[i].User_ID %>" type="checkbox">
-                        <%- flatmates[i].Username %>
-                    </label>
-                <% } %>
-            </div>
+        <div class="dropdown-wrapper">
+            People
+            <div class="dropdown">
+                <button type="button" onclick="addDropDown()" class="dropbtn">People</button>
+                <div id="myDropdown" class="dropdown-content">
+                    <% for (let i = 0; i < flatmates.length; i++) { %>
+                        <label>
+                            <input name="flatmates" value="<%- flatmates[i].User_ID %>" type="checkbox">
+                            <%- flatmates[i].Username %>
+                        </label>
+                    <% } %>
+                </div>
+            </div>    
         </div>
 
         <label for="start_time">Start Time</label>
@@ -138,7 +139,7 @@
         <h2>All Events:</h2>
         <div id="events">
             <% for (let i = 0; i < events.length; i++){ %>
-                <%- include('partials/event', {event: events[i]}) %>
+                <%- include('partials/event', {event: events[i], flatmates: flatmates}) %>
             <% } %>
         </div>
         <div class="buttons">
@@ -160,6 +161,29 @@
         <input name="title" type="text" required>
         <label for="desc">Description</label>
         <input name="desc" type="text" required>
+
+        <script>
+            function editDropDown() {
+                document.querySelector("#edit .dropdown-content").style.display = "flex";
+                document.querySelector("#edit .dropbtn").classList.toggle("active");
+            };
+
+            window.addEventListener('click', function(event) {
+                const dropdown = document.querySelector("#edit .dropdown");
+                if (!dropdown.contains(event.target)) {
+                    document.querySelector("#edit .dropdown-content").style.display = "none";
+                    document.querySelector("#edit .dropbtn").classList.remove("active");
+                }
+            });
+        </script>
+        <div class="dropdown-wrapper">
+            People
+            <div class="dropdown">
+                <button type="button" onclick="editDropDown()" class="dropbtn">People</button>
+                <div id="myDropdown" class="dropdown-content">
+                </div>
+            </div>
+        </div>
 
         <label for="start_time">Start Time</label>
         <input name="start_time" type="datetime-local" required>

@@ -651,7 +651,7 @@ router.get("/calendar", async (req, res) => {
     }
 
     let [rows, fields] = await db.query(events_query, [req.session.flat_Id]);
-    res.status(200);
+    
     let events = rows;
     for (let i = 0; i < events.length; i++) {
       events[i].start = format(
@@ -667,13 +667,13 @@ router.get("/calendar", async (req, res) => {
         people.push(rows[j].Username);
       }
 
-      console.log(people);
       events[i].people = people;
     }
 
     [rows, fields] = await db.query(flat_query, [req.session.flat_Id]);
     let flatmates = rows
 
+    res.status(200);
     res.render("calendar", { events: events, flatmates: flatmates });
   } catch (err) {
     console.error("Error fetching events:", err);
@@ -698,8 +698,6 @@ router.post("/calendar/addevent", async (req, res) => {
   const start = format(new Date(req.body.start_time), "yyyy-MM-dd HH:mm:SS");
   const end = format(new Date(req.body.end_time), "yyyy-MM-dd HH:mm:SS");
 
-  console.log(req.body);
-
   try {
     const [eventResult] = await db.query(event_stmt, [flat_id, title, desc, start, end]);
     const event_id = eventResult.insertId;
@@ -708,6 +706,7 @@ router.post("/calendar/addevent", async (req, res) => {
       await db.query(flat_stmt, [req.body.flatmates[i], event_id]);
     };
 
+    res.status(200);
     res.redirect("/calendar");
   } catch (err) {
     console.error("Error adding event:", err);
@@ -724,12 +723,13 @@ router.post("/calendar/addevent", async (req, res) => {
 router.post("/calendar/:id/deleteevent", async (req, res) => {
   const db = pool.promise();
   const stmt = `
+    DELETE FROM Users_Events WHERE Event_ID = ?;
     DELETE FROM Events WHERE Event_ID = ?;
   `;
   const id = req.params.id;
 
   try {
-    await db.query(stmt, id);
+    await db.query(stmt, [id, id]);
     res.redirect("/calendar");
   } catch (err) {
     console.error("Error deleting event:", err);
@@ -744,19 +744,34 @@ router.post("/calendar/:id/deleteevent", async (req, res) => {
 
 router.post("/calendar/editevent", async (req, res) => {
   const db = pool.promise();
-  const stmt = `
+  const event_stmt = `
     UPDATE Events 
     SET Title = ?, Description = ?, Start_Time = ?, End_Time = ?
     WHERE Event_ID = ?;
   `;
+  const del_users_stmt = `
+    DELETE FROM Users_Events WHERE Event_ID = ?;
+  `;
+  const add_users_stmt = `
+    INSERT INTO Users_Events VALUES(?, ?);
+  `;
+
   const id = req.body.id;
   const title = req.body.title;
   const desc = req.body.desc;
   const start = format(new Date(req.body.start_time), "yyyy-MM-dd HH:mm:SS");
   const end = format(new Date(req.body.end_time), "yyyy-MM-dd HH:mm:SS");
+  const flatmates = req.body.flatmates;
 
   try {
-    await db.query(stmt, [title, desc, start, end, id]);
+    await db.query(event_stmt, [title, desc, start, end, id]);
+
+    await db.query(del_users_stmt, [id]);
+    for (let i = 0; i < flatmates.length; i++) {
+      await db.query(add_users_stmt, [flatmates[i], id]);
+    }
+
+    res.status(200);
     res.redirect("/calendar");
   } catch (err) {
     console.error("Error editing event:", err);
