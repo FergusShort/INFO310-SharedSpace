@@ -38,7 +38,7 @@
                                     <%= grocery.Item %>
                                 </td>
                                 <td>
-                                    <input type="number" name="quantity" value="<%= grocery.Quantity %>" min="1"
+                                    <input type="number" name="quantity2" value="<%= grocery.Quantity %>" min="1"
                                         onchange="updateQuantity('<%= grocery.Flat_ID %>', '<%= grocery.Item %>', this.value)">
                                 </td>
                                 <td>$<%= parseFloat(grocery.Price).toFixed(2) %>
@@ -53,17 +53,20 @@
                 <h3>Estimated Total:</h3>
                 <p id="totalCost">$0.00</p>
             </div>
-            <div class="buttons">
+            <div class="button-container">
                 <form action="/groceries/add" method="POST" class="add-form">
-                    <input type="text" name="item" id="itemInput" placeholder="Item" required>
-                    <div class="price-quantity-row">
+                    <div class="input-row">
+                        <input type="text" name="item" id="itemInput" placeholder="Item" required>
                         <input type="number" name="price" step="0.01" min="0.01" placeholder="Price" required>
                         <input type="number" name="quantity" min="1" placeholder="Quantity" required>
                     </div>
-                    <button type="submit">Add item</button>
+                    <p id="itemWarning" style="color: red; font-size: 0.9rem; margin-top: -10px; display: none;">Item already exists!</p>
+                    <div class="button-row">
+                        <button id="add" type="submit">Add item</button>
+                    </div>
                 </form>
 
-                <div class="buttons-bottom">
+                <div class="button-row">
                     <form action="/groceries/clear-checked" method="POST">
                         <button id="clear-checked" type="submit">Clear checked</button>
                     </form>
@@ -75,6 +78,23 @@
             </div>
         </div>
         <script>
+
+            // Prevent adding duplicate item
+            const existingItems = <%- JSON.stringify(groceries.map(g => g.Item.toLowerCase())) %>;
+            const itemInput = document.getElementById("itemInput");
+            const warningMessage = document.getElementById("itemWarning");
+
+            const addForm = document.querySelector(".add-form");
+            addForm.addEventListener("submit", (e) => {
+                const enteredItem = itemInput.value.trim().toLowerCase();
+                if (existingItems.includes(enteredItem)) {
+                    e.preventDefault();
+                    warningMessage.style.display = "block";
+                } else {
+                    warningMessage.style.display = "none";
+                }
+            });
+
             // Calculate the total
             function calculateTotal() {
                 let total = 0;
