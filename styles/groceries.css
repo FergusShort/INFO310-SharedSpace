@@ -7,7 +7,6 @@
 
 body {
     background-color: white;
-    height: 100vh;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -51,8 +50,15 @@ th {
 }
 
 input[name="quantity2"] {
-    width: 50px;
+    width: 60px;
     text-align: center;
+    border: 1px solid lightgray;
+    border-radius: 25px;
+    padding: 3px;
+}
+
+.table tr {
+    height: 40px;
 }
 
 .estimated-cost {
@@ -60,7 +66,6 @@ input[name="quantity2"] {
     display: flex;
     gap: 10px;
     margin-bottom: 20px;
-
 }
 
 h3 {
