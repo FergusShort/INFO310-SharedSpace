@@ -62,17 +62,17 @@
                     </div>
                     <p id="itemWarning" style="color: red; font-size: 0.9rem; margin-top: -10px; display: none;">Item already exists!</p>
                     <div class="button-row">
-                        <button type="submit" id="add-button">Add item</button>
+                        <button id="add" type="submit">Add item</button>
                     </div>
                 </form>
 
                 <div class="button-row">
-                    <form action="/groceries/clear-checked" method="POST" class="half-button">
+                    <form action="/groceries/clear-checked" method="POST">
                         <button id="clear-checked" type="submit">Clear checked</button>
                     </form>
 
                     <form action="/groceries/clear-all" method="POST">
-                        <button id="clear-all" type="submit" class="half-button">Clear all</button>
+                        <button id="clear-all" type="submit">Clear all</button>
                     </form>
                 </div>
             </div>
