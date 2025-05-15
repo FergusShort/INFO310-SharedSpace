@@ -22,8 +22,8 @@ router.get("/login", async (req, res) => {
   res.render("login");
 });
 
-router.get("/signup", async (req, res) => {
-  res.render("signup");
+router.get("/signup", (req, res) => {
+  res.render("signup", { error: null, formData: {} });
 });
 
 router.get("/logout", async (req, res) => {
@@ -54,7 +54,7 @@ router.get("/joinGroup", async (req, res) => {
 
 router.get("/home", async (req, res) => {
   if (!req.session.userId || !req.session.flat_Id) {
-    return res.redirect("/login");
+    return res.render("signup", { error: null, formData: {} });
   }
 
   const flatId = req.session.flat_Id;
@@ -85,20 +85,9 @@ router.get("/home", async (req, res) => {
   }
 });
 
-
-
-
-
-
-
-
-
-
-
-
 router.get("/groceries", async (req, res) => {
   if (!req.session.userId) {
-    return res.render("signup");
+    return res.render("signup", { error: null, formData: {} });
   } else if (!req.session.flat_Id) {
     return res.render("createGroup");
   }
@@ -120,7 +109,7 @@ router.get("/groceries", async (req, res) => {
 
 router.get("/chores", async (req, res) => {
   if (!req.session.userId) {
-    return res.render("signup");
+    return res.render("signup", { error: null, formData: {} });
   } else if (!req.session.flat_Id) {
     return res.redirect("/createGroup");
   }
@@ -161,9 +150,10 @@ async function getUsersInFlat(flatID) {
   );
   return rows[0].count;
 }
+
 router.get("/bills", async (req, res) => {
   if (!req.session.userId) {
-    return res.render("signup");
+    return res.render("signup", { error: null, formData: {} });
   } else if (!req.session.flat_Id) {
     return res.render("createGroup");
   }
@@ -434,47 +424,51 @@ router.post("/login/submit", async (req, res) => {
 });
 
 router.post("/signup/submit", async (req, res) => {
-  const Uname = req.body.Uname;
-  const email = req.body.email;
-  const pwd = req.body.pwd;
-
+  const { Uname, email, pwd } = req.body;
   const db = pool.promise();
-  const status_query = `SELECT Email FROM User WHERE Email = ? OR Username = ?`;
+
   try {
-    const [rows] = await db.query(status_query, [email, Uname]);
+    const [rows] = await db.query(
+      `SELECT Email, Username FROM User WHERE Email = ? OR Username = ?`,
+      [email, Uname]
+    );
 
-    if (rows.length === 0) {
-      const dbdel = pool.promise();
+    if (rows.length > 0) {
+      let errorMessage = "";
 
-      const hashAmount = 10;
-      const hashedPwd = await bcrypt.hash(pwd, hashAmount);
-
-      const status_query_del = `INSERT INTO User (Email, Username, Password) VALUES (?, ?, ?);`;
-      try {
-        await dbdel.query(status_query_del, [email, Uname, hashedPwd]);
-      } catch (err) {
-        console.error(err + "\n\n\n");
-        return res.status(500).send("Database error. Please try again later.");
+      // Check if it's the email or username that already exists
+      for (const row of rows) {
+        if (row.Email === email) errorMessage += "Email already exists. ";
+        if (row.Username === Uname) errorMessage += "Username already exists. ";
       }
-    } else if (rows.length > 0) {
-      return res.status(400).send("Email or Username already exists");
-    } else {
-      return res.redirect("/signup");
-    }
-  } catch (err) {
-    console.error("You haven't set up the database yet!");
-  }
 
-  const dbb = pool.promise();
-  const status_queryy = `SELECT User_ID FROM User WHERE Email = ?`;
-  try {
-    const [rows] = await dbb.query(status_queryy, email);
-    req.session.userId = rows[0].User_ID;
+      return res.render("signup", {
+        error: errorMessage.trim(),
+        formData: { Uname, email }
+      });
+    }
+
+    const hashedPwd = await bcrypt.hash(pwd, 10);
+    await db.query(
+      `INSERT INTO User (Email, Username, Password) VALUES (?, ?, ?)`,
+      [email, Uname, hashedPwd]
+    );
+
+    const [result] = await db.query(
+      `SELECT User_ID FROM User WHERE Email = ?`,
+      [email]
+    );
+    req.session.userId = result[0].User_ID;
+    return res.redirect("/joinGroup");
   } catch (err) {
-    console.error("An error occurred: " + err);
+    console.error(err);
+    return res.status(500).render("signup", {
+      error: "An error occurred. Please try again later.",
+      formData: { Uname, email }
+    });
   }
-  return res.redirect("/joinGroup");
 });
+
 
 router.post("/createGroup/create", async (req, res) => {
   const groupName = req.body.groupName;
@@ -618,7 +612,7 @@ router.post("/chores/delete", async (req, res) => {
 /* Calendar / Events */
 router.get("/calendar", async (req, res) => {
   if (!req.session.userId) {
-    return res.render("signup");
+    return res.render("signup", { error: null, formData: {} });
   } else if (!req.session.flat_Id) {
     return res.render("createGroup");
   }
@@ -814,7 +808,6 @@ router.post("/groceries/update-quantity", async (req, res) => {
   }
 });
 
-
 router.post("/groceries/update-status", async (req, res) => {
   const { flatId, item, checked } = req.body;
 
@@ -834,7 +827,6 @@ router.post("/groceries/update-status", async (req, res) => {
   }
 });
 
-
 router.post("/groceries/clear-checked", async (req, res) => {
   const clearCheckedQuery = `
   DELETE FROM Groceries WHERE Checked_State = 1;
@@ -848,8 +840,6 @@ router.post("/groceries/clear-checked", async (req, res) => {
     res.status(500).send("Internal Server Error");
   }
 });
-
-
 
 router.post("/groceries/clear-all", async (req, res) => {
   const flatId = req.session.flat_Id;
