@@ -15,11 +15,11 @@ router.use(bodyParser.urlencoded({ extended: true }));
 router.use(fileUpload());
 
 router.get("/", async (req, res) => {
-  res.render("login");
+  return res.render("login", {error: null,formData: {}});
 });
 
 router.get("/login", async (req, res) => {
-  res.render("login");
+  return res.render("login", {error: null,formData: {}});
 });
 
 router.get("/signup", (req, res) => {
@@ -32,8 +32,8 @@ router.get("/logout", async (req, res) => {
       console.error("Error destroying session:", err);
       return res.status(500).send("Could not log out. Try again.");
     }
-    res.clearCookie("connect.sid"); // optional, clears session cookie
-    res.redirect("/login");         // or wherever your login page is
+    res.clearCookie("connect.sid");
+    return res.render("login", {error: null,formData: {}});
   });
 });
 
@@ -390,14 +390,13 @@ router.post("/bills/delete", async (req, res) => {
 });
 
 router.post("/login/submit", async (req, res) => {
-  const email = req.body.email;
-  const pwd = req.body.pwd;
+  const { email, pwd } = req.body;
 
   const db = pool.promise();
-  const status_query = `SELECT User_ID, Flat_ID, Password FROM User WHERE Email = ? OR Username = ?`;
+  const query = `SELECT User_ID, Flat_ID, Password FROM User WHERE Email = ? OR Username = ?`;
 
   try {
-    const [rows] = await db.query(status_query, [email, email]);
+    const [rows] = await db.query(query, [email, email]);
 
     if (rows.length > 0) {
       const storedHash = rows[0].Password;
@@ -415,13 +414,19 @@ router.post("/login/submit", async (req, res) => {
       }
     }
 
-    return res.status(401).send("Invalid email/username or password");
+    return res.status(401).render("login", {
+      error: "Invalid email/username or password.",
+      formData: { email }
+    });
   } catch (err) {
-    console.error("Login error:" + err);
-    return res.redirect("/login");
+    console.error("Login error:", err);
+    return res.status(500).render("login", {
+      error: "An unexpected error occurred. Please try again later.",
+      formData: { email }
+    });
   }
-  return res.redirect("/signup");
 });
+
 
 router.post("/signup/submit", async (req, res) => {
   const { Uname, email, pwd } = req.body;
