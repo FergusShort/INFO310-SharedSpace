@@ -48,7 +48,7 @@ router.get("/joinGroup", async (req, res) => {
   if (!req.session.userId) {
     return res.render("signup");
   }
-  res.render("joinGroup");
+  return res.render("joinGroup", {error: null, formData: {}});
 });
 
 
@@ -409,7 +409,7 @@ router.post("/login/submit", async (req, res) => {
           req.session.flat_Id = rows[0].Flat_ID;
           return res.redirect("/home");
         } else {
-          return res.redirect("/joinGroup");
+          return res.render("joinGroup", {error: null, formData: {}});
         }
       }
     }
@@ -464,7 +464,7 @@ router.post("/signup/submit", async (req, res) => {
       [email]
     );
     req.session.userId = result[0].User_ID;
-    return res.redirect("/joinGroup");
+    return res.render("joinGroup", {error: null, formData: {}});
   } catch (err) {
     console.error(err);
     return res.status(500).render("signup", {
@@ -505,24 +505,39 @@ router.post("/joinGroup/join", async (req, res) => {
 
   const db = pool.promise();
   const status_query = `SELECT Flat_ID FROM Flat WHERE Flat_ID = ?;`;
-  try {
-    const [rows] = await db.query(status_query, groupCode);
-    if (rows.length > 0) {
-      const dbb = pool.promise();
-      const status_queryy = `UPDATE User SET Flat_ID = ? WHERE User_ID = ?;`;
-      try {
-        const [row] = await dbb.query(status_queryy, [groupCode, userID]);
-        req.session.flat_Id = groupCode;
-      } catch (err) {
-        console.error("You haven't set up the database yet!!!" + err);
-      }
-    }
-  } catch (err) {
-    console.error("You haven't set up the database yet!!" + err);
-  }
 
-  return res.redirect("/home");
+  try {
+    const [rows] = await db.query(status_query, [groupCode]);
+
+    if (rows.length === 0) {
+      return res.status(400).render("joinGroup", {
+        error: "Invalid group code. Please try again.",
+        formData: { groupCode }
+      });
+    }
+
+    const update_query = `UPDATE User SET Flat_ID = ? WHERE User_ID = ?;`;
+    try {
+      await db.query(update_query, [groupCode, userID]);
+      req.session.flat_Id = groupCode;
+      return res.redirect("/home");
+    } catch (err) {
+      console.error("Error updating user group:" + err);
+      return res.status(500).render("joinGroup", {
+        error: "Something went wrong. Please try again.",
+        formData: { groupCode }
+      });
+    }
+
+  } catch (err) {
+    console.error("Error checking group ID:" + err);
+    return res.status(500).render("joinGroup", {
+      error: "Something went wrong. Please try again.",
+      formData: { groupCode }
+    });
+  }
 });
+
 
 async function makeFlatID() {
   const iD = generateFlatID();
