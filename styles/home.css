@@ -51,7 +51,7 @@ main {
 .dashboard-section li {
   padding: 0.5rem 0;
   border-bottom: 1px solid #eaeaea;
-  text-align: center; /* Center the content within the list item */
+  text-align: center;
 }
 
 .dashboard-section li:last-child {
@@ -101,4 +101,28 @@ strong {
 
 .arrow-icon:hover {
   background-color: #0056b3;
+}
+
+.grocery-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.grocery-item .item-name {
+  font-weight: bold;
+  flex-grow: 1;
+  text-align: left;
+}
+
+.grocery-item .item-details {
+  font-size: 0.9rem;
+  color: #666;
+  margin-left: 10px;
+  white-space: nowrap;
+}
+
+.checked {
+  text-decoration: line-through;
+  color: #999;
 }

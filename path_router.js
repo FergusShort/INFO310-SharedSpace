@@ -51,15 +51,6 @@ router.get("/joinGroup", async (req, res) => {
   res.render("joinGroup");
 });
 
-/*router.get("/home", async (req, res) => {
-  if (!req.session.userId) {
-      return res.render("signup");
-  } else if (!req.session.flat_Id) {
-      return res.render("createGroup");
-  }
-
-  res.render("home");
-});*/
 
 router.get("/home", async (req, res) => {
   if (!req.session.userId || !req.session.flat_Id) {
@@ -70,20 +61,22 @@ router.get("/home", async (req, res) => {
   const db = pool.promise();
 
   const events_query = `SELECT Title AS title, Start_Time AS date FROM Events WHERE Flat_ID = ? AND Start_Time BETWEEN NOW() AND DATE_ADD(NOW(), INTERVAL 7 DAY) ORDER BY Start_Time ASC;`;
-
   const tasks_query = `SELECT Title AS name, Description, Chore_ID FROM Chores WHERE Flat_ID = ? AND Completed = FALSE ORDER BY Priority DESC;`;
-
   const bills_query = `SELECT Title AS name, Initial_Amount AS amount, Due_Date AS dueDate FROM Bills WHERE Flat_ID = ? AND (Due_Date BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 7 DAY) OR Due_Date < CURDATE()) ORDER BY Due_Date ASC;`;
+  const groceryQuery = `SELECT Item as item, Quantity as quantity, Price as price, Checked_State as checked FROM Groceries WHERE Flat_ID = ? ORDER BY Checked_State ASC, Item ASC;`;
 
   try {
     const [eventRows] = await db.query(events_query, [flatId]);
     const [taskRows] = await db.query(tasks_query, [flatId]);
     const [billRows] = await db.query(bills_query, [flatId]);
+    const [grocerieRows] = await db.query(groceryQuery, [flatId]);
+
 
     return res.render("home", {
       events: eventRows,
       tasks: taskRows,
       bills: billRows,
+      groceries: grocerieRows,
     });
 
   } catch (err) {
@@ -216,21 +209,21 @@ async function getBillsWithUserPaymentStatus(sortType = "all", flatID, userId) {
   let billParams = [userId, userId, userId, flatID];
 
 
-if (sortType === "week") {
-  const nextWeek = new Date(today);
-  nextWeek.setDate(today.getDate() + 7);
-  billQuery += ` AND (Due_Date BETWEEN ? AND ? OR Due_Date < CURDATE()) ORDER BY Due_Date ASC`;
-  billParams.push(today, nextWeek);
-} else if (sortType === "month") {
-  const nextMonth = new Date(today);
-  nextMonth.setMonth(today.getMonth() + 1);
-  billQuery += ` AND (Due_Date BETWEEN ? AND ? OR Due_Date < CURDATE()) ORDER BY Due_Date ASC`;
-  billParams.push(today, nextMonth);
-} else {
-  // Default case: Show all upcoming and past due bills?
-  billQuery += ` AND Due_Date <= DATE_ADD(CURDATE(), INTERVAL 7 DAY) OR Due_Date < CURDATE() ORDER BY Due_Date ASC`;
-  // If you want to show all past and future, you might remove the date condition entirely
-}
+  if (sortType === "week") {
+    const nextWeek = new Date(today);
+    nextWeek.setDate(today.getDate() + 7);
+    billQuery += ` AND (Due_Date BETWEEN ? AND ? OR Due_Date < CURDATE()) ORDER BY Due_Date ASC`;
+    billParams.push(today, nextWeek);
+  } else if (sortType === "month") {
+    const nextMonth = new Date(today);
+    nextMonth.setMonth(today.getMonth() + 1);
+    billQuery += ` AND (Due_Date BETWEEN ? AND ? OR Due_Date < CURDATE()) ORDER BY Due_Date ASC`;
+    billParams.push(today, nextMonth);
+  } else {
+    // Default case: Show all upcoming and past due bills?
+    billQuery += ` AND Due_Date <= DATE_ADD(CURDATE(), INTERVAL 7 DAY) OR Due_Date < CURDATE() ORDER BY Due_Date ASC`;
+    // If you want to show all past and future, you might remove the date condition entirely
+  }
 
   try {
     const [rows] = await db.query(billQuery, billParams);
@@ -651,7 +644,7 @@ router.get("/calendar", async (req, res) => {
     }
 
     let [rows, fields] = await db.query(events_query, [req.session.flat_Id]);
-    
+
     let events = rows;
     for (let i = 0; i < events.length; i++) {
       events[i].start = format(
@@ -813,11 +806,11 @@ router.post("/groceries/update-quantity", async (req, res) => {
   `;
 
   try {
-      await db.query(updateQuery, [quantity, flatId, item]);
-      res.status(200).send("Quantity updated successfully");
+    await db.query(updateQuery, [quantity, flatId, item]);
+    res.status(200).send("Quantity updated successfully");
   } catch (err) {
-      console.error("Error updating quantity:", err);
-      res.status(500).send("Error updating quantity.");
+    console.error("Error updating quantity:", err);
+    res.status(500).send("Error updating quantity.");
   }
 });
 
