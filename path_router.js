@@ -120,7 +120,7 @@ router.get("/chores", async (req, res) => {
     const db = pool.promise();
     const [chores] = await db.query(
       `
-            SELECT Chore_ID, Title, Description, Priority
+            SELECT Chore_ID, Title, Description, Priority, Completed
             FROM Chores 
             WHERE Flat_ID = ?
         `,
@@ -427,7 +427,6 @@ router.post("/login/submit", async (req, res) => {
   }
 });
 
-
 router.post("/signup/submit", async (req, res) => {
   const { Uname, email, pwd } = req.body;
   const db = pool.promise();
@@ -473,7 +472,6 @@ router.post("/signup/submit", async (req, res) => {
     });
   }
 });
-
 
 router.post("/createGroup/create", async (req, res) => {
   const groupName = req.body.groupName;
@@ -538,7 +536,6 @@ router.post("/joinGroup/join", async (req, res) => {
   }
 });
 
-
 async function makeFlatID() {
   const iD = generateFlatID();
 
@@ -595,18 +592,17 @@ function generateFlatID() {
 }
 
 router.post("/chores/add", async (req, res) => {
-  const flat_id = req.session.flat_Id;
-  const { title, comment, urgency } = req.body;
+  const { title, description, priority } = req.body;
+  const flatId = req.session.flat_Id;
+
   const db = pool.promise();
+  const insertQuery = `
+    INSERT INTO Chores (Flat_ID, Title, Description, Priority)
+    VALUES (?, ?, ?, ?)
+  `;
 
   try {
-    const insertQuery = `
-      INSERT INTO Chores (Flat_ID, Priority, Title, Description)
-      VALUES (?, ?, ?, ?);
-    `;
-
-    await db.query(insertQuery, [flat_id, urgency, title, comment]);
-
+    await db.query(insertQuery, [flatId, title, description, priority]);
     res.redirect("/chores");
   } catch (err) {
     console.error("Error adding chore:", err);
@@ -628,6 +624,21 @@ router.post("/chores/delete", async (req, res) => {
     res.status(500).send("Error deleting chore");
   }
 });
+
+router.post('/chores/complete', async (req, res) => {
+    const choreId = req.body.chore_id;
+
+    const db = pool.promise();
+    const completedQuery = 'UPDATE Chores SET Completed = NOT Completed WHERE Chore_ID = ?;';
+    try {
+        await db.query(completedQuery, [choreId]);
+        res.redirect('/chores');
+    } catch (err) {
+        console.error('Error marking chore as complete:', err);
+        res.status(500).send('Internal Server Error');
+    }
+});
+
 
 /* Calendar / Events */
 router.get("/calendar", async (req, res) => {
