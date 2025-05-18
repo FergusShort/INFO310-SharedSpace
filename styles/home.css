@@ -133,3 +133,15 @@ strong {
   text-decoration: line-through;
   color: #999;
 }
+
+.group-code {
+  font-size: 1.2rem;
+  color: #696969;
+  background-color: #f0f0f0;
+  padding: 6px 12px;
+  border-radius: 8px;
+  display: inline-block;
+  margin-top: 8px;
+  font-weight: 500;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}

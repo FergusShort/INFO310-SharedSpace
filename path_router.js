@@ -64,12 +64,14 @@ router.get("/home", async (req, res) => {
   const tasks_query = `SELECT Title AS name, Description, Chore_ID FROM Chores WHERE Flat_ID = ? AND Completed = FALSE ORDER BY Priority DESC;`;
   const bills_query = `SELECT Title AS name, Initial_Amount AS amount, Due_Date AS dueDate FROM Bills WHERE Flat_ID = ? AND (Due_Date BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 7 DAY) OR Due_Date < CURDATE()) ORDER BY Due_Date ASC;`;
   const groceryQuery = `SELECT Item as item, Quantity as quantity, Price as price, Checked_State as checked FROM Groceries WHERE Flat_ID = ? ORDER BY Checked_State ASC, Item ASC;`;
+  const flatInfoQuery = `SELECT GroupName FROM Flat WHERE Flat_ID = ?`;
 
   try {
     const [eventRows] = await db.query(events_query, [flatId]);
     const [taskRows] = await db.query(tasks_query, [flatId]);
     const [billRows] = await db.query(bills_query, [flatId]);
     const [grocerieRows] = await db.query(groceryQuery, [flatId]);
+    const [flatInfo] = await db.query(flatInfoQuery, [flatId]);
 
 
     return res.render("home", {
@@ -77,7 +79,10 @@ router.get("/home", async (req, res) => {
       tasks: taskRows,
       bills: billRows,
       groceries: grocerieRows,
+      groupName: flatInfo[0],
+      groupCode: flatId
     });
+
 
   } catch (err) {
     console.error("Home route error:\n", err);
