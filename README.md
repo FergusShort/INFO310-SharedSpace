@@ -94,3 +94,4 @@
 >   - Automatically split between users in a group
 >   - Have Reoccuring bills for that repeat after a certain amount of days
 >   - Bills Coloured red if overdue
+>   - Can Filter upcoming bills (Monthly or Weekly)
