@@ -767,8 +767,11 @@ router.post("/calendar/editevent", async (req, res) => {
     await db.query(event_stmt, [title, desc, start, end, id]);
 
     await db.query(del_users_stmt, [id]);
-    for (let i = 0; i < flatmates.length; i++) {
-      await db.query(add_users_stmt, [flatmates[i], id]);
+
+    if (flatmates != undefined) {
+      for (let i = 0; i < flatmates.length; i++) {
+        await db.query(add_users_stmt, [flatmates[i], id]);
+      }  
     }
 
     res.status(200);
