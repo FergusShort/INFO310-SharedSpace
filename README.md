@@ -88,3 +88,8 @@
 >    - Clear all items if all purchased
 >
 > ### Bills
+>   - Add Bills
+>   - Delete Bills
+>   - Pay for bills
+>   - Automatically split between users in a group
+>   - Have Reoccuring bills for that repeat after a certain amount of days
