@@ -215,9 +215,7 @@ async function getBillsWithUserPaymentStatus(sortType = "all", flatID, userId) {
     billQuery += ` AND (Due_Date BETWEEN ? AND ? OR Due_Date < CURDATE()) ORDER BY Due_Date ASC`;
     billParams.push(today, nextMonth);
   } else {
-    // Default case: Show all upcoming and past due bills?
-    billQuery += ` AND Due_Date <= DATE_ADD(CURDATE(), INTERVAL 7 DAY) OR Due_Date < CURDATE() ORDER BY Due_Date ASC`;
-    // If you want to show all past and future, you might remove the date condition entirely
+    billQuery += `ORDER BY Due_Date ASC`;
   }
 
   try {
