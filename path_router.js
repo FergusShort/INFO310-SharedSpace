@@ -15,15 +15,15 @@ router.use(bodyParser.urlencoded({ extended: true }));
 router.use(fileUpload());
 
 router.get("/", async (req, res) => {
-  res.render("login");
+  return res.render("login", {error: null,formData: {}});
 });
 
 router.get("/login", async (req, res) => {
-  res.render("login");
+  return res.render("login", {error: null,formData: {}});
 });
 
-router.get("/signup", async (req, res) => {
-  res.render("signup");
+router.get("/signup", (req, res) => {
+  res.render("signup", { error: null, formData: {} });
 });
 
 router.get("/logout", async (req, res) => {
@@ -32,8 +32,8 @@ router.get("/logout", async (req, res) => {
       console.error("Error destroying session:", err);
       return res.status(500).send("Could not log out. Try again.");
     }
-    res.clearCookie("connect.sid"); // optional, clears session cookie
-    res.redirect("/login");         // or wherever your login page is
+    res.clearCookie("connect.sid");
+    return res.render("login", {error: null,formData: {}});
   });
 });
 
@@ -48,43 +48,41 @@ router.get("/joinGroup", async (req, res) => {
   if (!req.session.userId) {
     return res.render("signup");
   }
-  res.render("joinGroup");
+  return res.render("joinGroup", {error: null, formData: {}});
 });
 
-/*router.get("/home", async (req, res) => {
-  if (!req.session.userId) {
-      return res.render("signup");
-  } else if (!req.session.flat_Id) {
-      return res.render("createGroup");
-  }
-
-  res.render("home");
-});*/
 
 router.get("/home", async (req, res) => {
   if (!req.session.userId || !req.session.flat_Id) {
-    return res.redirect("/login");
+    return res.render("signup", { error: null, formData: {} });
   }
 
   const flatId = req.session.flat_Id;
   const db = pool.promise();
 
   const events_query = `SELECT Title AS title, Start_Time AS date FROM Events WHERE Flat_ID = ? AND Start_Time BETWEEN NOW() AND DATE_ADD(NOW(), INTERVAL 7 DAY) ORDER BY Start_Time ASC;`;
-
   const tasks_query = `SELECT Title AS name, Description, Chore_ID FROM Chores WHERE Flat_ID = ? AND Completed = FALSE ORDER BY Priority DESC;`;
-
   const bills_query = `SELECT Title AS name, Initial_Amount AS amount, Due_Date AS dueDate FROM Bills WHERE Flat_ID = ? AND (Due_Date BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 7 DAY) OR Due_Date < CURDATE()) ORDER BY Due_Date ASC;`;
+  const groceryQuery = `SELECT Item as item, Quantity as quantity, Price as price, Checked_State as checked FROM Groceries WHERE Flat_ID = ? ORDER BY Checked_State ASC, Item ASC;`;
+  const flatInfoQuery = `SELECT GroupName FROM Flat WHERE Flat_ID = ?`;
 
   try {
     const [eventRows] = await db.query(events_query, [flatId]);
     const [taskRows] = await db.query(tasks_query, [flatId]);
     const [billRows] = await db.query(bills_query, [flatId]);
+    const [grocerieRows] = await db.query(groceryQuery, [flatId]);
+    const [flatInfo] = await db.query(flatInfoQuery, [flatId]);
+
 
     return res.render("home", {
       events: eventRows,
       tasks: taskRows,
       bills: billRows,
+      groceries: grocerieRows,
+      groupName: flatInfo[0],
+      groupCode: flatId
     });
+
 
   } catch (err) {
     console.error("Home route error:\n", err);
@@ -92,20 +90,9 @@ router.get("/home", async (req, res) => {
   }
 });
 
-
-
-
-
-
-
-
-
-
-
-
 router.get("/groceries", async (req, res) => {
   if (!req.session.userId) {
-    return res.render("signup");
+    return res.render("signup", { error: null, formData: {} });
   } else if (!req.session.flat_Id) {
     return res.render("createGroup");
   }
@@ -127,7 +114,7 @@ router.get("/groceries", async (req, res) => {
 
 router.get("/chores", async (req, res) => {
   if (!req.session.userId) {
-    return res.render("signup");
+    return res.render("signup", { error: null, formData: {} });
   } else if (!req.session.flat_Id) {
     return res.redirect("/createGroup");
   }
@@ -138,7 +125,7 @@ router.get("/chores", async (req, res) => {
     const db = pool.promise();
     const [chores] = await db.query(
       `
-            SELECT Chore_ID, Title, Description, Priority
+            SELECT Chore_ID, Title, Description, Priority, Completed
             FROM Chores 
             WHERE Flat_ID = ?
         `,
@@ -168,9 +155,10 @@ async function getUsersInFlat(flatID) {
   );
   return rows[0].count;
 }
+
 router.get("/bills", async (req, res) => {
   if (!req.session.userId) {
-    return res.render("signup");
+    return res.render("signup", { error: null, formData: {} });
   } else if (!req.session.flat_Id) {
     return res.render("createGroup");
   }
@@ -216,21 +204,21 @@ async function getBillsWithUserPaymentStatus(sortType = "all", flatID, userId) {
   let billParams = [userId, userId, userId, flatID];
 
 
-if (sortType === "week") {
-  const nextWeek = new Date(today);
-  nextWeek.setDate(today.getDate() + 7);
-  billQuery += ` AND (Due_Date BETWEEN ? AND ? OR Due_Date < CURDATE()) ORDER BY Due_Date ASC`;
-  billParams.push(today, nextWeek);
-} else if (sortType === "month") {
-  const nextMonth = new Date(today);
-  nextMonth.setMonth(today.getMonth() + 1);
-  billQuery += ` AND (Due_Date BETWEEN ? AND ? OR Due_Date < CURDATE()) ORDER BY Due_Date ASC`;
-  billParams.push(today, nextMonth);
-} else {
-  // Default case: Show all upcoming and past due bills?
-  billQuery += ` AND Due_Date <= DATE_ADD(CURDATE(), INTERVAL 7 DAY) OR Due_Date < CURDATE() ORDER BY Due_Date ASC`;
-  // If you want to show all past and future, you might remove the date condition entirely
-}
+  if (sortType === "week") {
+    const nextWeek = new Date(today);
+    nextWeek.setDate(today.getDate() + 7);
+    billQuery += ` AND (Due_Date BETWEEN ? AND ? OR Due_Date < CURDATE()) ORDER BY Due_Date ASC`;
+    billParams.push(today, nextWeek);
+  } else if (sortType === "month") {
+    const nextMonth = new Date(today);
+    nextMonth.setMonth(today.getMonth() + 1);
+    billQuery += ` AND (Due_Date BETWEEN ? AND ? OR Due_Date < CURDATE()) ORDER BY Due_Date ASC`;
+    billParams.push(today, nextMonth);
+  } else {
+    // Default case: Show all upcoming and past due bills?
+    billQuery += ` AND Due_Date <= DATE_ADD(CURDATE(), INTERVAL 7 DAY) OR Due_Date < CURDATE() ORDER BY Due_Date ASC`;
+    // If you want to show all past and future, you might remove the date condition entirely
+  }
 
   try {
     const [rows] = await db.query(billQuery, billParams);
@@ -407,14 +395,13 @@ router.post("/bills/delete", async (req, res) => {
 });
 
 router.post("/login/submit", async (req, res) => {
-  const email = req.body.email;
-  const pwd = req.body.pwd;
+  const { email, pwd } = req.body;
 
   const db = pool.promise();
-  const status_query = `SELECT User_ID, Flat_ID, Password FROM User WHERE Email = ? OR Username = ?`;
+  const query = `SELECT User_ID, Flat_ID, Password FROM User WHERE Email = ? OR Username = ?`;
 
   try {
-    const [rows] = await db.query(status_query, [email, email]);
+    const [rows] = await db.query(query, [email, email]);
 
     if (rows.length > 0) {
       const storedHash = rows[0].Password;
@@ -427,60 +414,68 @@ router.post("/login/submit", async (req, res) => {
           req.session.flat_Id = rows[0].Flat_ID;
           return res.redirect("/home");
         } else {
-          return res.redirect("/joinGroup");
+          return res.render("joinGroup", {error: null, formData: {}});
         }
       }
     }
 
-    return res.status(401).send("Invalid email/username or password");
+    return res.status(401).render("login", {
+      error: "Invalid email/username or password.",
+      formData: { email }
+    });
   } catch (err) {
-    console.error("Login error:" + err);
-    return res.redirect("/login");
+    console.error("Login error:", err);
+    return res.status(500).render("login", {
+      error: "An unexpected error occurred. Please try again later.",
+      formData: { email }
+    });
   }
-  return res.redirect("/signup");
 });
 
 router.post("/signup/submit", async (req, res) => {
-  const Uname = req.body.Uname;
-  const email = req.body.email;
-  const pwd = req.body.pwd;
-
+  const { Uname, email, pwd } = req.body;
   const db = pool.promise();
-  const status_query = `SELECT Email FROM User WHERE Email = ? OR Username = ?`;
+
   try {
-    const [rows] = await db.query(status_query, [email, Uname]);
+    const [rows] = await db.query(
+      `SELECT Email, Username FROM User WHERE Email = ? OR Username = ?`,
+      [email, Uname]
+    );
 
-    if (rows.length === 0) {
-      const dbdel = pool.promise();
+    if (rows.length > 0) {
+      let errorMessage = "";
 
-      const hashAmount = 10;
-      const hashedPwd = await bcrypt.hash(pwd, hashAmount);
-
-      const status_query_del = `INSERT INTO User (Email, Username, Password) VALUES (?, ?, ?);`;
-      try {
-        await dbdel.query(status_query_del, [email, Uname, hashedPwd]);
-      } catch (err) {
-        console.error(err + "\n\n\n");
-        return res.status(500).send("Database error. Please try again later.");
+      // Check if it's the email or username that already exists
+      for (const row of rows) {
+        if (row.Email === email) errorMessage += "Email already exists. ";
+        if (row.Username === Uname) errorMessage += "Username already exists. ";
       }
-    } else if (rows.length > 0) {
-      return res.status(400).send("Email or Username already exists");
-    } else {
-      return res.redirect("/signup");
-    }
-  } catch (err) {
-    console.error("You haven't set up the database yet!");
-  }
 
-  const dbb = pool.promise();
-  const status_queryy = `SELECT User_ID FROM User WHERE Email = ?`;
-  try {
-    const [rows] = await dbb.query(status_queryy, email);
-    req.session.userId = rows[0].User_ID;
+      return res.render("signup", {
+        error: errorMessage.trim(),
+        formData: { Uname, email }
+      });
+    }
+
+    const hashedPwd = await bcrypt.hash(pwd, 10);
+    await db.query(
+      `INSERT INTO User (Email, Username, Password) VALUES (?, ?, ?)`,
+      [email, Uname, hashedPwd]
+    );
+
+    const [result] = await db.query(
+      `SELECT User_ID FROM User WHERE Email = ?`,
+      [email]
+    );
+    req.session.userId = result[0].User_ID;
+    return res.render("joinGroup", {error: null, formData: {}});
   } catch (err) {
-    console.error("An error occurred: " + err);
+    console.error(err);
+    return res.status(500).render("signup", {
+      error: "An error occurred. Please try again later.",
+      formData: { Uname, email }
+    });
   }
-  return res.redirect("/joinGroup");
 });
 
 router.post("/createGroup/create", async (req, res) => {
@@ -513,23 +508,37 @@ router.post("/joinGroup/join", async (req, res) => {
 
   const db = pool.promise();
   const status_query = `SELECT Flat_ID FROM Flat WHERE Flat_ID = ?;`;
-  try {
-    const [rows] = await db.query(status_query, groupCode);
-    if (rows.length > 0) {
-      const dbb = pool.promise();
-      const status_queryy = `UPDATE User SET Flat_ID = ? WHERE User_ID = ?;`;
-      try {
-        const [row] = await dbb.query(status_queryy, [groupCode, userID]);
-        req.session.flat_Id = groupCode;
-      } catch (err) {
-        console.error("You haven't set up the database yet!!!" + err);
-      }
-    }
-  } catch (err) {
-    console.error("You haven't set up the database yet!!" + err);
-  }
 
-  return res.redirect("/home");
+  try {
+    const [rows] = await db.query(status_query, [groupCode]);
+
+    if (rows.length === 0) {
+      return res.status(400).render("joinGroup", {
+        error: "Invalid group code. Please try again.",
+        formData: { groupCode }
+      });
+    }
+
+    const update_query = `UPDATE User SET Flat_ID = ? WHERE User_ID = ?;`;
+    try {
+      await db.query(update_query, [groupCode, userID]);
+      req.session.flat_Id = groupCode;
+      return res.redirect("/home");
+    } catch (err) {
+      console.error("Error updating user group:" + err);
+      return res.status(500).render("joinGroup", {
+        error: "Something went wrong. Please try again.",
+        formData: { groupCode }
+      });
+    }
+
+  } catch (err) {
+    console.error("Error checking group ID:" + err);
+    return res.status(500).render("joinGroup", {
+      error: "Something went wrong. Please try again.",
+      formData: { groupCode }
+    });
+  }
 });
 
 async function makeFlatID() {
@@ -588,18 +597,17 @@ function generateFlatID() {
 }
 
 router.post("/chores/add", async (req, res) => {
-  const flat_id = req.session.flat_Id;
-  const { title, comment, urgency } = req.body;
+  const { title, description, priority } = req.body;
+  const flatId = req.session.flat_Id;
+
   const db = pool.promise();
+  const insertQuery = `
+    INSERT INTO Chores (Flat_ID, Title, Description, Priority)
+    VALUES (?, ?, ?, ?)
+  `;
 
   try {
-    const insertQuery = `
-      INSERT INTO Chores (Flat_ID, Priority, Title, Description)
-      VALUES (?, ?, ?, ?);
-    `;
-
-    await db.query(insertQuery, [flat_id, urgency, title, comment]);
-
+    await db.query(insertQuery, [flatId, title, description, priority]);
     res.redirect("/chores");
   } catch (err) {
     console.error("Error adding chore:", err);
@@ -622,17 +630,41 @@ router.post("/chores/delete", async (req, res) => {
   }
 });
 
+router.post('/chores/complete', async (req, res) => {
+    const choreId = req.body.chore_id;
+
+    const db = pool.promise();
+    const completedQuery = 'UPDATE Chores SET Completed = NOT Completed WHERE Chore_ID = ?;';
+    try {
+        await db.query(completedQuery, [choreId]);
+        res.redirect('/chores');
+    } catch (err) {
+        console.error('Error marking chore as complete:', err);
+        res.status(500).send('Internal Server Error');
+    }
+});
+
+
 /* Calendar / Events */
 router.get("/calendar", async (req, res) => {
   if (!req.session.userId) {
-    return res.render("signup");
+    return res.render("signup", { error: null, formData: {} });
   } else if (!req.session.flat_Id) {
     return res.render("createGroup");
   }
   const db = pool.promise();
-  const query = `
-    SELECT Event_ID as id, Title as title, Description as descr, Start_Time as start, End_Time as end
+  const events_query = `
+    SELECT Event_ID as id, Title as title, Description as description, Start_Time as start, End_Time as end
     FROM Events where Flat_ID = ?;
+  `;
+  const flat_query = `
+    SELECT User_ID, Username FROM User WHERE Flat_ID = ?;
+  `;
+  const people_query = `
+    SELECT Username 
+    FROM Users_Events 
+    INNER JOIN User on User.User_ID=Users_Events.User_ID 
+    WHERE Event_ID=?;
   `;
 
   try {
@@ -641,8 +673,8 @@ router.get("/calendar", async (req, res) => {
       return res.status(400).send("Flat ID is missing.");
     }
 
-    const [rows, fields] = await db.query(query, req.session.flat_Id);
-    res.status(200);
+    let [rows, fields] = await db.query(events_query, [req.session.flat_Id]);
+
     let events = rows;
     for (let i = 0; i < events.length; i++) {
       events[i].start = format(
@@ -650,9 +682,22 @@ router.get("/calendar", async (req, res) => {
         "yyyy-MM-dd HH:mm:SS"
       );
       events[i].end = format(new Date(events[i].end), "yyyy-MM-dd HH:mm:SS");
+
+      [rows, fields] = await db.query(people_query, [events[i].id]);
+      people = [];
+
+      for (let j = 0; j < rows.length; j++) {
+        people.push(rows[j].Username);
+      }
+
+      events[i].people = people;
     }
 
-    res.render("calendar", { events: events });
+    [rows, fields] = await db.query(flat_query, [req.session.flat_Id]);
+    let flatmates = rows
+
+    res.status(200);
+    res.render("calendar", { events: events, flatmates: flatmates });
   } catch (err) {
     console.error("Error fetching events:", err);
     res.status(500).send("Server error.");
@@ -661,10 +706,15 @@ router.get("/calendar", async (req, res) => {
 
 router.post("/calendar/addevent", async (req, res) => {
   const db = pool.promise();
-  const stmt = `
+  const event_stmt = `
     INSERT INTO Events(Flat_ID, Title, Description, Start_Time, End_Time)
     VALUES (?, ?, ?, ?, ?);
   `;
+  const flat_stmt = `
+    INSERT INTO Users_Events(User_ID, Event_ID)
+    VALUES (?, ?);
+  `;
+
   const flat_id = req.session.flat_Id;
   const title = req.body.title;
   const desc = req.body.desc;
@@ -672,49 +722,91 @@ router.post("/calendar/addevent", async (req, res) => {
   const end = format(new Date(req.body.end_time), "yyyy-MM-dd HH:mm:SS");
 
   try {
-    await db.query(stmt, [flat_id, title, desc, start, end]);
+    const [eventResult] = await db.query(event_stmt, [flat_id, title, desc, start, end]);
+    const event_id = eventResult.insertId;
+
+    for (let i = 0; i < req.body.flatmates.length; i++) {
+      await db.query(flat_stmt, [req.body.flatmates[i], event_id]);
+    };
+
+    res.status(200);
     res.redirect("/calendar");
   } catch (err) {
     console.error("Error adding event:", err);
-    res.status(500).send("Error adding event.");
+    console.log(err);
+    res.status(500).send(`
+      <script>
+        window.location.href = '/calendar';
+        alert('Error adding event, please try again.');
+      </script>
+    `);
   }
 });
 
 router.post("/calendar/:id/deleteevent", async (req, res) => {
   const db = pool.promise();
   const stmt = `
+    DELETE FROM Users_Events WHERE Event_ID = ?;
     DELETE FROM Events WHERE Event_ID = ?;
   `;
   const id = req.params.id;
 
   try {
-    await db.query(stmt, id);
+    await db.query(stmt, [id, id]);
     res.redirect("/calendar");
   } catch (err) {
     console.error("Error deleting event:", err);
-    res.status(500).send("Error deleting event.");
+    res.status(500).send(`
+      <script>
+        window.location.href = '/calendar';
+        alert('Error deleting event, please try again.');
+      </script>
+    `);
   }
 });
 
 router.post("/calendar/editevent", async (req, res) => {
   const db = pool.promise();
-  const stmt = `
+  const event_stmt = `
     UPDATE Events 
     SET Title = ?, Description = ?, Start_Time = ?, End_Time = ?
     WHERE Event_ID = ?;
   `;
+  const del_users_stmt = `
+    DELETE FROM Users_Events WHERE Event_ID = ?;
+  `;
+  const add_users_stmt = `
+    INSERT INTO Users_Events VALUES(?, ?);
+  `;
+
   const id = req.body.id;
   const title = req.body.title;
   const desc = req.body.desc;
   const start = format(new Date(req.body.start_time), "yyyy-MM-dd HH:mm:SS");
   const end = format(new Date(req.body.end_time), "yyyy-MM-dd HH:mm:SS");
+  const flatmates = req.body.flatmates;
 
   try {
-    await db.query(stmt, [title, desc, start, end, id]);
+    await db.query(event_stmt, [title, desc, start, end, id]);
+
+    await db.query(del_users_stmt, [id]);
+
+    if (flatmates != undefined) {
+      for (let i = 0; i < flatmates.length; i++) {
+        await db.query(add_users_stmt, [flatmates[i], id]);
+      }  
+    }
+
+    res.status(200);
     res.redirect("/calendar");
   } catch (err) {
     console.error("Error editing event:", err);
-    res.status(500).send("Error editing event.");
+    res.status(500).send(`
+      <script>
+        window.location.href = '/calendar';
+        alert('Error editing event, please try again.');
+      </script>
+    `);
   }
 });
 
@@ -747,14 +839,13 @@ router.post("/groceries/update-quantity", async (req, res) => {
   `;
 
   try {
-      await db.query(updateQuery, [quantity, flatId, item]);
-      res.status(200).send("Quantity updated successfully");
+    await db.query(updateQuery, [quantity, flatId, item]);
+    res.status(200).send("Quantity updated successfully");
   } catch (err) {
-      console.error("Error updating quantity:", err);
-      res.status(500).send("Error updating quantity.");
+    console.error("Error updating quantity:", err);
+    res.status(500).send("Error updating quantity.");
   }
 });
-
 
 router.post("/groceries/update-status", async (req, res) => {
   const { flatId, item, checked } = req.body;
@@ -775,7 +866,6 @@ router.post("/groceries/update-status", async (req, res) => {
   }
 });
 
-
 router.post("/groceries/clear-checked", async (req, res) => {
   const clearCheckedQuery = `
   DELETE FROM Groceries WHERE Checked_State = 1;
@@ -789,8 +879,6 @@ router.post("/groceries/clear-checked", async (req, res) => {
     res.status(500).send("Internal Server Error");
   }
 });
-
-
 
 router.post("/groceries/clear-all", async (req, res) => {
   const flatId = req.session.flat_Id;

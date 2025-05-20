@@ -13,6 +13,7 @@
     <script src="https://cdn.jsdelivr.net/npm/preact@10.23.2/compat/dist/compat.umd.js"></script>
    
     <script src="https://cdn.jsdelivr.net/npm/@schedule-x/calendar@2.2.0/dist/core.umd.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@schedule-x/event-modal@2.2.0/dist/core.umd.js"></script>
    
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@schedule-x/theme-default@2.2.0/dist/index.css">
 
@@ -72,10 +73,14 @@
     <main id="calendar">
         <script type="module">
             const { createCalendar, createViewMonthAgenda } = window.SXCalendar;
+            const { createEventModalPlugin } = window.SXEventModal;
 
+            const eventModal = createEventModalPlugin();
+            
             const calendar = createCalendar({
                 views: [createViewMonthAgenda()],
                 events: <%- JSON.stringify(events) %>,
+                plugins: [eventModal]
             })
             
             calendar.render(document.getElementById("calendar"));
@@ -85,15 +90,45 @@
     <form class="eventmenu" id="add" action="/calendar/addevent" method="POST">
         <h2>Add Event:</h2>
         <label for="title">Title</label>
-        <input name="title" type="text" placeholder="Title" required>
+        <input id="title" name="title" type="text" placeholder="Title" required>
         <label for="desc">Description</label>
         <input name="desc" type="text" placeholder="Description" required>
+            
+        <script>
+            function addDropDown() {
+                document.querySelector("#add .dropdown-content").style.display = "flex";
+                document.querySelector("#add .dropbtn").classList.toggle("active");
+            };
+
+            window.addEventListener('click', function(event) {
+                const dropdown = document.querySelector("#add .dropdown");
+                if (!dropdown.contains(event.target)) {
+                    document.querySelector("#add .dropdown-content").style.display = "none";
+                    document.querySelector("#add .dropbtn").classList.remove("active");
+                }
+            });
+        </script>
+        <div class="dropdown-wrapper">
+            People
+            <div class="dropdown">
+                <button type="button" onclick="addDropDown()" class="dropbtn">People</button>
+                <div id="myDropdown" class="dropdown-content">
+                    <% for (let i = 0; i < flatmates.length; i++) { %>
+                        <label>
+                            <input name="flatmates" value="<%- flatmates[i].User_ID %>" type="checkbox">
+                            <%- flatmates[i].Username %>
+                        </label>
+                    <% } %>
+                </div>
+            </div>    
+        </div>
 
         <label for="start_time">Start Time</label>
-        <input name="start_time" type="datetime-local" required>
+        <input id="starttime" name="start_time" type="datetime-local" required>
 
         <label for="end_time">End Time</label>
         <input name="end_time" type="datetime-local" required>
+
         <div class="buttons">
             <button id="cancel" type="button" onclick="addEventCloseMenu()">Cancel</button>
             <button id="submit" type="submit">Submit</button>
@@ -104,7 +139,7 @@
         <h2>All Events:</h2>
         <div id="events">
             <% for (let i = 0; i < events.length; i++){ %>
-                <%- include('partials/event', {event: events[i]}) %>
+                <%- include('partials/event', {event: events[i], flatmates: flatmates}) %>
             <% } %>
         </div>
         <div class="buttons">
@@ -127,11 +162,35 @@
         <label for="desc">Description</label>
         <input name="desc" type="text" required>
 
+        <script>
+            function editDropDown() {
+                document.querySelector("#edit .dropdown-content").style.display = "flex";
+                document.querySelector("#edit .dropbtn").classList.toggle("active");
+            };
+
+            window.addEventListener('click', function(event) {
+                const dropdown = document.querySelector("#edit .dropdown");
+                if (!dropdown.contains(event.target)) {
+                    document.querySelector("#edit .dropdown-content").style.display = "none";
+                    document.querySelector("#edit .dropbtn").classList.remove("active");
+                }
+            });
+        </script>
+        <div class="dropdown-wrapper">
+            People
+            <div class="dropdown">
+                <button type="button" onclick="editDropDown()" class="dropbtn">People</button>
+                <div id="myDropdown" class="dropdown-content">
+                </div>
+            </div>
+        </div>
+
         <label for="start_time">Start Time</label>
         <input name="start_time" type="datetime-local" required>
 
         <label for="end_time">End Time</label>
         <input name="end_time" type="datetime-local" required>
+
         <div class="buttons">
             <button id="cancel" type="button" onclick="editEventCloseMenu()">Cancel</button>
             <button id="submit" type="submit">Submit</button>
