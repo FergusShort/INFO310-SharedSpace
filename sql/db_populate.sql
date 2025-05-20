@@ -10,11 +10,11 @@ INSERT INTO Flat (Flat_ID, GroupName) VALUES
 
 -- Insert Events (DATETIME-based)
 INSERT INTO Events (Flat_ID, Title, Description, Start_Time, End_Time) VALUES
-('ABCD', 'Flat Party', 'Weekend party for all', '2025-04-10 18:00:00', '2025-04-10 23:00:00'),
-('WXYZ', 'Cleaning Day', 'Flat cleaning and organization', '2025-04-15 09:00:00', '2025-04-15 12:00:00'),
-('ABCD', 'Game Night', 'Board games and snacks!', '2025-04-17 19:00:00', '2025-04-17 22:00:00'),
-('WXYZ', 'Roommate Meeting', 'Discuss bills and groceries', '2025-04-12 18:30:00', '2025-04-12 19:30:00'),
-('ABCD', 'Movie Marathon', 'Lord of the Rings + Pizza', '2025-04-20 16:00:00', '2025-04-20 23:59:00');
+('ABCD', 'Flat Party', 'Weekend party for all', '2025-05-21 18:00:00', '2025-04-10 23:00:00'),
+('WXYZ', 'Cleaning Day', 'Flat cleaning and organization', '2025-05-15 09:00:00', '2025-04-15 12:00:00'),
+('ABCD', 'Game Night', 'Board games and snacks!', '2025-05-17 19:00:00', '2025-04-17 22:00:00'),
+('WXYZ', 'Roommate Meeting', 'Discuss bills and groceries', '2025-05-12 18:30:00', '2025-04-12 19:30:00'),
+('ABCD', 'Movie Marathon', 'Lord of the Rings + Pizza', '2025-05-20 16:00:00', '2025-04-20 23:59:00');
 
 -- Insert Bills
 INSERT INTO Bills (Flat_ID, Initial_Amount, Amount_Left, Due_Date, Payment_Status, Title, Recurring, Time_period, Overdue, Description) VALUES
