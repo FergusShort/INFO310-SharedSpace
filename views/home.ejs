@@ -1,92 +1,128 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>SharedSpace Home</title>
   <link rel="stylesheet" href="nav.css" />
   <link rel="stylesheet" href="/home.css" />
 </head>
+
 <body>
   <%- include('navbar') %>
-  <div class="container">
-    <header>
-      <h1>Welcome to Your Flat Dashboard</h1>
-    </header>
+    <div class="container">
+      <header>
+        <h1>Group: <%= groupName.GroupName %></h1>
+        <p class="group-code">Group Code: <%= groupCode %></p>
+      </header>
 
-    <main>
-      <section class="dashboard-section">
-        <div class="dashboard-header">
-  <h2>Events This Week</h2>
-  <a href="/events" class="arrow-icon" title="Go to Events Page">
-    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M9 6l6 6-6 6" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-    </svg>
-  </a>
-</div>
 
-        <ul>
-          <% if (events && events.length > 0) { %>
-            <% events.forEach(event => { %>
+      <main>
+        <section class="dashboard-section">
+          <div class="dashboard-header">
+            <h2>Events This Week</h2>
+            <a href="/calendar" class="arrow-icon" title="Go to Events Page">
+              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M9 6l6 6-6 6" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+            </a>
+          </div>
+
+          <ul>
+            <% if (events && events.length> 0) { %>
+              <% events.forEach(event=> { %>
+                <li>
+                  <strong>
+                    <%= event.title %>
+                  </strong>
+                  <%= new Date(event.date).toLocaleString() %>
+                </li>
+                <% }) %>
+                  <% } else { %>
+                    <li>No upcoming events</li>
+                    <% } %>
+          </ul>
+        </section>
+
+        <section class="dashboard-section">
+          <div class="dashboard-header">
+            <h2>Tasks To Do</h2>
+            <a href="/chores" class="arrow-icon" title="Go to Tasks Page">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M9 6l6 6-6 6" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+            </a>
+          </div>
+          <% if (tasks && tasks.length> 0) { %>
+            <% tasks.forEach(task=> { %>
               <li>
-                <strong><%= event.title %></strong>
-                <%= new Date(event.date).toLocaleString() %>
+                <strong>
+                  <%= task.name %>
+                </strong> - <%= task.Description %>
               </li>
-            <% }) %>
-          <% } else { %>
-            <li>No upcoming events</li>
-          <% } %>
-        </ul>
-      </section>
+              <% }) %>
+                <% } else { %>
+                  <li>No tasks assigned</li>
+                  <% } %>
+                    </ul>
+        </section>
 
-      <section class="dashboard-section">
-        <div class="dashboard-header">
-  <h2>Tasks To Do</h2>
-  <a href="/chores" class="arrow-icon" title="Go to Tasks Page">
-    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M9 6l6 6-6 6" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-    </svg>
-  </a>
-</div>
-          <% if (tasks && tasks.length > 0) { %>
-            <% tasks.forEach(task => { %>
-              <li>
-                <strong><%= task.name %></strong> - <%= task.Description %>
-              </li>
-            <% }) %>
-          <% } else { %>
-            <li>No tasks assigned</li>
-          <% } %>
-        </ul>
-      </section>
+        <section class="dashboard-section">
+          <div class="dashboard-header">
+            <h2>Upcoming Bills</h2>
+            <a href="/bills" class="arrow-icon" title="Go to Bills Page">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M9 6l6 6-6 6" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+            </a>
+          </div>
+          <ul>
+            <% if (bills && bills.length> 0) { %>
+              <% bills.forEach(bill=> { %>
+                <% const isOverdue=new Date(bill.dueDate) < new Date(); %>
+                  <li>
+                    <strong>
+                      <%= bill.name %>
+                    </strong> – $<%= bill.amount %>,
+                      <%= new Date(bill.dueDate).toLocaleDateString() %>
+                        <% if (isOverdue) { %>
+                          <span class="overdue-label">(Overdue)</span>
+                          <% } %>
+                  </li>
+                  <% }) %>
+                    <% } else { %>
+                      <li>No bills due this week</li>
+                      <% } %>
+          </ul>
+        </section>
 
-      <section class="dashboard-section">
-        <div class="dashboard-header">
-  <h2>Upcoming Bills</h2>
-  <a href="/bills" class="arrow-icon" title="Go to Bills Page">
-    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M9 6l6 6-6 6" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-    </svg>
-  </a>
-</div>
-        <ul>
-          <% if (bills && bills.length > 0) { %>
-            <% bills.forEach(bill => { %>
-              <% const isOverdue = new Date(bill.dueDate) < new Date(); %>
-              <li>
-                <strong><%= bill.name %></strong> – $<%= bill.amount %>,
-                <%= new Date(bill.dueDate).toLocaleDateString() %>
-                <% if (isOverdue) { %>
-                  <span class="overdue-label">(Overdue)</span>
-                <% } %>
-              </li>
-            <% }) %>
-          <% } else { %>
-            <li>No bills due this week</li>
-          <% } %>
-        </ul>
-      </section>
-    </main>
-  </div>
+        <section class="dashboard-section">
+          <div class="dashboard-header">
+            <h2>Grocery List</h2>
+            <a href="/groceries" class="arrow-icon" title="Go to groceries Page">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M9 6l6 6-6 6" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+            </a>
+          </div>
+          <ul>
+            <% if (groceries && groceries.length> 0) { %>
+              <% groceries.forEach(item=> { %>
+                <li class="<%= item.checked ? 'checked' : '' %>">
+                  <strong>
+                    <%= item.item %>
+                  </strong> –
+                  <%= item.quantity %> × $<%= parseFloat(item.price).toFixed(2) %>
+                </li>
+                <% }) %>
+                  <% } else { %>
+                    <li>No groceries found</li>
+                    <% } %>
+          </ul>
+        </section>
+      </main>
+    </div>
 </body>
+
 </html>

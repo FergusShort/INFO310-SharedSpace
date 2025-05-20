@@ -24,9 +24,16 @@ header h1 {
 
 main {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  grid-template-columns: 1fr;
   gap: 2rem;
 }
+
+@media (min-width: 700px) {
+  main {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
 
 .dashboard-section {
   background-color: #ffffff;
@@ -51,7 +58,7 @@ main {
 .dashboard-section li {
   padding: 0.5rem 0;
   border-bottom: 1px solid #eaeaea;
-  text-align: center; /* Center the content within the list item */
+  text-align: center;
 }
 
 .dashboard-section li:last-child {
@@ -101,4 +108,40 @@ strong {
 
 .arrow-icon:hover {
   background-color: #0056b3;
+}
+
+.grocery-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.grocery-item .item-name {
+  font-weight: bold;
+  flex-grow: 1;
+  text-align: left;
+}
+
+.grocery-item .item-details {
+  font-size: 0.9rem;
+  color: #666;
+  margin-left: 10px;
+  white-space: nowrap;
+}
+
+.checked {
+  text-decoration: line-through;
+  color: #999;
+}
+
+.group-code {
+  font-size: 1.2rem;
+  color: #696969;
+  background-color: #f0f0f0;
+  padding: 6px 12px;
+  border-radius: 8px;
+  display: inline-block;
+  margin-top: 8px;
+  font-weight: 500;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }

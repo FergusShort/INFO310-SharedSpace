@@ -9,12 +9,16 @@
 <body>
     <div class="container">
         <h2>Join Group</h2>
+        <% if (error) { %>
+            <p style="color: red;"><%= error %></p>
+        <% } %>
+
         <form action="/joinGroup/join" method="POST" enctype="multipart/form-data">
             <label for="groupCode">Group Code</label>
-            <input type="text" id="groupCode" name="groupCode" required>
+            <input type="text" id="groupCode" name="groupCode" value="<%= formData?.groupCode || '' %>" required>
             
             <button type="submit">Join Group</button>
-            <p>Want to create a new group? <a href="createGroup">Create Group</a></p>
+            <p>Want to create a new group? <a href="/createGroup">Create Group</a></p>
         </form>
     </div>
 </body>
