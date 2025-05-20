@@ -82,6 +82,9 @@
 > Note: Chores are shared with all flatmates in your group
 >
 > ### Groceries
-> 
+>    - Add groceries
+>    - Tick items that have been purchased
+>    - Clear selected items if not all items purchased
+>    - Clear all items if all purchased
 >
 > ### Bills
