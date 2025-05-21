@@ -1,0 +1,11 @@
+# Don't copy node modules over from host. Instead install own npm things
+node_modules
+
+# #Only used for debugging so makes image larger then needed
+npm-debug.log
+
+# THis is personal vscode setting. Not needed for docker
+.vscode
+
+#This contains MySQL database files. Not needed as makes image larger and vulnerability for corruption
+mysql-data

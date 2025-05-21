@@ -1,8 +1,20 @@
-version: '3.7'
-
 services:
+  app:
+    build: .
+    ports:
+      - "3000:3000"
+    depends_on:
+      - mysql
+    environment:
+      DB_HOST: mysql
+      DB_USER: sharedspace
+      DB_PASSWORD: password
+      DB_NAME: SharedSpace
+    container_name: sharedspace-app
+    command: ["wait-for-it", "mysql:3306", "--", "node", "server.js"]
+
   mysql:
-    image: mysql
+    image: mysql:8.0
     environment:
       MYSQL_ROOT_PASSWORD: password
       MYSQL_DATABASE: SharedSpace
@@ -11,9 +23,14 @@ services:
     ports:
       - "3306:3306"
     volumes:
-      - ./sql:/sql # scripts for creating tables and inserting data
-      - ./mysql-data:/var/lib/mysql # Where mysql stores its data
+      - ./sql:/docker-entrypoint-initdb.d
+      - ./mysql-data:/var/lib/mysql
     container_name: sharedspacemysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
 
 volumes:
   mysql-data:
