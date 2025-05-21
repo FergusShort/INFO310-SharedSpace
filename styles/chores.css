@@ -56,7 +56,7 @@ input[type="text"] {
     padding: 10px;
     margin-bottom: 1px;
     border: 1px solid #dfe1e6;
-    border-radius: 5px;
+    border-radius: 20px;
     font-size: 1rem;
     color: black;
     background-color: #eaedf4;
@@ -70,11 +70,11 @@ input[type="text"]:focus { /* Focus state; keeping same colour scheme*/
 
 /* Button styles */
 button {
-    background-color: rgb(126, 158, 227);
+    background-color: #007bff;
     color: white;
     border: none;
     padding: 10px;
-    border-radius: 5px;
+    border-radius: 40px;
     font-size: 1rem;
     font-weight: bold;
     transition: background-color 0.2s ease-in-out, transform 0.1s ease-in-out; /* Transition effect */
@@ -82,7 +82,7 @@ button {
 
 /* Button hover effect */
 button:hover {
-    background-color: #003380;
+    background-color: #0056b3;
     transform: scale(1.01); /* Slight zoom effect */
 }
 
@@ -135,13 +135,15 @@ button:hover {
 textarea {
     width: 100%; 
     padding: 10px; 
-    margin-bottom: 10px; 
+    margin-bottom: 5px; 
+    margin-top: 5px;
     border: 1px solid #dfe1e6; 
     font-size: 1rem; 
     color: #172b4d; 
     background-color: #f4f5f7; 
     resize: none; /* Disable resizing completely */
     transition: border-color 0.2s ease-in-out; 
+    border-radius: 30px;
 }
 textarea:focus {
     outline: none; 
@@ -162,15 +164,6 @@ textarea:focus {
     font-size: 0.9rem; 
     color: #6b778c; 
 
-}
-
-/* Styles for the chore timestamp */
-.chore-timestamp {
-    font-size: 0.8rem; /* Smaller font size */
-    color: #a0a0a0; /* Subtle gray color */
-    margin-top: 5px; /* Add some space above the timestamp */
-    font-style: italic; /* Optional: make it italic for emphasis */
-    text-align: right; /* Align the timestamp to the right */
 }
 
 .chore-content {
