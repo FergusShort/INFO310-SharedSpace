@@ -64,12 +64,14 @@ router.get("/home", async (req, res) => {
   const tasks_query = `SELECT Title AS name, Description, Chore_ID FROM Chores WHERE Flat_ID = ? AND Completed = FALSE ORDER BY Priority DESC;`;
   const bills_query = `SELECT Title AS name, Initial_Amount AS amount, Due_Date AS dueDate FROM Bills WHERE Flat_ID = ? AND (Due_Date BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 7 DAY) OR Due_Date < CURDATE()) ORDER BY Due_Date ASC;`;
   const groceryQuery = `SELECT Item as item, Quantity as quantity, Price as price, Checked_State as checked FROM Groceries WHERE Flat_ID = ? ORDER BY Checked_State ASC, Item ASC;`;
+  const flatInfoQuery = `SELECT GroupName FROM Flat WHERE Flat_ID = ?`;
 
   try {
     const [eventRows] = await db.query(events_query, [flatId]);
     const [taskRows] = await db.query(tasks_query, [flatId]);
     const [billRows] = await db.query(bills_query, [flatId]);
     const [grocerieRows] = await db.query(groceryQuery, [flatId]);
+    const [flatInfo] = await db.query(flatInfoQuery, [flatId]);
 
 
     return res.render("home", {
@@ -77,7 +79,10 @@ router.get("/home", async (req, res) => {
       tasks: taskRows,
       bills: billRows,
       groceries: grocerieRows,
+      groupName: flatInfo[0],
+      groupCode: flatId
     });
+
 
   } catch (err) {
     console.error("Home route error:\n", err);
@@ -120,7 +125,7 @@ router.get("/chores", async (req, res) => {
     const db = pool.promise();
     const [chores] = await db.query(
       `
-            SELECT Chore_ID, Title, Description, Priority
+            SELECT Chore_ID, Title, Description, Priority, Completed
             FROM Chores 
             WHERE Flat_ID = ?
         `,
@@ -210,9 +215,7 @@ async function getBillsWithUserPaymentStatus(sortType = "all", flatID, userId) {
     billQuery += ` AND (Due_Date BETWEEN ? AND ? OR Due_Date < CURDATE()) ORDER BY Due_Date ASC`;
     billParams.push(today, nextMonth);
   } else {
-    // Default case: Show all upcoming and past due bills?
-    billQuery += ` AND Due_Date <= DATE_ADD(CURDATE(), INTERVAL 7 DAY) OR Due_Date < CURDATE() ORDER BY Due_Date ASC`;
-    // If you want to show all past and future, you might remove the date condition entirely
+    billQuery += `ORDER BY Due_Date ASC`;
   }
 
   try {
@@ -427,7 +430,6 @@ router.post("/login/submit", async (req, res) => {
   }
 });
 
-
 router.post("/signup/submit", async (req, res) => {
   const { Uname, email, pwd } = req.body;
   const db = pool.promise();
@@ -473,7 +475,6 @@ router.post("/signup/submit", async (req, res) => {
     });
   }
 });
-
 
 router.post("/createGroup/create", async (req, res) => {
   const groupName = req.body.groupName;
@@ -538,7 +539,6 @@ router.post("/joinGroup/join", async (req, res) => {
   }
 });
 
-
 async function makeFlatID() {
   const iD = generateFlatID();
 
@@ -595,18 +595,17 @@ function generateFlatID() {
 }
 
 router.post("/chores/add", async (req, res) => {
-  const flat_id = req.session.flat_Id;
-  const { title, comment, urgency } = req.body;
+  const { title, description, priority } = req.body;
+  const flatId = req.session.flat_Id;
+
   const db = pool.promise();
+  const insertQuery = `
+    INSERT INTO Chores (Flat_ID, Title, Description, Priority)
+    VALUES (?, ?, ?, ?)
+  `;
 
   try {
-    const insertQuery = `
-      INSERT INTO Chores (Flat_ID, Priority, Title, Description)
-      VALUES (?, ?, ?, ?);
-    `;
-
-    await db.query(insertQuery, [flat_id, urgency, title, comment]);
-
+    await db.query(insertQuery, [flatId, title, description, priority]);
     res.redirect("/chores");
   } catch (err) {
     console.error("Error adding chore:", err);
@@ -628,6 +627,21 @@ router.post("/chores/delete", async (req, res) => {
     res.status(500).send("Error deleting chore");
   }
 });
+
+router.post('/chores/complete', async (req, res) => {
+    const choreId = req.body.chore_id;
+
+    const db = pool.promise();
+    const completedQuery = 'UPDATE Chores SET Completed = NOT Completed WHERE Chore_ID = ?;';
+    try {
+        await db.query(completedQuery, [choreId]);
+        res.redirect('/chores');
+    } catch (err) {
+        console.error('Error marking chore as complete:', err);
+        res.status(500).send('Internal Server Error');
+    }
+});
+
 
 /* Calendar / Events */
 router.get("/calendar", async (req, res) => {
@@ -774,8 +788,11 @@ router.post("/calendar/editevent", async (req, res) => {
     await db.query(event_stmt, [title, desc, start, end, id]);
 
     await db.query(del_users_stmt, [id]);
-    for (let i = 0; i < flatmates.length; i++) {
-      await db.query(add_users_stmt, [flatmates[i], id]);
+
+    if (flatmates != undefined) {
+      for (let i = 0; i < flatmates.length; i++) {
+        await db.query(add_users_stmt, [flatmates[i], id]);
+      }  
     }
 
     res.status(200);
