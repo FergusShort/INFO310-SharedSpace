@@ -47,11 +47,12 @@ CREATE TABLE Events (
   Description VARCHAR(150),
   Start_Time  DATETIME,
   End_Time    DATETIME,
-  PRIMARY KEY (Event_ID, Flat_ID),
+  PRIMARY KEY (Event_ID), 
   FOREIGN KEY (Flat_ID)
     REFERENCES Flat(Flat_ID) ON DELETE CASCADE,
   CHECK (Start_Time < End_Time)
 );
+
 
 CREATE TABLE Bills (
   Bill_ID        INT NOT NULL AUTO_INCREMENT,

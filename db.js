@@ -3,7 +3,7 @@ const mysql2 = require('mysql2');
 
 //creates connection to database
 const pool = mysql2.createPool({
-    host: process.env.DB_HOST || 'mysql',   //connects to host
+    host: process.env.DB_HOST || 'localhost',   //connects to host
     user: process.env.DB_USER || 'sharedspace',     //use these credentials (Not really needed as included in the yml but better safe then sorry :)
     password: process.env.DB_PASSWORD || 'password',
     database: process.env.DB_NAME || 'SharedSpace',
